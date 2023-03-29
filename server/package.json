@@ -1,0 +1,22 @@
+{
+  "name": "@sling/artus-web-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "peerDependencies": {
+    "typescript": "^5.0.2"
+  },
+  "dependencies": {
+    "@artus/core": "^1.0.8",
+    "@artus/pipeline": "^0.2.2"
+  },
+  "devDependencies": {
+    "@artus/tsconfig": "^1.0.1"
+  }
+}
