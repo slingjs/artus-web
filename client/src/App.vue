@@ -2,8 +2,10 @@
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
 import { calcRandomString } from '@sling/artus-web-shared/utils/common'
+import { useCounterStore } from '@/stores/counter'
 
 const random = calcRandomString()
+const counterStore = useCounterStore()
 </script>
 
 <template>
@@ -17,6 +19,7 @@ const random = calcRandomString()
         <RouterLink to='/about'>About</RouterLink>
       </nav>
       <p>Got random string from workspace package - <strong>{{ random }}</strong></p>
+      <button @click='counterStore.increment'>{{ counterStore.count }} - {{ counterStore.doubleCount }}</button>
     </div>
   </header>
 
