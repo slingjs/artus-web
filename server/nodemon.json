@@ -1,0 +1,13 @@
+{
+  "watch": [
+    "./"
+  ],
+  "ext": "ts,json",
+  "ignore": [
+    "package.json",
+    "nodemon.json",
+    ".cache",
+    "**/manifest.json"
+  ],
+  "exec": "ts-node ./app.ts"
+}
