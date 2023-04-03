@@ -13,6 +13,10 @@
     "@sling/artus-web-client": "workspace:^",
     "@sling/artus-web-server": "workspace:^",
     "@sling/artus-web-shared": "workspace:^",
+    "lodash": "^4.17.21",
     "typescript": "^5.0.2"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.192"
   }
 }
