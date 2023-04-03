@@ -15,9 +15,7 @@ export const userAuthMiddleware: MiddlewareGenerator = (roles?: Roles[]) => {
     const session = await getSession(ctx)
 
     if (!session.loggedIn) {
-      ctx.output.data = {
-        status: 401
-      }
+      ctx.output.data.status = 401
 
       return
     }
@@ -28,9 +26,7 @@ export const userAuthMiddleware: MiddlewareGenerator = (roles?: Roles[]) => {
     }
 
     if (!roles.every(r => session.roles.some(sR => sR.toUpperCase() === r.toUpperCase()))) {
-      ctx.output.data = {
-        status: 401
-      }
+      ctx.output.data.status = 401
 
       return
     }
