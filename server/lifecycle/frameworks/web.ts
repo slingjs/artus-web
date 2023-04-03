@@ -8,7 +8,7 @@ import {
   ScopeEnum
 } from '@artus/core'
 import { AppConfig } from '../../types'
-import { ARTUS_FRAMEWORK_WEB_CLIENT } from '../../frameworks/framework-web/types/client'
+import { ARTUS_FRAMEWORK_WEB_CLIENT } from '../../frameworks/framework-web/types'
 import { FrameworkWebClient } from '../../frameworks/framework-web/client'
 
 @LifecycleHookUnit()

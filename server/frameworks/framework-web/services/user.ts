@@ -1,10 +1,20 @@
-import { Injectable } from '@artus/core'
+import { Injectable, ScopeEnum } from '@artus/core'
+import { promiseDelay } from '@sling/artus-web-shared/utils/promise'
+import { ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles, UserSession } from '../types'
 
-@Injectable()
+@Injectable({
+  id: ARTUS_FRAMEWORK_WEB_USER_SERVICE,
+  scope: ScopeEnum.SINGLETON
+})
 export default class UserService {
-  async info () {
+  async session () {
+    // Delay 300ms.
+    await promiseDelay(300)
+
     return {
-      name: 'Sling'
-    }
+      name: 'Sling',
+      roles: [Roles.SUPER_ADMIN, Roles.ANONYMOUS],
+      loggedIn: true
+    } as UserSession
   }
 }

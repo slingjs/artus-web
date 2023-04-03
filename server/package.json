@@ -11,7 +11,8 @@
   "author": "",
   "license": "ISC",
   "peerDependencies": {
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "lodash": "^4.17.21"
   },
   "dependencies": {
     "@artus/core": "^1.0.8",

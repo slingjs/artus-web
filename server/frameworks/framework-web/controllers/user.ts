@@ -1,13 +1,16 @@
 import { ArtusApplication, ArtusInjectEnum, Inject } from '@artus/core'
-import { All, HTTPController } from '../../../plugins/plugin-http/decorator'
+import { All, HTTPController, Use } from '../../../plugins/plugin-http/decorator'
 import UserService from '../services/user'
-import { HTTPHandler } from '../../../plugins/plugin-http/types'
 import { AppConfig } from '../../../types'
-import { ARTUS_FRAMEWORK_WEB_CLIENT } from '../types/client'
+import { ARTUS_FRAMEWORK_WEB_CLIENT, ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles } from '../types'
+import { Middleware } from '@artus/pipeline/src/base'
+import { initUser, userAuthMiddleware } from '../middlewares/business/user'
+import { getSession } from '../utils/business/user'
 
 @HTTPController('/user')
+@Use(initUser())
 export default class UserController {
-  @Inject()
+  @Inject(ARTUS_FRAMEWORK_WEB_USER_SERVICE)
   userService: UserService
 
   // @Inject(ArtusInjectEnum.Config)
@@ -20,14 +23,16 @@ export default class UserController {
   frameworkApp: ArtusApplication
 
   @All()
-  async getAll (...args: Parameters<HTTPHandler>): Promise<ReturnType<HTTPHandler>> {
-    const [_, res] = args
-    const user = await this.userService.info()
+  @Use(userAuthMiddleware([Roles.SUPER_ADMIN]))
+  async getAll (...args: Parameters<Middleware>) {
+    const [ctx, _next] = args
 
-    res.statusCode = 400
-    res.end(JSON.stringify({
-      config: this.app.config as AppConfig,
-      user
-    }))
+    ctx.output.data.set(
+      'body',
+      JSON.stringify({
+        config: this.app.config as AppConfig,
+        user: getSession(ctx)
+      })
+    )
   }
 }

@@ -1,6 +1,6 @@
 import { ArtusApplication, Injectable, Scanner, ScopeEnum } from '@artus/core'
 import fs from 'fs-extra'
-import { ARTUS_FRAMEWORK_WEB_CLIENT } from './types/client'
+import { ARTUS_FRAMEWORK_WEB_CLIENT } from './types'
 
 @Injectable({
   id: ARTUS_FRAMEWORK_WEB_CLIENT,

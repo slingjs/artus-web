@@ -68,6 +68,19 @@
         "unitName": "http"
       },
       {
+        "path": "..\\..\\plugins\\plugin-http\\trigger",
+        "extname": ".ts",
+        "filename": "trigger.ts",
+        "loader": "module",
+        "source": "plugin",
+        "loaderState": {
+          "exportNames": [
+            "HTTPTrigger"
+          ]
+        },
+        "unitName": "http"
+      },
+      {
         "path": "client",
         "extname": ".ts",
         "filename": "client.ts",

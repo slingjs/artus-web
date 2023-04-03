@@ -1,15 +1,23 @@
 import http from 'http'
 import { ArtusApplication, ArtusInjectEnum, Inject, Injectable, ScopeEnum } from '@artus/core'
-import Router, { Handler, HTTPVersion } from 'find-my-way'
+import Router from 'find-my-way'
 import {
   ARTUS_PLUGIN_HTTP_CLIENT,
-  CONTROLLER_METADATA, HTTPConfig,
+  ARTUS_PLUGIN_HTTP_ROUTER_HANDLER,
+  ARTUS_PLUGIN_HTTP_TRIGGER,
+  CONTROLLER_METADATA,
+  HTTPConfig,
   HTTPControllerMetadata,
   HTTPRouteMetadata,
+  HTTPRouteMiddlewaresMetadata,
   ROUTER_METADATA,
-  WEB_CONTROLLER_TAG
+  WEB_CONTROLLER_TAG,
+  WEB_MIDDLEWARE_METADATA
 } from './types'
 import * as url from 'url'
+import { Middleware } from '@artus/pipeline/src/base'
+import { HTTPTrigger } from './trigger'
+import { ARTUS_WEB_APP } from '../../types'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_CLIENT,
@@ -29,6 +37,13 @@ export class PluginHTTPClient {
     for (const controllerClazz of controllerClazzList) {
       const controllerMetadata = Reflect.getMetadata(CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
       const controller = this.app.container.get(controllerClazz) as FunctionConstructor
+      // Controller Middlewares.
+      const controllerMiddlewaresMetadata = (
+        Reflect.getMetadata(
+          WEB_MIDDLEWARE_METADATA,
+          controllerClazz
+        ) ?? []
+      ) as HTTPRouteMiddlewaresMetadata
 
       // 读取 Controller 中的 Function.
       const handlerDescriptorList = Object.getOwnPropertyDescriptors(controllerClazz.prototype)
@@ -42,8 +57,21 @@ export class PluginHTTPClient {
           continue
         }
 
+        // Route Middlewares.
+        const routeMiddlewaresMetadata = (
+          Reflect.getMetadata(
+            WEB_MIDDLEWARE_METADATA,
+            handlerDescriptor.value
+          ) ?? []
+        ) as HTTPRouteMiddlewaresMetadata
+
         // 注入 router.
-        this.registerRoute(controllerMetadata, routeMetadataList, controller[key].bind(controller))
+        this.registerRoute(
+          controllerMetadata,
+          routeMetadataList,
+          controllerMiddlewaresMetadata.concat(routeMiddlewaresMetadata),
+          controller[key].bind(controller)
+        )
       }
     }
 
@@ -55,7 +83,7 @@ export class PluginHTTPClient {
     const { host, port } = config
     this.server.listen(port, host, () => {
       // @ts-ignore
-      this.app.logger.log(`Server listening on: ${ url.format({ host, port, protocol: 'http' }) }`)
+      this.app.logger.info(`Server listening on: ${ url.format({ host, port, protocol: 'http' }) }`)
     })
 
     return this.server
@@ -68,11 +96,42 @@ export class PluginHTTPClient {
   private registerRoute (
     controllerMetadata: HTTPControllerMetadata,
     routeMetadataList: HTTPRouteMetadata,
-    handler: Handler<HTTPVersion.V1>
+    routeMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata,
+    handler: Middleware
   ) {
     for (const routeMetadata of routeMetadataList) {
       const routePath = (controllerMetadata.prefix ?? '/') + routeMetadata.path
-      this.router.on(routeMetadata.method, routePath, handler)
+      const trigger = this.app.container.get(ARTUS_PLUGIN_HTTP_TRIGGER) as HTTPTrigger
+      const app = this.app
+      this.router.on(
+        routeMetadata.method,
+        routePath,
+        async function(req, res, params, store, searchParams) {
+          const ctx = await trigger.initContext()
+
+          const artusWebAppStorage = ctx.namespace(ARTUS_WEB_APP)
+          artusWebAppStorage.set(app, 'app')
+
+          const routeHandlerStorage = ctx.namespace(ARTUS_PLUGIN_HTTP_ROUTER_HANDLER)
+          routeHandlerStorage.set(req, 'req')
+          routeHandlerStorage.set(res, 'res')
+          routeHandlerStorage.set(params, 'params')
+          routeHandlerStorage.set(store, 'store')
+          routeHandlerStorage.set(searchParams, 'searchParams')
+          routeHandlerStorage.set(arguments, 'routeHandlerArguments')
+
+          for (const middlewares of routeMiddlewaresMetadata) {
+            await trigger.use(middlewares)
+          }
+
+          await trigger.use(handler)
+
+          await trigger.startPipeline(ctx)
+            .catch(e => {
+              app.logger.error(e)
+            })
+        }
+      )
     }
   }
 }

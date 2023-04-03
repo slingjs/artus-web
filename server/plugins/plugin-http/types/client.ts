@@ -6,6 +6,8 @@ export interface HTTPConfig {
 }
 
 export const ARTUS_PLUGIN_HTTP_CLIENT = 'ARTUS_PLUGIN_HTTP_CLIENT'
+export const ARTUS_PLUGIN_HTTP_TRIGGER = 'ARTUS_PLUGIN_HTTP_TRIGGER'
+export const ARTUS_PLUGIN_HTTP_ROUTER_HANDLER = 'ARTUS_PLUGIN_HTTP_ROUTER_HANDLER'
 
 export type HTTPHandler = Handler<HTTPVersion.V1>
 export type HTTPHandlerAsync = AsyncGenerator<HTTPHandler>
