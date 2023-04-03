@@ -3,7 +3,6 @@ import { ArtusApplication, ArtusInjectEnum, Inject, Injectable, ScopeEnum } from
 import Router from 'find-my-way'
 import {
   ARTUS_PLUGIN_HTTP_CLIENT,
-  ARTUS_PLUGIN_HTTP_ROUTER_HANDLER,
   ARTUS_PLUGIN_HTTP_TRIGGER,
   CONTROLLER_METADATA,
   HTTPConfig,
@@ -17,7 +16,7 @@ import {
 import * as url from 'url'
 import { Middleware } from '@artus/pipeline/src/base'
 import { HTTPTrigger } from './trigger'
-import { ARTUS_WEB_APP } from '../../types'
+import { Input, Output } from '@artus/pipeline'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_CLIENT,
@@ -107,18 +106,23 @@ export class PluginHTTPClient {
         routeMetadata.method,
         routePath,
         async function(req, res, params, store, searchParams) {
-          const ctx = await trigger.initContext()
+          const input = new Input()
+          input.params = {
+            req,
+            res,
+            params,
+            store,
+            searchParams,
+            app
+          }
 
-          const artusWebAppStorage = ctx.namespace(ARTUS_WEB_APP)
-          artusWebAppStorage.set(app, 'app')
+          const output = new Output()
+          output.data = {
+            status: 404, // 404 is the fallback/default status in koa2.
+            body: null
+          }
 
-          const routeHandlerStorage = ctx.namespace(ARTUS_PLUGIN_HTTP_ROUTER_HANDLER)
-          routeHandlerStorage.set(req, 'req')
-          routeHandlerStorage.set(res, 'res')
-          routeHandlerStorage.set(params, 'params')
-          routeHandlerStorage.set(store, 'store')
-          routeHandlerStorage.set(searchParams, 'searchParams')
-          routeHandlerStorage.set(arguments, 'routeHandlerArguments')
+          const ctx = await trigger.initContext(input)
 
           for (const middlewares of routeMiddlewaresMetadata) {
             await trigger.use(middlewares)

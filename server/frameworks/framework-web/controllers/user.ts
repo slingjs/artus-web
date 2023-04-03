@@ -3,9 +3,9 @@ import { All, HTTPController, Use } from '../../../plugins/plugin-http/decorator
 import UserService from '../services/user'
 import { AppConfig } from '../../../types'
 import { ARTUS_FRAMEWORK_WEB_CLIENT, ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles } from '../types'
-import { Middleware } from '@artus/pipeline/src/base'
 import { initUser, userAuthMiddleware } from '../middlewares/business/user'
 import { getSession } from '../utils/business/user'
+import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
 
 @HTTPController('/user')
 @Use(initUser())
@@ -24,15 +24,12 @@ export default class UserController {
 
   @All()
   @Use(userAuthMiddleware([Roles.SUPER_ADMIN]))
-  async getAll (...args: Parameters<Middleware>) {
+  async getAll (...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args
 
-    ctx.output.data.set(
-      'body',
-      JSON.stringify({
-        config: this.app.config as AppConfig,
-        user: getSession(ctx)
-      })
-    )
+    ctx.output.data.body = JSON.stringify({
+      config: this.app.config as AppConfig,
+      user: getSession(ctx)
+    })
   }
 }

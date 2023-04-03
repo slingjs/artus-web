@@ -1,7 +1,6 @@
 import { Injectable, ScopeEnum, Trigger } from '@artus/core'
-import { Context, Next } from '@artus/pipeline'
 import { Stream } from 'stream'
-import { ARTUS_PLUGIN_HTTP_ROUTER_HANDLER, ARTUS_PLUGIN_HTTP_TRIGGER } from './types'
+import { ARTUS_PLUGIN_HTTP_TRIGGER, HTTPMiddleware } from './types'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_TRIGGER,
@@ -10,20 +9,19 @@ import { ARTUS_PLUGIN_HTTP_ROUTER_HANDLER, ARTUS_PLUGIN_HTTP_TRIGGER } from './t
 export class HTTPTrigger extends Trigger {
   constructor () {
     super()
-    this.use(async (ctx: Context, next: Next) => {
+    const run: HTTPMiddleware = async (ctx, next) => {
       await next()
 
       return await this.response(ctx, next)
-    })
+    }
+
+    this.use(run)
   }
 
-  async response (ctx: Context, _next: Next) {
-    const handlerStorage = this.getHandlerStorage(ctx)
-    const res = handlerStorage.get('res')
-    const { data } = ctx.output
+  async response (...args: Parameters<HTTPMiddleware>) {
+    const [ctx, _next] = args
 
-    const status = data.get('status')
-    const body = data.get('body')
+    const { input: { params: { res } }, output: { data: { status, body } } } = ctx
 
     // 404 is the fallback/default status in koa2.
     res.statusCode = typeof status === 'number'
@@ -41,9 +39,5 @@ export class HTTPTrigger extends Trigger {
     }
 
     return res.end(JSON.stringify(body))
-  }
-
-  getHandlerStorage (ctx: Context) {
-    return ctx.namespace(ARTUS_PLUGIN_HTTP_ROUTER_HANDLER)
   }
 }

@@ -1,4 +1,8 @@
 import { Handler, HTTPVersion } from 'find-my-way'
+import { BaseContext, Middleware } from '@artus/pipeline'
+import { BaseInput, BaseOutput } from '@artus/pipeline/src/types'
+import { Stream } from 'stream'
+import { ArtusApplication } from '@artus/core'
 
 export interface HTTPConfig {
   host: string
@@ -7,8 +11,30 @@ export interface HTTPConfig {
 
 export const ARTUS_PLUGIN_HTTP_CLIENT = 'ARTUS_PLUGIN_HTTP_CLIENT'
 export const ARTUS_PLUGIN_HTTP_TRIGGER = 'ARTUS_PLUGIN_HTTP_TRIGGER'
-export const ARTUS_PLUGIN_HTTP_ROUTER_HANDLER = 'ARTUS_PLUGIN_HTTP_ROUTER_HANDLER'
 
 export type HTTPHandler = Handler<HTTPVersion.V1>
 export type HTTPHandlerAsync = AsyncGenerator<HTTPHandler>
 export type HTTPHandlerUnit = HTTPHandlerAsync | HTTPHandler
+
+export type HTTPHandlerArguments = Parameters<HTTPHandler>
+
+export type HTTPHandlerArgumentsRecord = {
+  req: HTTPHandlerArguments[0],
+  res: HTTPHandlerArguments[1],
+  params: HTTPHandlerArguments[2],
+  store: HTTPHandlerArguments[3],
+  searchParams: HTTPHandlerArguments[4],
+  app: ArtusApplication
+}
+
+export type HTTPHandlerOutputData = {
+  body: null | string | object | Stream
+  status: number
+}
+
+export interface HTTPMiddlewareContext extends Required<BaseContext> {
+  input: Required<BaseInput<HTTPHandlerArgumentsRecord>>
+  output: Required<BaseOutput<HTTPHandlerOutputData>>
+}
+
+export type HTTPMiddleware = Middleware<HTTPMiddlewareContext>
