@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev",
     "build": "pnpm run -r --filter \"@sling/artus-web-*\" build",
-    "publish": "pnpm publish &&pnpm publish -r --filter \"@sling/artus-web-*\""
+    "publish": "pnpm publish &&pnpm publish --access public -r --filter \"@sling/artus-web-*\""
   },
   "keywords": [],
   "author": "",
