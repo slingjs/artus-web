@@ -26,7 +26,3 @@ export async function start (options: any = {}) {
 
   return app
 }
-
-start().catch(e => {
-  console.error('[Fatal] Failed to start app.', e)
-})

@@ -1,7 +1,9 @@
-import { start } from './app/bootstrap';
+import { start } from './app/bootstrap'
 
 const run = async () => {
-  await start();
-};
+  return await start()
+}
 
-run();
+run().catch(e => {
+  console.error('[Fatal] Failed to start app.', e)
+})

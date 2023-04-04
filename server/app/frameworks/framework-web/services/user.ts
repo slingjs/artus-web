@@ -13,7 +13,7 @@ export default class UserService {
 
     return {
       name: 'Sling',
-      roles: [ Roles.ANONYMOUS],
+      roles: [Roles.ANONYMOUS],
       loggedIn: true
     } as UserSession
   }
