@@ -1,7 +1,7 @@
 import path from 'path'
 import dotEnv from 'dotenv'
 import { AppConfig } from '../types'
-import { FILE_BASE_DIR } from '@sling/artus-web-shared/constants/client'
+import { FILE_BASE_DIR } from '@sling/artus-web-shared/constants'
 
 dotEnv.config()
 

@@ -3,8 +3,8 @@ import { Inject } from '@artus/core'
 import { ARTUS_FRAMEWORK_WEB_APP_SERVICE } from '../types'
 import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
 import AppService from '../services/app'
-import { compareIgnoreCase } from '@sling/artus-web-shared/utils/string'
-import { FILE_BASE_PATH } from '@sling/artus-web-shared/constants/client'
+import { compareIgnoreCase } from '@sling/artus-web-shared/utils'
+import { FILE_BASE_PATH } from '@sling/artus-web-shared/constants'
 
 @HTTPController('', -1)
 export class AppController {

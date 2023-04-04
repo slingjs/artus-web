@@ -3,7 +3,7 @@ import { Get, HTTPController } from '../../../plugins/plugin-http/decorator'
 import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
 import FileService from '../services/file'
 import { ARTUS_FRAMEWORK_WEB_FILE_SERVICE } from '../types'
-import { FILE_BASE_PATH } from '@sling/artus-web-shared/constants/client'
+import { FILE_BASE_PATH } from '@sling/artus-web-shared/constants'
 
 @HTTPController(FILE_BASE_PATH)
 export class FileController {

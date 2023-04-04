@@ -1,5 +1,5 @@
 import { Injectable, ScopeEnum } from '@artus/core'
-import { promiseDelay } from '@sling/artus-web-shared/utils/promise'
+import { promiseDelay } from '@sling/artus-web-shared/utils'
 import { ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles, UserSession } from '../types'
 
 @Injectable({
