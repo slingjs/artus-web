@@ -1,11 +1,12 @@
 {
-  "name": "artus-web",
+  "name": "@sling/artus-web",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev",
-    "build": "pnpm run -r --filter \"@sling/artus-web-*\" build"
+    "build": "pnpm run -r --filter \"@sling/artus-web-*\" build",
+    "publish": "pnpm publish &&pnpm publish -r --filter \"@sling/artus-web-*\""
   },
   "keywords": [],
   "author": "",
