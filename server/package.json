@@ -13,7 +13,8 @@
   "license": "ISC",
   "peerDependencies": {
     "lodash": "^4.17.21",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "tslib": "^2.5.0"
   },
   "dependencies": {
     "@artus/core": "^1.0.8",
@@ -23,8 +24,7 @@
     "find-my-way": "^7.6.0",
     "fs-extra": "^11.1.1",
     "reflect-metadata": "^0.1.13",
-    "send": "^0.18.0",
-    "tslib": "^2.5.0"
+    "send": "^0.18.0"
   },
   "devDependencies": {
     "@artus/tsconfig": "^1.0.1",

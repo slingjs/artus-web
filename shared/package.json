@@ -10,7 +10,8 @@
   "author": "",
   "license": "ISC",
   "peerDependencies": {
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "tslib": "^2.5.0"
   },
   "main": "index.js"
 }

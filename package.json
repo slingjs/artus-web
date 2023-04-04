@@ -15,7 +15,8 @@
     "@sling/artus-web-server": "workspace:^",
     "@sling/artus-web-shared": "workspace:^",
     "lodash": "^4.17.21",
-    "typescript": "^5.0.3"
+    "typescript": "^5.0.3",
+    "tslib": "^2.5.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.192"
