@@ -15,7 +15,7 @@ export class AppController {
     const [ctx, next] = args
 
     const { input: { params: { params: { appPath } } } } = ctx
-    if (utils.compareIgnoreCase(appPath, constants.FILE_BASE_PATH)) {
+    if (utils.compareIgnoreCase(appPath, constants.FILE_BASE_DIR)) {
       return await next()
     }
 
