@@ -16,7 +16,8 @@ export enum HTTPMethod {
 }
 
 export interface HTTPControllerMetadata {
-  prefix?: string
+  prefix: string
+  order: number
 }
 
 export type HTTPRouteMetadata = Array<{

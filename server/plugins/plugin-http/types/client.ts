@@ -28,8 +28,11 @@ export type HTTPHandlerArgumentsRecord = {
 }
 
 export type HTTPHandlerOutputData = {
-  body: null | string | object | Stream
-  status: number
+  body: undefined | string | object | Stream,
+  __body__: HTTPHandlerOutputData['body'],
+  status: number | undefined,
+  __status__: HTTPHandlerOutputData['status']
+  __modified__: boolean
 }
 
 export interface HTTPMiddlewareContext extends Required<BaseContext> {

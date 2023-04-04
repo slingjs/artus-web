@@ -5,15 +5,17 @@ import {
   ROUTER_METADATA,
   WEB_MIDDLEWARE_METADATA,
   WEB_CONTROLLER_TAG,
-  HTTPRouteMiddlewaresMetadata
+  HTTPRouteMiddlewaresMetadata,
+  HTTPControllerMetadata
 } from './types'
 import { Middleware, MiddlewareInput } from '@artus/pipeline/src/base'
 
-export function HTTPController (prefix: string = ''): ClassDecorator {
+export function HTTPController (prefix: string = '', order: number = 0): ClassDecorator {
   return target => {
     const controllerMetaData = {
-      prefix
-    }
+      prefix,
+      order
+    } as HTTPControllerMetadata
 
     Reflect.defineMetadata(CONTROLLER_METADATA, controllerMetaData, target)
     addTag(WEB_CONTROLLER_TAG, target)

@@ -6,5 +6,8 @@ export default {
       host: '0.0.0.0',
       port: 9528
     }
+  },
+  framework: {
+    web: {}
   }
 } as AppConfig

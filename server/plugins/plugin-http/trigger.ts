@@ -1,21 +1,30 @@
 import { Injectable, ScopeEnum, Trigger } from '@artus/core'
 import { Stream } from 'stream'
 import { ARTUS_PLUGIN_HTTP_TRIGGER, HTTPMiddleware } from './types'
+import { Pipeline } from '@artus/pipeline'
+import { DEFAULT_HTTP_STATUS, SUCCESS_HTTP_STATUS } from '../../frameworks/framework-web/constants'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_TRIGGER,
   scope: ScopeEnum.SINGLETON
 })
 export class HTTPTrigger extends Trigger {
+  private handlePipeline: Pipeline | null
+
   constructor () {
     super()
-    const run: HTTPMiddleware = async (ctx, next) => {
+    const HTTPTriggerRun: HTTPMiddleware = async (ctx, next) => {
       await next()
+
+      const { output: { data: { __modified__: modified } } } = ctx
+      if (this.handlePipeline && !modified) {
+        await this.handlePipeline.run(ctx)
+      }
 
       return await this.response(ctx, next)
     }
 
-    this.use(run)
+    this.use(HTTPTriggerRun)
   }
 
   async response (...args: Parameters<HTTPMiddleware>) {
@@ -23,12 +32,11 @@ export class HTTPTrigger extends Trigger {
 
     const { input: { params: { res } }, output: { data: { status, body } } } = ctx
 
-    // 404 is the fallback/default status in koa2.
     res.statusCode = typeof status === 'number'
       ? status
       : body == null
-        ? 404
-        : 200
+        ? DEFAULT_HTTP_STATUS
+        : SUCCESS_HTTP_STATUS
 
     if (Buffer.isBuffer(body) || typeof body === 'string') {
       return res.end(body)
@@ -39,5 +47,9 @@ export class HTTPTrigger extends Trigger {
     }
 
     return res.end(JSON.stringify(body))
+  }
+
+  setHandlePipeline (pipeline: HTTPTrigger['handlePipeline']) {
+    this.handlePipeline = pipeline
   }
 }

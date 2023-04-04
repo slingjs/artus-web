@@ -2,6 +2,7 @@ import { FrameworksEnum, PluginsEnum } from './plugins'
 
 export interface AppConfig {
   cacheDir: string
+  distDir: string
   plugin: Record<PluginsEnum, any>
   framework: Record<FrameworksEnum, any>
 }

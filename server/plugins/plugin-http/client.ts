@@ -6,7 +6,7 @@ import {
   ARTUS_PLUGIN_HTTP_TRIGGER,
   CONTROLLER_METADATA,
   HTTPConfig,
-  HTTPControllerMetadata,
+  HTTPControllerMetadata, HTTPMiddlewareContext,
   HTTPRouteMetadata,
   HTTPRouteMiddlewaresMetadata,
   ROUTER_METADATA,
@@ -15,7 +15,8 @@ import {
 } from './types'
 import url from 'url'
 import { HTTPTrigger } from './trigger'
-import { Input, Output, Middleware } from '@artus/pipeline'
+import { Input, Output, Middleware, Pipeline } from '@artus/pipeline'
+import _ from 'lodash'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_CLIENT,
@@ -30,7 +31,15 @@ export class PluginHTTPClient {
 
   // 读取已经附加 metadata 信息并注入到 container 的 controller
   public async init (config: HTTPConfig) {
-    const controllerClazzList = this.app.container.getInjectableByTag(WEB_CONTROLLER_TAG)
+    const controllerClazzList = _.orderBy(
+      this.app.container.getInjectableByTag(WEB_CONTROLLER_TAG),
+      function(controllerClazz) {
+        const controllerMetadata = Reflect.getMetadata(CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
+
+        return controllerMetadata.order
+      },
+      'desc'
+    )
 
     for (const controllerClazz of controllerClazzList) {
       const controllerMetadata = Reflect.getMetadata(CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
@@ -105,7 +114,7 @@ export class PluginHTTPClient {
         routeMetadata.method,
         routePath,
         async function(req, res, params, store, searchParams) {
-          const input = new Input()
+          const input = new Input() as HTTPMiddlewareContext['input']
           input.params = {
             req,
             res,
@@ -115,23 +124,44 @@ export class PluginHTTPClient {
             app
           }
 
-          const output = new Output()
+          const output = new Output() as HTTPMiddlewareContext['output']
           output.data = {
-            status: 404, // 404 is the fallback/default status in koa2.
-            body: null
+            __status__: undefined,
+            get status () {
+              return this.__status__
+            },
+            set status (val: any) {
+              this.__modified__ = true
+              this.__status__ = val
+            },
+            __body__: undefined,
+            get body () {
+              return this.__body__
+            },
+            set body (val: any) {
+              this.__modified__ = true
+              this.__body__ = val
+            },
+            __modified__: false
           }
 
-          const ctx = await trigger.initContext(input)
+          const ctx = await trigger.initContext(input, output)
 
+          const pipeline = new Pipeline()
           for (const middlewares of routeMiddlewaresMetadata) {
-            await trigger.use(middlewares)
+            await pipeline.use(middlewares)
           }
 
-          await trigger.use(handler)
+          await pipeline.use(handler)
+
+          trigger.setHandlePipeline(pipeline)
 
           await trigger.startPipeline(ctx)
             .catch(e => {
               app.logger.error(e)
+            })
+            .finally(() => {
+              trigger.setHandlePipeline(null)
             })
         }
       )

@@ -6,9 +6,10 @@ import { ARTUS_FRAMEWORK_WEB_CLIENT, ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles } f
 import { initUser, userAuthMiddleware } from '../middlewares/business/user'
 import { getSession } from '../utils/business/user'
 import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
+import { executionTimeMiddleware } from '../middlewares/common/execution-time'
 
 @HTTPController('/user')
-@Use(initUser())
+@Use([executionTimeMiddleware(), initUser()])
 export default class UserController {
   @Inject(ARTUS_FRAMEWORK_WEB_USER_SERVICE)
   userService: UserService
