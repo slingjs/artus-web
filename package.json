@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev"
+    "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev",
+    "build": "pnpm run -r --filter \"@sling/artus-web-*\" build"
   },
   "keywords": [],
   "author": "",
