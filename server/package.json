@@ -6,7 +6,7 @@
   "bin": "./dist/bin/cli.js",
   "scripts": {
     "start": "node .",
-    "start:dev": "ts-node app.ts",
+    "start:dev": "ts-node index.ts",
     "dev": "tsc -d -w & nodemon",
     "build": "tsc -d"
   },

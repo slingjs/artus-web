@@ -13,7 +13,7 @@ export async function start (options: any = {}) {
     exclude: options.exclude || ['test']
   })
 
-  const baseDir = options.baseDir || process.cwd()
+  const baseDir = options.baseDir || __dirname
   const manifest = await scanner.scan(baseDir)
 
   // Start app.
