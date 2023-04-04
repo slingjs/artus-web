@@ -13,10 +13,9 @@ import {
   WEB_CONTROLLER_TAG,
   WEB_MIDDLEWARE_METADATA
 } from './types'
-import * as url from 'url'
-import { Middleware } from '@artus/pipeline/src/base'
+import url from 'url'
 import { HTTPTrigger } from './trigger'
-import { Input, Output } from '@artus/pipeline'
+import { Input, Output, Middleware } from '@artus/pipeline'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_CLIENT,

@@ -118,14 +118,11 @@ export function All (path: string = '') {
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<Middleware>
   ) {
-    const routeMetadataList = Reflect.getMetadata(ROUTER_METADATA, descriptor.value!) ?? []
-
-    Object.values(HTTPMethod).forEach(m => {
-      routeMetadataList.push({ path, method: m })
-    })
-
+    const routeMetadataList = [
+      { path, method: Object.values(HTTPMethod) } // All support methods.
+    ]
     Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
-  } as any
+  }
 }
 
 export function Use (middlewares: MiddlewareInput) {
@@ -143,7 +140,8 @@ export function Use (middlewares: MiddlewareInput) {
 
       clazzRouteMiddlewaresMetadata.push(middlewares)
       Reflect.defineMetadata(WEB_MIDDLEWARE_METADATA, clazzRouteMiddlewaresMetadata, target)
-      return;
+
+      return
     }
 
     // Method Decorator.
