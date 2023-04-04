@@ -32,6 +32,9 @@ importers:
 
   client:
     dependencies:
+      '@sling/artus-web-shared':
+        specifier: workspace:^
+        version: link:../shared
       pinia:
         specifier: ^2.0.32
         version: 2.0.32(typescript@5.0.3)(vue@3.2.47)
@@ -111,6 +114,9 @@ importers:
       '@artus/pipeline':
         specifier: ^0.2.2
         version: 0.2.2
+      '@sling/artus-web-shared':
+        specifier: workspace:^
+        version: link:../shared
       dayjs:
         specifier: ^1.11.7
         version: 1.11.7
