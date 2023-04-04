@@ -1,6 +1,6 @@
 {
   "name": "@sling/artus-web-server",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "",
   "main": "dist/index.js",
   "bin": "./dist/bin/cli.js",
@@ -21,6 +21,7 @@
   "dependencies": {
     "@artus/core": "^1.0.8",
     "@artus/pipeline": "^0.2.2",
+    "@types/node": "^18.14.2",
     "@sling/artus-web-shared": "workspace:^",
     "@sling/artus-web-client": "workspace:^",
     "dayjs": "^1.11.7",
