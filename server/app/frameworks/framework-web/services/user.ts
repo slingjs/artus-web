@@ -1,5 +1,5 @@
 import { Injectable, ScopeEnum } from '@artus/core'
-import { promiseDelay } from '@sling/artus-web-shared/utils'
+import { utils } from '@sling/artus-web-shared'
 import { ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles, UserSession } from '../types'
 
 @Injectable({
@@ -9,7 +9,7 @@ import { ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles, UserSession } from '../types'
 export default class UserService {
   async session () {
     // Delay 300ms.
-    await promiseDelay(300)
+    await utils.promiseDelay(300)
 
     return {
       name: 'Sling',

@@ -1,12 +1,12 @@
 import path from 'path'
 import dotEnv from 'dotenv'
 import { AppConfig } from '../types'
-import { FILE_BASE_DIR } from '@sling/artus-web-shared/constants'
+import { constants } from '@sling/artus-web-shared'
 
 dotEnv.config()
 
 const cacheDir = path.resolve(process.cwd(), './.cache')
-const distDir = path.resolve(process.cwd(), '../client/', FILE_BASE_DIR)
+const distDir = path.resolve(process.cwd(), '../client/', constants.FILE_BASE_DIR)
 export default {
   cacheDir,
 
