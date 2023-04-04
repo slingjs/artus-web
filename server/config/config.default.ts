@@ -8,15 +8,15 @@ const cacheDir = path.resolve(process.cwd(), './.cache')
 export default {
   cacheDir,
 
-  plugins: {
+  plugin: {
     http: {
       host: '0.0.0.0',
-      port: 3000,
+      port: 9527, // Will use this.
       cacheDir: path.resolve(cacheDir, 'plugins/http')
     }
   },
 
-  frameworks: {
+  framework: {
     web: {
       cacheDir: path.resolve(cacheDir, 'frameworks/web')
     }

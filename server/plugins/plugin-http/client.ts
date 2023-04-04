@@ -82,7 +82,7 @@ export class PluginHTTPClient {
     const { host, port } = config
     this.server.listen(port, host, () => {
       // @ts-ignore
-      this.app.logger.info(`Server listening on: ${ url.format({ host, port, protocol: 'http' }) }`)
+      this.app.logger.info(`Server listening on: ${ url.format({ hostname: host, port, protocol: 'http' }) }`)
     })
 
     return this.server

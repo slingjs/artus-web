@@ -26,7 +26,7 @@
             "FrameworkWebClient"
           ]
         },
-        "unitName": "D:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
+        "unitName": "E:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
       },
       {
         "path": "controllers\\user",
@@ -39,7 +39,7 @@
             "default"
           ]
         },
-        "unitName": "D:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
+        "unitName": "E:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
       },
       {
         "path": "services\\user",
@@ -52,7 +52,7 @@
             "default"
           ]
         },
-        "unitName": "D:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
+        "unitName": "E:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
       },
       {
         "path": "..\\..\\plugins\\plugin-http\\client",
@@ -127,7 +127,7 @@
             "default"
           ]
         },
-        "unitName": "D:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
+        "unitName": "E:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
       },
       {
         "path": "lifecycle\\http",
@@ -150,7 +150,7 @@
         "loaderState": {
           "exportNames": []
         },
-        "unitName": "D:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
+        "unitName": "E:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
       },
       {
         "path": "config\\plugin.default",
@@ -161,7 +161,7 @@
         "loaderState": {
           "exportNames": []
         },
-        "unitName": "D:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
+        "unitName": "E:\\Codes\\Github\\artus-web\\server\\frameworks\\framework-web"
       },
       {
         "path": "..\\..\\plugins\\plugin-http\\config\\config.default",
