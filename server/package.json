@@ -8,7 +8,7 @@
     "start": "node .",
     "start:dev": "ts-node index.ts",
     "dev": "tsc -d -w & nodemon",
-    "build": "tsc -d"
+    "build": "rimraf ./dist && tsc -d"
   },
   "keywords": [],
   "author": "",

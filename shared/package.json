@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "description": "",
   "scripts": {
-    "build": "tsc -d",
+    "build": "rimraf ./dist && tsc -d",
     "dev": "tsc -w -d"
   },
   "keywords": [],
