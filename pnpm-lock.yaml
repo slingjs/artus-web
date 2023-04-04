@@ -114,6 +114,9 @@ importers:
       '@artus/pipeline':
         specifier: ^0.2.2
         version: 0.2.2
+      '@sling/artus-web-client':
+        specifier: workspace:^
+        version: link:../client
       '@sling/artus-web-shared':
         specifier: workspace:^
         version: link:../shared
