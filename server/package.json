@@ -2,12 +2,14 @@
   "name": "@sling/artus-web-server",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "dist/index.js",
+  "bin": "./dist/bin/cli.js",
   "scripts": {
-    "start": "ts-node ./app.ts",
-    "dev": "nodemon"
+    "start": "node .",
+    "start:dev": "ts-node app.ts",
+    "dev": "tsc -d -w & nodemon",
+    "build": "tsc -d"
   },
-  "type": "commonjs",
   "keywords": [],
   "author": "",
   "license": "ISC",

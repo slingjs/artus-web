@@ -3,7 +3,7 @@ import { ArtusApplication, Scanner } from '@artus/core'
 
 // import * as frameworks from './frameworks/app'
 
-async function start (options: any = {}) {
+export async function start (options: any = {}) {
   const scanner = new Scanner({
     appName: 'application',
     needWriteFile: false,
