@@ -1,22 +1,20 @@
 {
   "name": "@sling/artus-web",
   "version": "0.0.7",
-  "description": "",
+  "private": true,
+  "description": "Artus web",
   "main": "index.js",
   "scripts": {
+    "start": "pnpm run -r --filter \"@sling/artus-web-*\" start",
     "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev",
     "build": "pnpm run -r --filter \"@sling/artus-web-*\" build",
-    "publish": "pnpm run build && pnpm publish -r --filter \"@sling/artus-web-*\" --no-git-checks --access public"
+    "publish": "pnpm run build && pnpm publish -r --filter \"@sling/artus-web*\" --no-git-checks --access public"
   },
   "keywords": [
     "nodejs",
     "artusjs",
     "vue3",
     "typescript"
-  ],
-  "files": [
-    "dist/",
-    "package.json"
   ],
   "author": {
     "name": "wangziling",
