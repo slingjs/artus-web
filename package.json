@@ -4,7 +4,7 @@
   "private": true,
   "description": "Artus web.",
   "scripts": {
-    "start": "npx ./node_modules/@sling/artus-web-server/ run start",
+    "start": "pnpm -C ./node_modules/@sling/artus-web-server/ run start",
     "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev",
     "build": "pnpm run -r --filter \"@sling/artus-web-*\" build",
     "publish": "pnpm run build && pnpm publish -r --filter \"@sling/artus-web*\" --no-git-checks --access public"
