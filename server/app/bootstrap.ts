@@ -1,7 +1,8 @@
 import 'reflect-metadata'
 import { ArtusApplication, Scanner } from '@artus/core'
+import dotEnv from 'dotenv'
 
-// import * as frameworks from './frameworks/app'
+dotEnv.config()
 
 export async function start (options: any = {}) {
   const scanner = new Scanner({
