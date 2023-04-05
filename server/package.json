@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node .",
     "start:dev": "ts-node index.ts",
-    "dev": "tsc -d -w & nodemon",
+    "dev": "nodemon",
     "build": "rimraf ./dist && tsc -d"
   },
   "keywords": [
@@ -26,28 +26,36 @@
   "license": "MIT",
   "peerDependencies": {
     "lodash": "^4.17.21",
-    "typescript": "^5.0.2",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.2"
   },
   "dependencies": {
     "@artus/core": "^1.0.8",
     "@artus/pipeline": "^0.2.2",
-    "@types/node": "^18.14.2",
-    "@sling/artus-web-shared": "workspace:^",
     "@sling/artus-web-client": "workspace:^",
+    "@sling/artus-web-shared": "workspace:^",
+    "@types/node": "^18.14.2",
+    "cookie": "^0.5.0",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
     "find-my-way": "^7.6.0",
     "fs-extra": "^11.1.1",
+    "ioredis": "^5.3.1",
+    "lru-cache": "^8.0.4",
     "reflect-metadata": "^0.1.13",
     "send": "^0.18.0"
   },
   "devDependencies": {
     "@artus/tsconfig": "^1.0.1",
+    "@types/cookie": "^0.5.1",
     "@types/fs-extra": "^11.0.1",
     "@types/node": "^18.14.2",
     "@types/send": "^0.17.1",
     "nodemon": "^2.0.22",
     "ts-node": "^10.9.1"
+  },
+  "type": "commonjs",
+  "engines": {
+    "node": ">= 16"
   }
 }

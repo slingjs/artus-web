@@ -5,7 +5,8 @@
     "strictNullChecks": true,
     "resolveJsonModule": true,
     "outDir": "dist",
-    "target": "ESNext"
+    "target": "ESNext",
+    "moduleResolution": "Node"
   },
   "include": [
     "./**/*.ts",

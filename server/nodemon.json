@@ -9,5 +9,5 @@
     ".cache",
     "**/manifest.json"
   ],
-  "exec": "ts-node ./app.ts"
+  "exec": "ts-node ./index.ts"
 }
