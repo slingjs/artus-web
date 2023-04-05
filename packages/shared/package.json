@@ -25,12 +25,14 @@
   },
   "dependencies": {
     "tslib": "^2.5.0",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.2",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-typescript": "^11.1.0",
     "@types/node": "^18.14.2",
+    "@types/uuid": "^9.0.1",
     "rollup": "^3.20.2"
   },
   "main": "dist/index.js",
