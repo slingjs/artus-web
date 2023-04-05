@@ -14,7 +14,7 @@ export default defineConfig([
     plugins: [nodeResolve({ preferBuiltins: true, browser: true }), typescript({ tsconfig: './tsconfig.json' })]
   },
   {
-    input: globSync(['**/*.ts', '!(node_modules)/*.ts']),
+    input: globSync(['*.ts', '!(node_modules|dist)/*.ts']),
     output: {
       dir: './dist',
       format: 'cjs',
@@ -31,7 +31,7 @@ export default defineConfig([
     ]
   },
   {
-    input: globSync(['**/*.ts', '!(node_modules)/*.ts']),
+    input: globSync(['*.ts', '!(node_modules|dist)/*.ts']),
     output: {
       dir: './dist',
       format: 'module',
