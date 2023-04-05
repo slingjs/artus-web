@@ -1,10 +1,10 @@
 <script setup lang='ts'>
 import { RouterLink, RouterView } from 'vue-router'
 import HelloWorld from './components/HelloWorld.vue'
-import { calcRandomString } from '@sling/artus-web-shared/utils'
+import shared from '@sling/artus-web-shared'
 import { useCounterStore } from '@/stores/counter'
 
-const random = calcRandomString()
+const random = shared.utils.calcRandomString()
 const counterStore = useCounterStore()
 </script>
 
