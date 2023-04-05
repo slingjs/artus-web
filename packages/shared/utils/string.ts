@@ -1,3 +1,5 @@
+import { v4 as uuidV4 } from 'uuid'
+
 export function compareIgnoreCase (str1: any, str2: any) {
   str1 += ''
   str2 += ''
@@ -16,4 +18,8 @@ export function calcRandomString (len?: number): string {
   }
 
   return pwd
+}
+
+export function calcUUID () {
+  return uuidV4()
 }
