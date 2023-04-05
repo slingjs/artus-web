@@ -14,6 +14,12 @@
     "vue3",
     "typescript"
   ],
+  "files": [
+    "*/dist",
+    "package.json",
+    "pnpm-workspace.yaml",
+    "pnpm-lock.yaml"
+  ],
   "author": {
     "name": "wangziling",
     "url": "https://github.com/wangziling"
