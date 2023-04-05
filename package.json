@@ -2,8 +2,7 @@
   "name": "@sling/artus-web",
   "version": "0.0.7",
   "private": true,
-  "description": "Artus web",
-  "main": "index.js",
+  "description": "Artus web.",
   "scripts": {
     "start": "pnpm run -r --filter \"@sling/artus-web-*\" start",
     "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev",
