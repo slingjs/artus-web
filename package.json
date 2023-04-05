@@ -7,7 +7,9 @@
     "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev",
     "build": "pnpm run -r --filter \"@sling/artus-web-*\" build",
     "prepublish": "pnpm run build",
-    "release": "pnpm publish --no-git-checks --access public"
+    "release:self": "pnpm publish --no-git-checks --access public",
+    "release:workspaces": "pnpm publish -r --filter \"@sling/artus-web-*\" --no-git-checks --access public",
+    "release": "pnpm run release:self && pnpm run release:workspaces"
   },
   "keywords": [
     "nodejs",
