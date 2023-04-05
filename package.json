@@ -4,7 +4,7 @@
   "description": "Artus web.",
   "scripts": {
     "start": "pnpm -C ./node_modules/@sling/artus-web-server/ run start",
-    "dev": "pnpm run -r --filter \"@sling/artus-web-*\" dev",
+    "dev": "pnpm run -r --filter \"@sling/artus-web-*\" --parallel dev",
     "build": "pnpm run -r --filter \"@sling/artus-web-*\" build",
     "prepublish": "pnpm run build",
     "release:self": "pnpm publish --no-git-checks --access public",
