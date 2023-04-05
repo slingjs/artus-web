@@ -18,9 +18,9 @@
     "url": "https://github.com/wangziling"
   },
   "repository": {
-    "url": "git+https://github.com/wangziling/artus-web.git"
+    "url": "git+https://github.com/slingjs/artus-web.git"
   },
-  "homepage": "https://github.com/wangziling/artus-web",
+  "homepage": "https://github.com/slingjs/artus-web",
   "license": "MIT",
   "peerDependencies": {
     "@types/node": "^18.14.2",

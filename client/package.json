@@ -25,9 +25,9 @@
     "url": "https://github.com/wangziling"
   },
   "repository": {
-    "url": "git+https://github.com/wangziling/artus-web.git"
+    "url": "git+https://github.com/slingjs/artus-web.git"
   },
-  "homepage": "https://github.com/wangziling/artus-web",
+  "homepage": "https://github.com/slingjs/artus-web",
   "dependencies": {
     "pinia": "^2.0.32",
     "vue": "^3.2.47",
