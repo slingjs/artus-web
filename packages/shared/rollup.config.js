@@ -1,34 +1,63 @@
 import typescript from '@rollup/plugin-typescript'
 import { nodeResolve } from '@rollup/plugin-node-resolve'
 import { defineConfig } from 'rollup'
+import { globSync } from 'glob'
 
 export default defineConfig([
   {
     input: './index.ts',
     output: {
-      file: './dist/index.mjs',
-      format: 'module',
+      file: './dist/index.esm.js',
+      format: 'esm',
       sourcemap: true
     },
-    plugins: [ typescript({ tsconfig: './tsconfig.json' })]
+    plugins: [nodeResolve({ preferBuiltins: true, browser: true }), typescript({ tsconfig: './tsconfig.json' })]
   },
   {
-    input: './index.ts',
+    input: globSync(['**/*.ts', '!(node_modules)/*.ts']),
     output: {
-      file: './dist/index.cjs',
+      dir: './dist',
       format: 'cjs',
-      sourcemap: true
+      preserveModules: true,
+      preserveModulesRoot: './',
+      sourcemap: true,
+      // Rename all ts files to .cjs
+      entryFileNames: i => i.name + '.cjs'
     },
-    plugins: [typescript({ tsconfig: './tsconfig.json' })]
+    external: ['uuid'],
+    plugins: [
+      nodeResolve({ browser: false, moduleDirectories: ['uuid'] }),
+      typescript({ tsconfig: './tsconfig.json' })
+    ]
+  },
+  {
+    input: globSync(['**/*.ts', '!(node_modules)/*.ts']),
+    output: {
+      dir: './dist',
+      format: 'module',
+      preserveModules: true,
+      preserveModulesRoot: './',
+      sourcemap: true,
+      // Rename all ts files to .mjs
+      entryFileNames: i => i.name + '.mjs'
+    },
+    external: ['uuid'],
+    plugins: [
+      nodeResolve({ browser: false, moduleDirectories: ['uuid'] }),
+      typescript({ tsconfig: './tsconfig.json' })
+    ]
   },
   {
     input: './index.ts',
     output: {
-      file: './dist/index.js',
+      file: './dist/index.umd.js',
       format: 'umd',
       sourcemap: true,
-      name: 'index.js'
+      name: 'index.umd.js'
     },
-    plugins: [typescript({ tsconfig: './tsconfig.json' })]
+    plugins: [
+      nodeResolve({ preferBuiltins: true, browser: false }),
+      typescript({ tsconfig: './tsconfig.json' })
+    ]
   }
 ])
