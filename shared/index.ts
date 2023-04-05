@@ -1,3 +1,10 @@
-export * as constants from './constants'
-export * as types from './types'
-export * as utils from './utils'
+import * as constants from './constants'
+import * as types from './types'
+import * as utils from './utils'
+
+export default {
+  constants,
+  types,
+  utils
+}
+

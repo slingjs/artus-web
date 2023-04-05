@@ -5,7 +5,10 @@
     "resolveJsonModule": true,
     "outDir": "dist",
     "target": "ESNext",
-    "module": "CommonJS"
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "declaration": true,
+    "sourceMap": true
   },
   "include": [
     "./**/*.ts",

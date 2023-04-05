@@ -3,7 +3,7 @@
   "version": "0.0.6",
   "description": "",
   "scripts": {
-    "build": "rimraf ./dist && tsc -d",
+    "build": "rimraf ./dist && rollup -c rollup.config.js",
     "dev": "tsc -w -d"
   },
   "keywords": [],
@@ -11,15 +11,27 @@
   "license": "ISC",
   "peerDependencies": {
     "@types/node": "^18.14.2",
-    "typescript": "^5.0.2",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.2"
   },
   "dependencies": {
-    "typescript": "^5.0.2",
-    "tslib": "^2.5.0"
+    "tslib": "^2.5.0",
+    "typescript": "^5.0.2"
   },
   "devDependencies": {
-    "@types/node": "^18.14.2"
+    "@rollup/plugin-node-resolve": "^15.0.2",
+    "@rollup/plugin-typescript": "^11.1.0",
+    "@types/node": "^18.14.2",
+    "rollup": "^3.20.2"
   },
-  "main": "dist/index.js"
+  "main": "dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "default": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "type": "module"
 }
