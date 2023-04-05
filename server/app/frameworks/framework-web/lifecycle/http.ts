@@ -9,6 +9,7 @@ import {
 import { ARTUS_PLUGIN_HTTP_CLIENT, HTTPConfig } from '../../../plugins/plugin-http/types'
 import { PluginHTTPClient } from '../../../plugins/plugin-http/client'
 import { AppConfig } from '../../../types'
+import { filterPluginConfig } from '../utils/plugins'
 
 @LifecycleHookUnit()
 export default class HTTPLifecycle implements ApplicationLifecycle {
@@ -19,7 +20,7 @@ export default class HTTPLifecycle implements ApplicationLifecycle {
   @LifecycleHook()
   public async willReady () {
     const client = this.app.container.get(ARTUS_PLUGIN_HTTP_CLIENT) as PluginHTTPClient
-    await client.init((this.app.config as AppConfig).plugin.http as HTTPConfig)
+    await client.init(filterPluginConfig((this.app.config as AppConfig).plugin.http as HTTPConfig) as AppConfig['plugin']['http'])
 
     // const trigger = this.app.container.get(ARTUS_PLUGIN_HTTP_TRIGGER) as HTTPTrigger
     // await trigger.use(executionTimeMiddleware())

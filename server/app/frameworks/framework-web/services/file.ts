@@ -8,7 +8,7 @@ import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
   id: ARTUS_FRAMEWORK_WEB_FILE_SERVICE,
   scope: ScopeEnum.SINGLETON
 })
-export default class FileService {
+export class FileService {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 

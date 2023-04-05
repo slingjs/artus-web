@@ -1,10 +1,9 @@
 import { ArtusApplication, ArtusInjectEnum, Inject } from '@artus/core'
 import { All, HTTPController, Use } from '../../../plugins/plugin-http/decorator'
-import UserService from '../services/user'
+import { UserService } from '../services/user'
 import { AppConfig } from '../../../types'
 import { ARTUS_FRAMEWORK_WEB_CLIENT, ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles } from '../types'
 import { initUser, userAuthMiddleware } from '../middlewares/business/user'
-import { getSession } from '../utils/business/user'
 import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
 import { executionTimeMiddleware } from '../middlewares/common/execution-time'
 
@@ -30,7 +29,7 @@ export default class UserController {
 
     ctx.output.data.body = JSON.stringify({
       config: this.app.config as AppConfig,
-      user: getSession(ctx)
+      user: await this.userService.getCtxSession(ctx)
     })
   }
 }

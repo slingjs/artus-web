@@ -1,7 +1,7 @@
 import { Inject } from '@artus/core'
 import { Get, HTTPController } from '../../../plugins/plugin-http/decorator'
 import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
-import FileService from '../services/file'
+import { FileService } from '../services/file'
 import { ARTUS_FRAMEWORK_WEB_FILE_SERVICE } from '../types'
 import shared from '@sling/artus-web-shared'
 

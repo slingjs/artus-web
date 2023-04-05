@@ -8,7 +8,7 @@ import { AppConfig } from '../../../types'
   id: ARTUS_FRAMEWORK_WEB_APP_SERVICE,
   scope: ScopeEnum.SINGLETON
 })
-export default class AppService {
+export class AppService {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 

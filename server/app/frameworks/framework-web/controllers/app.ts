@@ -1,11 +1,13 @@
-import { Get, HTTPController } from '../../../plugins/plugin-http/decorator'
+import { Get, HTTPController, Use } from '../../../plugins/plugin-http/decorator'
 import { Inject } from '@artus/core'
 import { ARTUS_FRAMEWORK_WEB_APP_SERVICE } from '../types'
 import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
-import AppService from '../services/app'
+import { AppService } from '../services/app'
 import shared from '@sling/artus-web-shared'
+import { initUser } from '../middlewares/business/user'
 
 @HTTPController('', -1)
+@Use(initUser())
 export class AppController {
   @Inject(ARTUS_FRAMEWORK_WEB_APP_SERVICE)
   appService: AppService

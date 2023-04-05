@@ -1,20 +1,68 @@
-import { MiddlewareGenerator } from '../../../../types'
-import { Roles } from '../../types'
-import { getSession, setSession } from '../../utils/business/user'
+import { ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles } from '../../types'
+import { UserService } from '../../services/user'
+import cookie from 'cookie'
+import shared from '@sling/artus-web-shared'
+import _ from 'lodash'
+import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 
-export const initUser: MiddlewareGenerator = () => {
+export const initUser = (): HTTPMiddleware => {
   return async function initUser (ctx, next) {
-    await setSession(ctx)
+    const { input: { params: { app, req, res } } } = ctx
+
+    const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
+    const userService = app
+      .container
+      .get(ARTUS_FRAMEWORK_WEB_USER_SERVICE) as UserService
+
+    const initNewSession = async function initNewSession () {
+      const newSession = await userService.initSession(ctx)
+      await userService.setDistributeSession(
+        ctx,
+        newSession.id,
+        newSession
+      )
+      await userService.setCtxSession(ctx, newSession)
+      res.setHeader(
+        'set-cookie',
+        cookie.serialize(shared.constants.USER_SESSION_KEY, newSession.id)
+      )
+    }
+
+    if (!sessionCookieValue) {
+      await initNewSession()
+
+      return await next()
+    }
+
+    const sessionString = await userService.getDistributeSession(ctx, sessionCookieValue)
+    if (!sessionString) {
+      await initNewSession()
+
+      return await next()
+    }
+
+    try {
+      const session = JSON.parse(sessionString)
+      await userService.setCtxSession(ctx, session)
+    } catch (e) {
+      await initNewSession()
+
+      return await next()
+    }
 
     await next()
   }
 }
 
-export const userAuthMiddleware: MiddlewareGenerator = (roles?: Roles[]) => {
+export const userAuthMiddleware = (roles?: Roles[]): HTTPMiddleware => {
   return async function userAuthMiddleware (ctx, next) {
-    const session = await getSession(ctx)
+    const { input: { params: { app } } } = ctx
+    const userService = app
+      .container
+      .get(ARTUS_FRAMEWORK_WEB_USER_SERVICE) as UserService
 
-    if (!session.loggedIn) {
+    const session = await userService.getCtxSession(ctx)
+    if (!(session && session.loggedIn)) {
       ctx.output.data.status = 401
 
       return

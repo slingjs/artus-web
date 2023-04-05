@@ -1,7 +1,9 @@
 import { PluginConfigItem } from '@artus/core'
 
 export enum PluginsEnum {
-  http = 'http'
+  http = 'http',
+  redis = 'redis',
+  cache = 'cache'
 }
 
 export type PluginsConfig = {
