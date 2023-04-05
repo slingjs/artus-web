@@ -1,6 +1,6 @@
 {
   "name": "@sling/artus-web-client",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "scripts": {
     "dev": "vite",
     "build": "rimraf ./dist && run-p type-check build-only",
