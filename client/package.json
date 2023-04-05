@@ -12,10 +12,18 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/"
   },
+  "keywords": [
+    "vue3",
+    "typescript"
+  ],
   "files": [
     "dist/",
     "package.json"
   ],
+  "author": {
+    "name": "wangziling",
+    "url": "https://github.com/wangziling"
+  },
   "dependencies": {
     "pinia": "^2.0.32",
     "vue": "^3.2.47",

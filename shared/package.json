@@ -6,9 +6,18 @@
     "build": "rimraf ./dist && rollup -c rollup.config.js",
     "dev": "tsc -w -d"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "typescript"
+  ],
+  "files": [
+    "dist/",
+    "package.json"
+  ],
+  "author": {
+    "name": "wangziling",
+    "url": "https://github.com/wangziling"
+  },
+  "license": "MIT",
   "peerDependencies": {
     "@types/node": "^18.14.2",
     "tslib": "^2.5.0",

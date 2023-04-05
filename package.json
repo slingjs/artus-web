@@ -8,9 +8,21 @@
     "build": "pnpm run -r --filter \"@sling/artus-web-*\" build",
     "publish": "pnpm run build && pnpm publish -r --no-git-checks --access public"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "nodejs",
+    "artusjs",
+    "vue3",
+    "typescript"
+  ],
+  "files": [
+    "dist/",
+    "package.json"
+  ],
+  "author": {
+    "name": "wangziling",
+    "url": "https://github.com/wangziling"
+  },
+  "license": "MIT",
   "dependencies": {
     "@sling/artus-web-client": "workspace:^",
     "@sling/artus-web-server": "workspace:^",

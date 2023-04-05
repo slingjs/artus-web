@@ -10,9 +10,20 @@
     "dev": "tsc -d -w & nodemon",
     "build": "rimraf ./dist && tsc -d"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "nodejs",
+    "artusjs",
+    "typescript"
+  ],
+  "files": [
+    "dist/",
+    "package.json"
+  ],
+  "author": {
+    "name": "wangziling",
+    "url": "https://github.com/wangziling"
+  },
+  "license": "MIT",
   "peerDependencies": {
     "lodash": "^4.17.21",
     "typescript": "^5.0.2",
