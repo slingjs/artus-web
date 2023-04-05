@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "build": "rimraf ./dist && rollup -c rollup.config.js",
-    "dev": "rimraf ./dist && rollup -c rollup.config.js --watch"
+    "dev": "rollup -c rollup.config.js --watch"
   },
   "keywords": [
     "typescript"
