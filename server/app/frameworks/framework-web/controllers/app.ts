@@ -3,7 +3,7 @@ import { Inject } from '@artus/core'
 import { ARTUS_FRAMEWORK_WEB_APP_SERVICE } from '../types'
 import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
 import AppService from '../services/app'
-import { utils, constants } from '@sling/artus-web-shared'
+import shared from '@sling/artus-web-shared'
 
 @HTTPController('', -1)
 export class AppController {
@@ -15,7 +15,7 @@ export class AppController {
     const [ctx, next] = args
 
     const { input: { params: { params: { appPath } } } } = ctx
-    if (utils.compareIgnoreCase(appPath, constants.FILE_BASE_DIR)) {
+    if (shared.utils.compareIgnoreCase(appPath, shared.constants.FILE_BASE_DIR)) {
       return await next()
     }
 
