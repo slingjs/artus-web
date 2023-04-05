@@ -17,6 +17,10 @@
     "name": "wangziling",
     "url": "https://github.com/wangziling"
   },
+  "repository": {
+    "url": "git+https://github.com/wangziling/artus-web.git"
+  },
+  "homepage": "https://github.com/wangziling/artus-web",
   "license": "MIT",
   "peerDependencies": {
     "@types/node": "^18.14.2",
