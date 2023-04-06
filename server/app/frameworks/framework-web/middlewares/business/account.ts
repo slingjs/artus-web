@@ -4,6 +4,7 @@ import cookie from 'cookie'
 import shared from '@sling/artus-web-shared'
 import _ from 'lodash'
 import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
+import { USER_SESSION_COOKIE_MAX_AGE } from '../../constants'
 
 export const initUser = (): HTTPMiddleware => {
   return async function initUser (ctx, next) {
@@ -14,8 +15,8 @@ export const initUser = (): HTTPMiddleware => {
       .container
       .get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
 
-    const initNewSession = async function initNewSession () {
-      const newSession = await userService.initSession(ctx)
+    const initNewSession = async function initNewSession (sessionCookieValue?: string) {
+      const newSession = await userService.initSession(ctx, undefined, { _sessionId: sessionCookieValue })
       await userService.setDistributeSession(
         ctx,
         newSession._sessionId,
@@ -24,7 +25,14 @@ export const initUser = (): HTTPMiddleware => {
       await userService.setCtxSession(ctx, newSession)
       res.setHeader(
         'set-cookie',
-        cookie.serialize(shared.constants.USER_SESSION_KEY, newSession._sessionId)
+        cookie.serialize(
+          shared.constants.USER_SESSION_KEY,
+          newSession._sessionId,
+          {
+            path: '/', // Must set this. Otherwise, it will be req.path as default.
+            maxAge: USER_SESSION_COOKIE_MAX_AGE
+          }
+        )
       )
     }
 

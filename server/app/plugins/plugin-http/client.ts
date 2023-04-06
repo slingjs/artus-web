@@ -32,7 +32,7 @@ export class PluginHTTPClient {
   private server: http.Server
   private readonly router = Router()
 
-  // 读取已经附加 metadata 信息并注入到 container 的 controller
+  // Handle on retrieving registered route metadata.
   public async init (config: HTTPConfig) {
     const controllerClazzList = _.orderBy(
       this.app.container.getInjectableByTag(WEB_CONTROLLER_TAG),
@@ -45,6 +45,7 @@ export class PluginHTTPClient {
     )
 
     for (const controllerClazz of controllerClazzList) {
+      // Retrieve the registered metadata from the controller's generator..
       const controllerMetadata = Reflect.getMetadata(CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
       const controller = this.app.container.get(controllerClazz) as FunctionConstructor
       // Controller Middlewares.
@@ -55,7 +56,7 @@ export class PluginHTTPClient {
         ) ?? []
       ) as HTTPRouteMiddlewaresMetadata
 
-      // 读取 Controller 中的 Function.
+      // Retrieve the registered metadata from controller's proto functions.
       const handlerDescriptorList = Object.getOwnPropertyDescriptors(controllerClazz.prototype)
       for (const key of Object.keys(handlerDescriptorList)) {
         const handlerDescriptor = handlerDescriptorList[key]
@@ -75,7 +76,7 @@ export class PluginHTTPClient {
           ) ?? []
         ) as HTTPRouteMiddlewaresMetadata
 
-        // 注入 router.
+        // Inject metadata in route. Handle on route's request.
         this.registerRoute(
           controllerMetadata,
           routeMetadataList,

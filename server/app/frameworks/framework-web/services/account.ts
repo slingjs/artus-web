@@ -9,7 +9,11 @@ import {
 } from '../types'
 import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
 import { CacheService } from './cache'
-import { ACCESSIBLE_ACCOUNT_PROPERTIES, USER_DISTRIBUTE_CACHE_DEFAULT_TTL } from '../constants'
+import {
+  ACCESSIBLE_ACCOUNT_PROPERTIES,
+  USER_DISTRIBUTE_CACHE_DEFAULT_TTL,
+  USER_SESSION_COOKIE_MAX_AGE, USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
+} from '../constants'
 import { Account } from '../models/mongo/generated/client'
 import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
 import { PluginPrismaClient } from '../../../plugins/plugin-prisma/client'
@@ -59,20 +63,38 @@ export class AccountService {
     }
   }
 
-  async handleSessionCertificated (ctx: HTTPMiddlewareContext, signedInAccount: Account) {
-    const { input: { params: { res } } } = ctx
+  async handleSessionCertificated (
+    ctx: HTTPMiddlewareContext,
+    signedInAccount: Account,
+    options?: Partial<{ keepSignedIn: boolean }>
+  ) {
+    const { input: { params: { res, req } } } = ctx
 
     const ctxPreviousSession = await this.getCtxSession(ctx)
-    const sessionKeyValue = _.get(ctxPreviousSession, '_sessionId') || shared.utils.calcUUID()
+    const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
+    const ctxPreviousSessionKeyValue = _.get(ctxPreviousSession, '_sessionId')
+    const sessionKeyValue = sessionCookieValue || ctxPreviousSessionKeyValue || shared.utils.calcUUID()
     const session = await this.initSession(ctx, signedInAccount, { _sessionId: sessionKeyValue })
     await this.setCtxSession(ctx, session)
 
     await this.setDistributeSession(ctx, sessionKeyValue, session)
 
-    res.setHeader(
-      'set-cookie',
-      cookie.serialize(shared.constants.USER_SESSION_KEY, sessionKeyValue)
-    )
+    // If already set.
+    if (!([ctxPreviousSessionKeyValue, sessionCookieValue].includes(sessionKeyValue))) {
+      res.setHeader(
+        'set-cookie',
+        cookie.serialize(
+          shared.constants.USER_SESSION_KEY,
+          sessionKeyValue,
+          {
+            path: '/', // Must set this. Otherwise, it will be req.path as default.
+            maxAge: _.get(options, 'keepSignedIn')
+              ? USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
+              : USER_SESSION_COOKIE_MAX_AGE
+          }
+        )
+      )
+    }
   }
 
   async getCtxSession (ctx: HTTPMiddlewareContext) {
@@ -161,7 +183,7 @@ export class AccountService {
   async signUp (
     ctx: HTTPMiddlewareContext,
     registration: Pick<Account, 'email' | 'name' | 'password'>,
-    options?: Partial<{ passwordPreEncrypt: boolean }>
+    options?: Partial<{ passwordPreEncrypt: boolean, keepSignIn: boolean }>
   ) {
     const foundAccount = await this.find(ctx, { email: registration.email })
     if (foundAccount) {
