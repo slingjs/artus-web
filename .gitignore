@@ -105,3 +105,6 @@ dist
 
 # JetBrains IDE config.
 .idea/
+
+# Prisma models generated folders.
+/server/app/**/models/**/generated/
