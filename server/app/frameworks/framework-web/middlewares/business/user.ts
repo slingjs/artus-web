@@ -73,7 +73,7 @@ export const userAuthMiddleware = (roles?: Roles[]): HTTPMiddleware => {
       return
     }
 
-    if (!roles.every(r => session.roles.some(sR => sR.toUpperCase() === r.toUpperCase()))) {
+    if (!roles.every(r => session.roles.some(sR => shared.utils.compareIgnoreCase(sR, r)))) {
       ctx.output.data.status = 401
 
       return
