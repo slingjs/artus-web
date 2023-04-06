@@ -6,7 +6,8 @@
     "start": "pnpm -C ./node_modules/@sling/artus-web-server/ run generate-dist-prisma && pnpm -C ./node_modules/@sling/artus-web-server/ run start",
     "dev": "pnpm run -r --filter \"@sling/artus-web-*\" --parallel dev",
     "build": "pnpm run -r --filter \"@sling/artus-web-*\" build",
-    "prepublish": "pnpm run build",
+    "build:release": "pnpm run -r --filter \"@sling/artus-web-*\" build:release",
+    "prepublish": "pnpm run build:release",
     "release:self": "pnpm publish --no-git-checks --access public",
     "release:workspaces": "pnpm publish -r --filter \"@sling/artus-web-*\" --no-git-checks --access public",
     "release": "pnpm run release:self && pnpm run release:workspaces"

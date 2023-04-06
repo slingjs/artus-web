@@ -9,6 +9,7 @@
     "start:dev": "ts-node index.ts",
     "dev": "nodemon",
     "build": "rimraf ./dist && tsc -d && node ./.build/build-fix.js && node ./.build/generate-dist-prisma.js",
+    "build:release": "rimraf ./dist && tsc -d && node ./.build/build-fix.js",
     "postinstall": "node ./.build/generate-dist-prisma.js",
     "generate-dist-prisma": "node ./.build/generate-dist-prisma.js"
   },
