@@ -17,7 +17,6 @@ export default class FrameworkWebLifecycle implements ApplicationLifecycle {
   @Inject(ARTUS_FRAMEWORK_WEB_CLIENT)
   webClient: FrameworkWebClient
 
-  // 在 Artus 生命周期 willReady 时启动 HTTP server
   @LifecycleHook()
   public async didReady () {
 

@@ -17,7 +17,7 @@ export default class RedisLifecycle implements ApplicationLifecycle {
   app: ArtusApplication
 
   @LifecycleHook()
-  async willReady () {
+  async didLoad () {
     const client = this.app.container.get(ARTUS_PLUGIN_REDIS_CLIENT) as RedisClient
     await client.init(filterPluginConfig((this.app.config as AppConfig).plugin.redis) as AppConfig['plugin']['redis'])
 

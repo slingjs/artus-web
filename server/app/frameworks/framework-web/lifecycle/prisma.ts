@@ -17,7 +17,7 @@ export default class PrismaLifecycle implements ApplicationLifecycle {
   app: ArtusApplication
 
   @LifecycleHook()
-  async willReady () {
+  async didLoad () {
     const client = this.app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
     await client.init(filterPluginConfig((this.app.config as AppConfig).plugin.prisma) as AppConfig['plugin']['http'])
 

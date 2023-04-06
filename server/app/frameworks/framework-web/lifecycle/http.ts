@@ -16,9 +16,8 @@ export default class HTTPLifecycle implements ApplicationLifecycle {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 
-  // 在 Artus 生命周期 willReady 时启动 HTTP server
   @LifecycleHook()
-  public async willReady () {
+  public async didLoad () {
     const client = this.app.container.get(ARTUS_PLUGIN_HTTP_CLIENT) as PluginHTTPClient
     await client.init(filterPluginConfig((this.app.config as AppConfig).plugin.http as HTTPConfig) as AppConfig['plugin']['http'])
 

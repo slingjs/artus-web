@@ -17,7 +17,7 @@ export default class CacheLifecycle implements ApplicationLifecycle {
   app: ArtusApplication
 
   @LifecycleHook()
-  async willReady () {
+  async didLoad () {
     const client = this.app.container.get(ARTUS_PLUGIN_CACHE_CLIENT) as CacheClient
     await client.init(filterPluginConfig((this.app.config as AppConfig).plugin.cache) as AppConfig['plugin']['cache'])
   }
