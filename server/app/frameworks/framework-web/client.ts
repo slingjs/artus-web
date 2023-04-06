@@ -7,7 +7,7 @@ import { PluginHTTPClient } from '../../plugins/plugin-http/client'
   id: ARTUS_FRAMEWORK_WEB_CLIENT,
   scope: ScopeEnum.SINGLETON
 })
-export class FrameworkWebClient extends ArtusApplication {
+export class FrameworkWebClient {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 
