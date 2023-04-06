@@ -14,7 +14,7 @@ import {
   DistributeCacheValue
 } from '../../types'
 import _ from 'lodash'
-import { ArrayOrPrimitive } from '@sling/artus-web-shared/dist/types'
+import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
 import {
   DISTRIBUTE_CACHE_CLEAR_SUCCESS_VALUE,
   DISTRIBUTE_CACHE_DEFAULT_TTL,
