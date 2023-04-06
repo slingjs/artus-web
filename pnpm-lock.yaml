@@ -209,9 +209,15 @@ importers:
       '@types/fs-extra':
         specifier: ^11.0.1
         version: 11.0.1
+      '@types/glob':
+        specifier: ^8.1.0
+        version: 8.1.0
       '@types/send':
         specifier: ^0.17.1
         version: 0.17.1
+      glob:
+        specifier: ^9.3.4
+        version: 9.3.4
       nodemon:
         specifier: ^2.0.22
         version: 2.0.22
@@ -1025,7 +1031,6 @@ packages:
     dependencies:
       '@types/minimatch': 5.1.2
       '@types/node': 18.14.2
-    dev: false
 
   /@types/jsdom@21.1.0:
     resolution: {integrity: sha512-leWreJOdnuIxq9Y70tBVm/bvTuh31DSlF/r4l7Cfi4uhVQqLHD0Q4v301GMisEMwwbMgF7ZKxuZ+Jbd4NcdmRw==}
@@ -1055,7 +1060,6 @@ packages:
 
   /@types/minimatch@5.1.2:
     resolution: {integrity: sha512-K0VQKziLUWkVKiRVrx4a40iPaxTUefQmjtkQofBkYRcoaaL/8rhwDWww9qWbrgicNOgnpIsMxyNIUM4+n6dUIA==}
-    dev: false
 
   /@types/node@18.14.2:
     resolution: {integrity: sha512-1uEQxww3DaghA0RxqHx0O0ppVlo43pJhepY51OxuQIKHpjbnYLA7vcdwioNPzIqmC2u3I/dmylcqjlh0e7AyUA==}
