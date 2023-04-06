@@ -7,4 +7,4 @@ export const MEMORY_CACHE_DEFAULT_TTL = 5 * 60 * 1000 // ms.
 
 export const USER_DISTRIBUTE_CACHE_DEFAULT_TTL = 30 * 60 * 1000 // ms.
 
-export const ACCESSIBLE_ACCOUNT_PROPERTIES = ['email', 'name', 'roles', 'id']
+export const ACCESSIBLE_ACCOUNT_PROPERTIES = ['email', 'name', 'roles', 'userId']
