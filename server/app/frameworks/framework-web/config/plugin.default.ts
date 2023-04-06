@@ -13,5 +13,9 @@ export default {
   cache: {
     enable: true,
     path: path.resolve(__dirname, '../../../plugins/plugin-cache')
+  },
+  prisma: {
+    enable: true,
+    path: path.resolve(__dirname, '../../../plugins/plugin-prisma')
   }
 } as PluginsConfig

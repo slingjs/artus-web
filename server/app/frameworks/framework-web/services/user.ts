@@ -23,7 +23,8 @@ export class UserService {
       name: uuid,
       roles: [Roles.ANONYMOUS],
       loggedIn: false,
-      id: uuid
+      id: uuid,
+      email: 'test@test.com'
     } as UserSession
   }
 

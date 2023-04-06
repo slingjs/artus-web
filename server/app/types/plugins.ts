@@ -3,7 +3,8 @@ import { PluginConfigItem } from '@artus/core'
 export enum PluginsEnum {
   http = 'http',
   redis = 'redis',
-  cache = 'cache'
+  cache = 'cache',
+  prisma = 'prisma'
 }
 
 export type PluginsConfig = {

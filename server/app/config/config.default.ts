@@ -27,6 +27,9 @@ export default {
       allowStale: false,
       updateAgeOnGet: false,
       updateAgeOnHas: false
+    },
+    prisma: {
+      dataSources: {}
     }
   },
 

@@ -36,6 +36,7 @@
   "dependencies": {
     "@artus/core": "^1.0.8",
     "@artus/pipeline": "^0.2.2",
+    "@prisma/client": "^4.12.0",
     "@sling/artus-web-client": "workspace:^",
     "@sling/artus-web-shared": "workspace:^",
     "@types/node": "^18.14.2",
@@ -56,6 +57,7 @@
     "@types/node": "^18.14.2",
     "@types/send": "^0.17.1",
     "nodemon": "^2.0.22",
+    "prisma": "^4.12.0",
     "ts-node": "^10.9.1"
   },
   "type": "commonjs",
