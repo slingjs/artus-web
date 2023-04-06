@@ -4,7 +4,8 @@ import {
   PrismaPluginClientConfig,
   PrismaPluginClientConfigDataSourceItem,
   PrismaPluginDataSourceName,
-  PrismaPluginDataSources
+  PrismaPluginDataSources,
+  PrismaPluginClientDataSourceItemInstance
 } from './types'
 import _ from 'lodash'
 
@@ -47,8 +48,9 @@ export class PluginPrismaClient {
     // )
   }
 
-  getPrisma (dataSourceName: PrismaPluginDataSourceName) {
-    return _.get(this.dataSources, [dataSourceName, 'prisma'])
+  // @ts-ignore
+  getPrisma (dataSourceName: PrismaPluginDataSourceName): PrismaPluginClientDataSourceItemInstance {
+    return _.get(this.dataSources, [dataSourceName, 'prisma']) as any
   }
 
   async disconnect () {
