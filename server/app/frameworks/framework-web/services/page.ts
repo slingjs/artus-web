@@ -1,14 +1,14 @@
 import { ArtusApplication, ArtusInjectEnum, Inject, Injectable, ScopeEnum } from '@artus/core'
-import { ARTUS_FRAMEWORK_WEB_APP_SERVICE } from '../types'
+import { ARTUS_FRAMEWORK_WEB_PAGE_SERVICE } from '../types'
 import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
 import send from 'send'
 import { AppConfig } from '../../../types'
 
 @Injectable({
-  id: ARTUS_FRAMEWORK_WEB_APP_SERVICE,
+  id: ARTUS_FRAMEWORK_WEB_PAGE_SERVICE,
   scope: ScopeEnum.SINGLETON
 })
-export class AppService {
+export class PageService {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 
