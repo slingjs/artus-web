@@ -15,6 +15,7 @@
   "exclude": [
     "package.json",
     "tsconfig.json",
-    "nodemon.json"
+    "nodemon.json",
+    "./**/package.json"
   ]
 }

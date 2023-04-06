@@ -8,7 +8,9 @@
     "start": "node .",
     "start:dev": "ts-node index.ts",
     "dev": "nodemon",
-    "build": "rimraf ./dist && tsc -d && node ./.build/build-fix.js"
+    "build": "rimraf ./dist && tsc -d && node ./.build/build-fix.js",
+    "postinstall": "node ./.build/generate-dist-prisma.js",
+    "generate-dist-prisma": "node ./.build/generate-dist-prisma.js"
   },
   "keywords": [
     "nodejs",
@@ -54,8 +56,10 @@
     "@artus/tsconfig": "^1.0.1",
     "@types/cookie": "^0.5.1",
     "@types/fs-extra": "^11.0.1",
+    "@types/glob": "^8.1.0",
     "@types/node": "^18.14.2",
     "@types/send": "^0.17.1",
+    "glob": "^9.3.4",
     "nodemon": "^2.0.22",
     "prisma": "^4.12.0",
     "ts-node": "^10.9.1"
