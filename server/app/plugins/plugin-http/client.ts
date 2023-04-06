@@ -6,7 +6,8 @@ import {
   ARTUS_PLUGIN_HTTP_TRIGGER,
   CONTROLLER_METADATA,
   HTTPConfig,
-  HTTPControllerMetadata, HTTPMiddlewareContext,
+  HTTPControllerMetadata,
+  HTTPMiddlewareContext,
   HTTPRouteMetadata,
   HTTPRouteMiddlewaresMetadata,
   ROUTER_METADATA,
@@ -17,6 +18,8 @@ import url from 'url'
 import { HTTPTrigger } from './trigger'
 import { Input, Output, Middleware, Pipeline } from '@artus/pipeline'
 import _ from 'lodash'
+import bodyParser from 'body-parser'
+import { HTTP_DEFAULT_BODY_PARSER_OPTIONS } from './constants'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_CLIENT,
@@ -148,8 +151,33 @@ export class PluginHTTPClient {
           const ctx = await trigger.initContext(input, output)
 
           const pipeline = new Pipeline()
+
           for (const middlewares of routeMiddlewaresMetadata) {
             await pipeline.use(middlewares)
+          }
+
+          // For body-parser.
+          if (_.get(routeMetadata.options, 'useBodyParser')) {
+            const bodyParserOptions = _.get(routeMetadata.options, 'bodyParserOptions') ??
+              HTTP_DEFAULT_BODY_PARSER_OPTIONS
+
+            await pipeline.use(async function httpBodyParser (_ctx, next) {
+              let resolve: any, reject: any
+              const p = new Promise(function(res, rej) {
+                resolve = res
+                reject = rej
+              })
+
+              try {
+                bodyParser(bodyParserOptions)(req, res, function bodyParserNext () {
+                  resolve(next())
+                })
+              } catch (e) {
+                reject(e)
+              }
+
+              return p
+            })
           }
 
           await pipeline.use(handler)

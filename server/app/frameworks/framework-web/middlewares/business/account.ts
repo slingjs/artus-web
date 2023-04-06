@@ -18,13 +18,13 @@ export const initUser = (): HTTPMiddleware => {
       const newSession = await userService.initSession(ctx)
       await userService.setDistributeSession(
         ctx,
-        newSession.id,
+        newSession._sessionId,
         newSession
       )
       await userService.setCtxSession(ctx, newSession)
       res.setHeader(
         'set-cookie',
-        cookie.serialize(shared.constants.USER_SESSION_KEY, newSession.id)
+        cookie.serialize(shared.constants.USER_SESSION_KEY, newSession._sessionId)
       )
     }
 
@@ -62,7 +62,7 @@ export const userAuthMiddleware = (roles?: Roles[]): HTTPMiddleware => {
       .get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
 
     const session = await userService.getCtxSession(ctx)
-    if (!(session && session.loggedIn)) {
+    if (!(session && session.signedIn)) {
       ctx.output.data.status = 401
 
       return

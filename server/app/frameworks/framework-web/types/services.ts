@@ -8,10 +8,12 @@ export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE = 'ARTUS_FRAMEWORK_WEB
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY'
 
 export interface UserSession {
-  name: string,
-  roles: Array<Roles>,
-  loggedIn: boolean,
+  name: string
+  roles: Array<Roles>
+  signedIn: boolean
   id: string
+  email: string
+  _sessionId: string
 }
 
 export type DistributeCacheKey = string

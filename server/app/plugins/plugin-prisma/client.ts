@@ -49,7 +49,7 @@ export class PluginPrismaClient {
   }
 
   // @ts-ignore
-  getPrisma (dataSourceName: PrismaPluginDataSourceName): PrismaPluginClientDataSourceItemInstance {
+  getPrisma<T extends PrismaPluginDataSourceName> (dataSourceName: T): PrismaPluginClientDataSourceItemInstance<T> {
     return _.get(this.dataSources, [dataSourceName, 'prisma']) as any
   }
 

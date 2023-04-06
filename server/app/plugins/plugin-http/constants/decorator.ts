@@ -1,0 +1,1 @@
+export const HTTP_DEFAULT_BODY_PARSER_OPTIONS = {}

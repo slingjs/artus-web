@@ -89,6 +89,20 @@ Prisma.NullTypes = {
 // https://github.com/microsoft/TypeScript/issues/3192#issuecomment-261720275
 function makeEnum(x) { return x; }
 
+exports.Prisma.AccountScalarFieldEnum = makeEnum({
+  id: 'id',
+  name: 'name',
+  userId: 'userId',
+  roles: 'roles',
+  email: 'email',
+  salt: 'salt',
+  password: 'password',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  inactive: 'inactive',
+  inactiveAt: 'inactiveAt'
+});
+
 exports.Prisma.QueryMode = makeEnum({
   default: 'default',
   insensitive: 'insensitive'
@@ -99,19 +113,9 @@ exports.Prisma.SortOrder = makeEnum({
   desc: 'desc'
 });
 
-exports.Prisma.UserScalarFieldEnum = makeEnum({
-  name: 'name',
-  userId: 'userId',
-  id: 'id',
-  roles: 'roles',
-  email: 'email',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
-});
-
 
 exports.Prisma.ModelName = makeEnum({
-  User: 'User'
+  Account: 'Account'
 });
 
 /**

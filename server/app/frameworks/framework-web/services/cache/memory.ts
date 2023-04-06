@@ -3,9 +3,15 @@ import { ARTUS_PLUGIN_CACHE_CLIENT } from '../../../../plugins/plugin-cache/type
 import { CacheClient } from '../../../../plugins/plugin-cache/client'
 import {
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY,
-  MemoryCacheDefaultOptions, MemoryCacheExistsOptions, MemoryCacheExpireOptions,
+  MemoryCacheDefaultOptions,
+  MemoryCacheExistsOptions,
+  MemoryCacheExpireOptions,
   MemoryCacheGetOptions,
-  MemoryCacheKey, MemoryCacheRemoveOptions, MemoryCacheSetOptions, MemoryCacheStaleOptions, MemoryCacheValue
+  MemoryCacheKey,
+  MemoryCacheRemoveOptions,
+  MemoryCacheSetOptions,
+  MemoryCacheStaleOptions,
+  MemoryCacheValue
 } from '../../types'
 import { MEMORY_CACHE_DEFAULT_TTL } from '../../constants'
 import _ from 'lodash'

@@ -19,7 +19,7 @@ export type HTTPHandlerUnit = HTTPHandlerAsync | HTTPHandler
 export type HTTPHandlerArguments = Parameters<HTTPHandler>
 
 export type HTTPHandlerArgumentsRecord = {
-  req: HTTPHandlerArguments[0],
+  req: HTTPHandlerArguments[0] & Partial<{ body: any }>,
   res: HTTPHandlerArguments[1],
   params: HTTPHandlerArguments[2],
   store: HTTPHandlerArguments[3],

@@ -20,9 +20,15 @@ export interface HTTPControllerMetadata {
   order: number
 }
 
+export type HTTPDecoratorOptions = {
+  useBodyParser: boolean
+  bodyParserOptions: any
+}
+
 export type HTTPRouteMetadata = Array<{
   path: string
-  method: HTTPMethod
+  method: HTTPMethod,
+  options: Partial<HTTPDecoratorOptions>
 }>
 
 export type HTTPRouteMiddlewaresMetadata = Array<MiddlewareInput>

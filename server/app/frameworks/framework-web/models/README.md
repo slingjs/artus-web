@@ -1,1 +1,1 @@
-**Please execute 'npx prisma generate --schema ./mongo/schema.prisma' at first.**
+**Please execute 'pnpm run generate-app-prisma' at first.**
