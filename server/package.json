@@ -11,7 +11,8 @@
     "build": "rimraf ./dist && tsc -d && node ./.build/build-fix.js && node ./.build/generate-dist-prisma.js",
     "build:release": "rimraf ./dist && tsc -d && node ./.build/build-fix.js",
     "postinstall": "node ./.build/generate-dist-prisma.js",
-    "generate-dist-prisma": "node ./.build/generate-dist-prisma.js"
+    "generate-dist-prisma": "node ./.build/generate-dist-prisma.js",
+    "generate-app-prisma": "node ./.build/generate-app-prisma.js"
   },
   "keywords": [
     "nodejs",
