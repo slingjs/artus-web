@@ -29,7 +29,24 @@ export default {
       updateAgeOnHas: false
     },
     prisma: {
-      dataSources: {}
+      dataSources: {
+        mongo: {
+          enable: true,
+          schemaOutputPath: path.resolve(__dirname, '../frameworks/framework-web/models/mongo/generated/client'),
+          envs: {
+            // https://www.mongodb.com/compatibility/deploying-a-mongodb-cluster-with-docker
+            MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/test?replicaSet=rs0'
+          }
+        },
+        mysql: {
+          enable: true,
+          schemaOutputPath: path.resolve(__dirname, '../frameworks/framework-web/models/mysql/generated/client'),
+          envs: {
+            // https://hub.docker.com/_/mysql
+            MYSQL_URI: process.env.MYSQL_URI || 'mysql://root:123456@localhost:3306/test'
+          }
+        }
+      }
     }
   },
 
