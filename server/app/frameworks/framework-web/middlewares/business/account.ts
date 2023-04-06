@@ -1,5 +1,5 @@
-import { ARTUS_FRAMEWORK_WEB_USER_SERVICE, Roles } from '../../types'
-import { UserService } from '../../services/user'
+import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, Roles } from '../../types'
+import { AccountService } from '../../services/account'
 import cookie from 'cookie'
 import shared from '@sling/artus-web-shared'
 import _ from 'lodash'
@@ -12,7 +12,7 @@ export const initUser = (): HTTPMiddleware => {
     const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
     const userService = app
       .container
-      .get(ARTUS_FRAMEWORK_WEB_USER_SERVICE) as UserService
+      .get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
 
     const initNewSession = async function initNewSession () {
       const newSession = await userService.initSession(ctx)
@@ -59,7 +59,7 @@ export const userAuthMiddleware = (roles?: Roles[]): HTTPMiddleware => {
     const { input: { params: { app } } } = ctx
     const userService = app
       .container
-      .get(ARTUS_FRAMEWORK_WEB_USER_SERVICE) as UserService
+      .get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
 
     const session = await userService.getCtxSession(ctx)
     if (!(session && session.loggedIn)) {

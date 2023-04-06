@@ -3,7 +3,7 @@ import shared from '@sling/artus-web-shared'
 import {
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE,
   ARTUS_FRAMEWORK_WEB_USER_NAMESPACE,
-  ARTUS_FRAMEWORK_WEB_USER_SERVICE,
+  ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
   Roles,
   UserSession
 } from '../types'
@@ -12,10 +12,10 @@ import { CacheService } from './cache'
 import { USER_DISTRIBUTE_CACHE_DEFAULT_TTL } from '../constants'
 
 @Injectable({
-  id: ARTUS_FRAMEWORK_WEB_USER_SERVICE,
+  id: ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
   scope: ScopeEnum.SINGLETON
 })
-export class UserService {
+export class AccountService {
   async initSession (_ctx: HTTPMiddlewareContext) {
     const uuid = shared.utils.calcUUID()
 
