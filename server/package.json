@@ -8,7 +8,7 @@
     "start": "node .",
     "start:dev": "ts-node index.ts",
     "dev": "nodemon",
-    "build": "rimraf ./dist && tsc -d"
+    "build": "rimraf ./dist && tsc -d && node ./build/build-fix.js"
   },
   "keywords": [
     "nodejs",
