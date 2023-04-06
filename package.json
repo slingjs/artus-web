@@ -1,6 +1,6 @@
 {
   "name": "@sling/artus-web",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "Artus web.",
   "scripts": {
     "start": "pnpm -C ./node_modules/@sling/artus-web-server/ run generate-dist-prisma && pnpm -C ./node_modules/@sling/artus-web-server/ run start",
