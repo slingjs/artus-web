@@ -2,7 +2,7 @@ import { ArtusApplication, ArtusInjectEnum, Inject } from '@artus/core'
 import { HTTPController, Post, Use } from '../../../../plugins/plugin-http/decorator'
 import { AccountService } from '../../services/account'
 import { ARTUS_FRAMEWORK_WEB_CLIENT, ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE } from '../../types'
-import { initUser } from '../../middlewares/business/account'
+import { initUser, userAuthMiddleware } from '../../middlewares/business/account'
 import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
 import _ from 'lodash'
@@ -90,9 +90,35 @@ export default class AccountController {
     data.status = 200
     data.body = {
       code: 'SUCCESS_SIGN_UP_SUCCESS',
-      status: 'SUCCESS'
+      status: _.omit(result, 'account')
+    }
+  }
+
+  // Need signed in.
+  @Post('/change-pwd', { useBodyParser: true })
+  @Use([userAuthMiddleware()])
+  async changePwd (...args: Parameters<HTTPMiddleware>) {
+    const [ctx, _next] = args
+    const { input: { params: { req } }, output: { data } } = ctx
+
+    const result = await this.accountService.changePwd(ctx, req.body, { passwordPreEncrypt: true })
+      .catch(e => {
+        this.app.logger.error('[Error] Failed to change pwd.', e)
+        return {
+          account: null,
+          code: 'ERROR_CHANGE_PWD_UNEXPECTED_ERROR',
+          status: 'FAIL'
+        }
+      })
+
+    if (!result.account) {
+      data.status = 400
+      data.body = _.omit(result, 'account')
+      return
     }
 
-    return
+    await this.accountService.handleCertificatedSessionTampered(ctx)
+    data.status = 200
+    data.body = _.omit(result, 'account')
   }
 }

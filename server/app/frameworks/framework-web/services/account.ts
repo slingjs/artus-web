@@ -18,8 +18,12 @@ import { Account } from '../models/mongo/generated/client'
 import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
 import { PluginPrismaClient } from '../../../plugins/plugin-prisma/client'
 import _ from 'lodash'
-import { encryptPassword } from '../utils/business/account'
+import { encryptPassword, rectifyPassword } from '../utils/business/account'
 import cookie from 'cookie'
+import dayjs from 'dayjs'
+import dayjsUtc from 'dayjs/plugin/utc'
+
+dayjs.extend(dayjsUtc)
 
 @Injectable({
   id: ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
@@ -97,6 +101,34 @@ export class AccountService {
     }
   }
 
+  async handleCertificatedSessionTampered (ctx: HTTPMiddlewareContext) {
+    const { input: { params: { res, req } } } = ctx
+
+    const ctxPreviousSession = await this.getCtxSession(ctx)
+    const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
+    const ctxPreviousSessionKeyValue = _.get(ctxPreviousSession, '_sessionId')
+    const sessionKeyValue = sessionCookieValue || ctxPreviousSessionKeyValue
+
+    if (!sessionKeyValue) {
+      return
+    }
+
+    await this.staleCtxSession(ctx)
+
+    await this.staleDistributeSession(ctx, sessionKeyValue)
+
+    res.setHeader(
+      'set-cookie',
+      cookie.serialize(
+        shared.constants.USER_SESSION_KEY,
+        '',
+        {
+          path: '/' // Must set this. Otherwise, it will be req.path as default.
+        }
+      )
+    )
+  }
+
   async getCtxSession (ctx: HTTPMiddlewareContext) {
     const storage = ctx.namespace(ARTUS_FRAMEWORK_WEB_USER_NAMESPACE)
     return storage.get('session') as UserSession
@@ -105,6 +137,13 @@ export class AccountService {
   async setCtxSession (ctx: HTTPMiddlewareContext, session: UserSession | null) {
     const storage = ctx.namespace(ARTUS_FRAMEWORK_WEB_USER_NAMESPACE)
     storage.set(session, 'session')
+
+    return storage
+  }
+
+  async staleCtxSession (ctx: HTTPMiddlewareContext) {
+    const storage = ctx.namespace(ARTUS_FRAMEWORK_WEB_USER_NAMESPACE)
+    storage.set(null, 'session')
 
     return storage
   }
@@ -136,8 +175,27 @@ export class AccountService {
     )
   }
 
-  async find (ctx: HTTPMiddlewareContext, condition: Pick<Account, 'email'>) {
+  async staleDistributeSession (ctx: HTTPMiddlewareContext, sessionKeyValue: string) {
+    const { input: { params: { app } } } = ctx
+
+    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+
+    return cacheService.distribute.stale(this.calcDistributeCacheSessionKey(ctx, sessionKeyValue))
+  }
+
+  async findInPersistent (ctx: HTTPMiddlewareContext, condition: Pick<Account, 'email'>) {
     return this.getPrisma(ctx).account.findFirst({ where: condition })
+  }
+
+  async updateOnPersistent (
+    ctx: HTTPMiddlewareContext,
+    condition: Pick<Account, 'email'>,
+    data: Partial<Pick<Account, 'password' | 'name' | 'updatedAt' | 'inactive' | 'inactiveAt'>>
+  ) {
+    return this.getPrisma(ctx).account.update({
+      where: condition,
+      data: _.merge({ updatedAt: dayjs.utc().toDate() }, data)
+    })
   }
 
   async signIn (
@@ -145,7 +203,7 @@ export class AccountService {
     certification: Pick<Account, 'email' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
-    const foundAccount = await this.find(ctx, { email: certification.email })
+    const foundAccount = await this.findInPersistent(ctx, { email: certification.email })
     if (!foundAccount) {
       return {
         account: null,
@@ -154,10 +212,11 @@ export class AccountService {
       }
     }
 
-    const finalPassword = _.get(options, 'passwordPreEncrypt')
-      ? Buffer.from(certification.password, 'base64').toString()
-      : certification.password
-    if (encryptPassword(finalPassword, foundAccount.salt) !== foundAccount.password) {
+    const rectifiedPassword = rectifyPassword(
+      certification.password,
+      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
+    )
+    if (encryptPassword(rectifiedPassword, foundAccount.salt) !== foundAccount.password) {
       return {
         account: null,
         code: 'ERROR_SIGN_IN_ACCOUNT_WRONG_PASSWORD',
@@ -185,7 +244,7 @@ export class AccountService {
     registration: Pick<Account, 'email' | 'name' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean, keepSignIn: boolean }>
   ) {
-    const foundAccount = await this.find(ctx, { email: registration.email })
+    const foundAccount = await this.findInPersistent(ctx, { email: registration.email })
     if (foundAccount) {
       return {
         account: null,
@@ -197,13 +256,14 @@ export class AccountService {
     const salt = shared.utils.calcUUID()
     // Password, base64 decode.
     const finalPassword = encryptPassword(
-      _.get(options, 'passwordPreEncrypt')
-        ? Buffer.from(registration.password, 'base64').toString()
-        : registration.password,
+      rectifyPassword(
+        registration.password,
+        { preEncrypt: _.get(options, 'passwordPreEncrypt') }
+      ),
       salt
     )
 
-    const userData = {
+    const accountData = {
       email: registration.email,
       name: registration.name,
       password: finalPassword,
@@ -213,12 +273,59 @@ export class AccountService {
     }
     // Create user.
     await this.getPrisma(ctx).account.create({
-      data: userData
+      data: accountData
     })
 
     return {
-      account: _.pick(userData, ACCESSIBLE_ACCOUNT_PROPERTIES),
+      account: _.pick(accountData, ACCESSIBLE_ACCOUNT_PROPERTIES),
       code: 'SUCCESS_SIGN_UP_SUCCESS',
+      status: 'SUCCESS'
+    }
+  }
+
+  async changePwd (
+    ctx: HTTPMiddlewareContext,
+    certification: Pick<Account, 'email' | 'password'> & { oldPassword: string },
+    options?: Partial<{ passwordPreEncrypt: boolean }>
+  ) {
+    const foundAccount = await this.findInPersistent(ctx, { email: certification.email })
+    if (!foundAccount) {
+      return {
+        account: null,
+        code: 'ERROR_CHANGE_PWD_ACCOUNT_NOT_FOUND',
+        status: 'FAIL'
+      }
+    }
+
+    const rectifiedOldPasswordPassword = rectifyPassword(
+      certification.oldPassword,
+      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
+    )
+    if (encryptPassword(rectifiedOldPasswordPassword, foundAccount.salt) !== foundAccount.password) {
+      return {
+        account: null,
+        code: 'ERROR_CHANGE_PWD_ACCOUNT_WRONG_OLD_PASSWORD',
+        status: 'FAIL'
+      }
+    }
+
+    // Update.
+    const rectifiedPassword = rectifyPassword(
+      certification.password,
+      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
+    )
+    const finalPassword = encryptPassword(rectifiedPassword, foundAccount.salt)
+    const finalAccount = await this.updateOnPersistent(
+      ctx,
+      { email: certification.email },
+      {
+        password: finalPassword
+      }
+    )
+
+    return {
+      account: _.pick(finalAccount, ACCESSIBLE_ACCOUNT_PROPERTIES),
+      code: 'SUCCESS_CHANGE_PWD_SUCCESS',
       status: 'SUCCESS'
     }
   }

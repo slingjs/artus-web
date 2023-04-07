@@ -106,7 +106,7 @@ export class DistributeCache {
         })
     }
 
-    return await this.client.expire(key, -1) === DISTRIBUTE_CACHE_SUCCESS_VALUE
+    return await this.client.pexpire(key, -1) === DISTRIBUTE_CACHE_SUCCESS_VALUE
   }
 
   async expire (key: ArrayOrPrimitive<DistributeCacheKey>, options?: Partial<DistributeCacheExpireOptions>) {

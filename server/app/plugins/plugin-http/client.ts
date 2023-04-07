@@ -153,10 +153,6 @@ export class PluginHTTPClient {
 
           const pipeline = new Pipeline()
 
-          for (const middlewares of routeMiddlewaresMetadata) {
-            await pipeline.use(middlewares)
-          }
-
           // For body-parser.
           if (_.get(routeMetadata.options, 'useBodyParser')) {
             const bodyParserOptions = _.get(routeMetadata.options, 'bodyParserOptions') ??
@@ -179,6 +175,10 @@ export class PluginHTTPClient {
 
               return p
             })
+          }
+
+          for (const middlewares of routeMiddlewaresMetadata) {
+            await pipeline.use(middlewares)
           }
 
           await pipeline.use(handler)

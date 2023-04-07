@@ -1,4 +1,5 @@
 import crypto from 'crypto'
+import _ from 'lodash'
 
 export function encryptPassword (password: string, salt: string) {
   const hash = crypto.createHash(
@@ -16,4 +17,10 @@ export function encryptPassword (password: string, salt: string) {
       salt
     ].join('')
   ).digest('hex')
+}
+
+export function rectifyPassword (password: string, options?: Partial<{ preEncrypt: boolean }>) {
+  return _.get(options, 'preEncrypt')
+    ? Buffer.from(password, 'base64').toString()
+    : password
 }
