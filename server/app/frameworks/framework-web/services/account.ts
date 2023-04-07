@@ -47,7 +47,7 @@ export class AccountService {
       const uuid = shared.utils.calcUUID()
 
       return {
-        name: uuid,
+        name: shared.utils.calcUUID(),
         roles: [Roles.ANONYMOUS],
         signedIn: false,
         id: uuid,
