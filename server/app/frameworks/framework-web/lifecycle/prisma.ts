@@ -20,26 +20,6 @@ export default class PrismaLifecycle implements ApplicationLifecycle {
   async didLoad () {
     const client = this.app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
     await client.init(filterPluginConfig((this.app.config as AppConfig).plugin.prisma) as AppConfig['plugin']['http'])
-
-    // Create a demo mysql user.
-    // await client.getPrisma(PrismaPluginDataSourceName.MYSQL).user.create({
-    //   data: {
-    //     id: shared.utils.calcUUID(),
-    //     email: 'i@email.com',
-    //     name: 'Sling',
-    //     roles: [Roles.ANONYMOUS].join()
-    //   }
-    // })
-
-    // Create a demo mongo user.
-    // await client.getPrisma(PrismaPluginDataSourceName.MONGO).user.create({
-    //   data: {
-    //     id: shared.utils.calcUUID(),
-    //     email: 'i@email.com',
-    //     name: 'Sling',
-    //     roles: [Roles.ANONYMOUS].join()
-    //   }
-    // })
   }
 
   @LifecycleHook()
