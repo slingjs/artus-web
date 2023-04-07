@@ -19,7 +19,8 @@ import { HTTPTrigger } from './trigger'
 import { Input, Output, Middleware, Pipeline } from '@artus/pipeline'
 import _ from 'lodash'
 import bodyParser from 'body-parser'
-import { HTTP_DEFAULT_BODY_PARSER_OPTIONS } from './constants'
+import { HTTP_DEFAULT_BODY_PARSER_OPTIONS, HTTP_DEFAULT_BODY_PARSER_TYPE } from './constants'
+import shared from '@sling/artus-web-shared'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_CLIENT,
@@ -158,15 +159,17 @@ export class PluginHTTPClient {
             const bodyParserOptions = _.get(routeMetadata.options, 'bodyParserOptions') ??
               HTTP_DEFAULT_BODY_PARSER_OPTIONS
 
+            const bodyParserType = _.get(routeMetadata.options, 'bodyParserType') ||
+              HTTP_DEFAULT_BODY_PARSER_TYPE
+
             await pipeline.use(async function httpBodyParser (_ctx, next) {
-              let resolve: any, reject: any
-              const p = new Promise(function(res, rej) {
-                resolve = res
-                reject = rej
-              })
+              const { p, resolve, reject } = shared.utils.generateOperablePromise()
+              const usedBodyParserUtil = bodyParserType && _.has(bodyParser, bodyParserType)
+                ? _.get(bodyParser, bodyParserType)
+                : bodyParser
 
               try {
-                bodyParser(bodyParserOptions)(req, res, function bodyParserNext () {
+                usedBodyParserUtil(bodyParserOptions)(req, res, function bodyParserNext () {
                   resolve(next())
                 })
               } catch (e) {

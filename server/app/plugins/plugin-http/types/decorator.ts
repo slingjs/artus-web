@@ -23,6 +23,7 @@ export interface HTTPControllerMetadata {
 export type HTTPDecoratorOptions = {
   useBodyParser: boolean
   bodyParserOptions: any
+  bodyParserType: 'json' | 'raw' | 'text' | 'urlencoded'
 }
 
 export type HTTPRouteMetadata = Array<{
