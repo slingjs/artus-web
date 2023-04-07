@@ -1,7 +1,7 @@
 import { ArtusApplication, ArtusInjectEnum, Inject } from '@artus/core'
 import { HTTPController, Post, Use } from '../../../../plugins/plugin-http/decorator'
 import { AccountService } from '../../services/account'
-import { ARTUS_FRAMEWORK_WEB_CLIENT, ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE } from '../../types'
+import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE } from '../../types'
 import { initUser, userAuthMiddleware } from '../../middlewares/business/account'
 import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
@@ -15,9 +15,6 @@ export default class AccountController {
 
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
-
-  @Inject(ARTUS_FRAMEWORK_WEB_CLIENT)
-  frameworkApp: ArtusApplication
 
   @Post('/sign-in', { useBodyParser: true })
   async signIn (...args: Parameters<HTTPMiddleware>) {
