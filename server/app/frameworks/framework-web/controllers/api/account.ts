@@ -32,6 +32,14 @@ export default class AccountController {
       return
     }
 
+    /**
+     * Sign in invoker.
+     * Password should be a base64 encrypt string.
+     *
+     * Here only show an example. No matter password encrypted or not.
+     *
+     * fetch('/api/account/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ' }) })
+     */
     const result = await this.accountService.signIn(ctx, req.body, { passwordPreEncrypt: true })
     if (!result.account) {
       data.status = 400
@@ -65,6 +73,14 @@ export default class AccountController {
       return
     }
 
+    /**
+     * Sign up invoker.
+     * Password should be a base64 encrypt string.
+     *
+     * Here only show an example. No matter password encrypted or not.
+     *
+     * fetch('/api/account/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', name: 'YouAreMySunShine' }) })
+     */
     const result = await this.accountService.signUp(ctx, req.body, { passwordPreEncrypt: true })
       .catch(e => {
         this.app.logger.error('[Error] Failed to sign up.', e)
@@ -98,6 +114,15 @@ export default class AccountController {
     const [ctx, _next] = args
     const { input: { params: { req } }, output: { data } } = ctx
 
+    /**
+     * Change pwd invoker.
+     * Password should be a base64 encrypt string.
+     * Currently, we tolerate that new password is the same as the old one.
+     *
+     * Here only show an example. No matter password encrypted or not.
+     *
+     * fetch('/api/account/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', oldPassword: '1qaz!QAZ' }) })
+     */
     const result = await this.accountService.changePwd(ctx, req.body, { passwordPreEncrypt: true })
       .catch(e => {
         this.app.logger.error('[Error] Failed to change pwd.', e)

@@ -21,6 +21,7 @@ export function encryptPassword (password: string, salt: string) {
 
 export function rectifyPassword (password: string, options?: Partial<{ preEncrypt: boolean }>) {
   return _.get(options, 'preEncrypt')
+    // Base64 decrypt.
     ? Buffer.from(password, 'base64').toString()
     : password
 }

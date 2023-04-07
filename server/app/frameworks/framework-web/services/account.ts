@@ -339,6 +339,7 @@ export class AccountService {
       }
     }
 
+    // Currently, we tolerate that new password is the same as the old one.
     const rectifiedOldPasswordPassword = rectifyPassword(
       certification.oldPassword,
       { preEncrypt: _.get(options, 'passwordPreEncrypt') }
