@@ -300,7 +300,7 @@ export class AccountService {
       password: finalPassword,
       salt,
       userId: shared.utils.calcUUID(),
-      roles: Roles.ANONYMOUS
+      roles: [Roles.ANONYMOUS]
     }
     // Create user.
     await this.getPrisma(ctx).account.create({
