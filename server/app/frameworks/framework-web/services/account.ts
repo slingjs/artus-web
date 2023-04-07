@@ -24,6 +24,11 @@ import { encryptPassword, rectifyPassword } from '../utils/business/account'
 import cookie from 'cookie'
 import dayjs from 'dayjs'
 import dayjsUtc from 'dayjs/plugin/utc'
+import {
+  validateAccountChangePwdPayload,
+  validateAccountSignInPayload,
+  validateAccountSignUpPayload
+} from '../utils/validation'
 
 dayjs.extend(dayjsUtc)
 
@@ -207,6 +212,17 @@ export class AccountService {
     certification: Pick<Account, 'email' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
+    const validateResult = await validateAccountSignInPayload(certification);
+    if (!validateResult) {
+      // @ts-ignore
+      const errors = validateAccountSignInPayload.errors;
+      return {
+        account: null,
+        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
+        status: 'FAIL'
+      }
+    }
+
     const foundAccount = await this.findInPersistent(ctx, { email: certification.email })
     if (!foundAccount) {
       return {
@@ -248,6 +264,17 @@ export class AccountService {
     registration: Pick<Account, 'email' | 'name' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean, keepSignIn: boolean }>
   ) {
+    const validateResult = await validateAccountSignUpPayload(registration);
+    if (!validateResult) {
+      // @ts-ignore
+      const errors = validateAccountSignUpPayload.errors;
+      return {
+        account: null,
+        code: 'ERROR_SIGN_UP_PAYLOAD_SCHEMA_INVALID',
+        status: 'FAIL'
+      }
+    }
+
     const foundAccount = await this.findInPersistent(ctx, { email: registration.email })
     if (foundAccount) {
       return {
@@ -292,6 +319,17 @@ export class AccountService {
     certification: Pick<Account, 'email' | 'password'> & { oldPassword: string },
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
+    const validateResult = await validateAccountChangePwdPayload(certification);
+    if (!validateResult) {
+      // @ts-ignore
+      const errors = validateAccountChangePwdPayload.errors;
+      return {
+        account: null,
+        code: 'ERROR_CHANGE_PWD_PAYLOAD_SCHEMA_INVALID',
+        status: 'FAIL'
+      }
+    }
+
     const foundAccount = await this.findInPersistent(ctx, { email: certification.email })
     if (!foundAccount) {
       return {

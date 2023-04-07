@@ -91,3 +91,21 @@ export interface MemoryCacheStaleOptions {}
 export interface MemoryCacheExpireOptions {
   ttl: number // ms.
 }
+
+export interface AccountSignUpPayload {
+  email: string
+  name: string
+  password: string
+  roles?: Roles[]
+}
+
+export interface AccountSignInPayload {
+  email: string
+  password: string
+}
+
+export interface AccountChangePwdPayload {
+  email: string
+  password: string
+  oldPassword: string
+}
