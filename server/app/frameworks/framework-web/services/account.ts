@@ -4,6 +4,7 @@ import {
   ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE,
   ARTUS_FRAMEWORK_WEB_USER_NAMESPACE,
+  DistributeCachePrismaInstance,
   Roles,
   UserSession
 } from '../types'
@@ -12,7 +13,8 @@ import { CacheService } from './cache'
 import {
   ACCESSIBLE_ACCOUNT_PROPERTIES,
   USER_DISTRIBUTE_CACHE_DEFAULT_TTL,
-  USER_SESSION_COOKIE_MAX_AGE, USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
+  USER_SESSION_COOKIE_MAX_AGE,
+  USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
 } from '../constants'
 import { Account } from '../models/mongo/generated/client'
 import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
@@ -35,7 +37,9 @@ export class AccountService {
 
     const prismaClient = app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
 
-    return prismaClient.getPrisma(PrismaPluginDataSourceName.MONGO)
+    return prismaClient.getPrisma<DistributeCachePrismaInstance<PrismaPluginDataSourceName.MONGO>>(
+      PrismaPluginDataSourceName.MONGO
+    )
   }
 
   async initSession (

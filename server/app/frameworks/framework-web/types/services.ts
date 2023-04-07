@@ -1,4 +1,10 @@
 import { Roles } from './roles'
+import { PrismaClient as PrismaClientMongo } from '../models/mongo/generated/client'
+import { PrismaClient as PrismaClientMysql } from '../models/mysql/generated/client'
+import {
+  PrismaPluginClientDataSourceItemInstance,
+  PrismaPluginDataSourceName
+} from '../../../plugins/plugin-prisma/types'
 
 export const ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE = 'ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE'
 export const ARTUS_FRAMEWORK_WEB_FILE_SERVICE = 'ARTUS_FRAMEWORK_WEB_FILE_SERVICE'
@@ -47,6 +53,12 @@ export interface DistributeCacheStaleOptions {}
 export interface DistributeCacheExpireOptions {
   ttl: number // ms.
 }
+
+export  type DistributeCachePrismaInstance<T extends PrismaPluginDataSourceName = any> = T extends PrismaPluginDataSourceName.MONGO
+  ? PrismaClientMongo
+  : T extends PrismaPluginDataSourceName.MYSQL
+    ? PrismaClientMysql
+    : PrismaPluginClientDataSourceItemInstance
 
 export type MemoryCacheKey = string
 
