@@ -1,22 +1,24 @@
-import { Inject, Injectable, ScopeEnum } from '@artus/core'
+import { Injectable, ScopeEnum } from '@artus/core'
 import shared from '@sling/artus-web-shared'
 import {
   ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
+  ARTUS_FRAMEWORK_WEB_CACHE_SERVICE,
   ARTUS_FRAMEWORK_WEB_USER_NAMESPACE,
-  AccountPersistentDataSource,
+  DistributeCachePrismaInstance,
   Roles,
   UserSession
 } from '../types'
 import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
-import { CacheService } from '../../../services/cache'
+import { CacheService } from './cache'
 import {
-  ACCOUNT_PERSISTENT_ACCESSIBLE_PROPERTIES,
+  ACCESSIBLE_ACCOUNT_PROPERTIES,
   USER_DISTRIBUTE_CACHE_DEFAULT_TTL,
   USER_SESSION_COOKIE_MAX_AGE,
   USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
 } from '../constants'
 import { Account } from '../models/mongo/generated/client'
-import { PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
+import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
+import { PluginPrismaClient } from '../../../plugins/plugin-prisma/client'
 import _ from 'lodash'
 import { encryptPassword, rectifyPassword } from '../utils/business/account'
 import cookie from 'cookie'
@@ -27,8 +29,6 @@ import {
   validateAccountSignInPayload,
   validateAccountSignUpPayload
 } from '../utils/validation'
-import { ARTUS_FRAMEWORK_WEB_CACHE_SERVICE, ARTUS_FRAMEWORK_WEB_PERSISTENT_SERVICE } from '../../../types'
-import { PersistentService } from '../../../services/persistent'
 
 dayjs.extend(dayjsUtc)
 
@@ -37,11 +37,12 @@ dayjs.extend(dayjsUtc)
   scope: ScopeEnum.SINGLETON
 })
 export class AccountService {
-  @Inject(ARTUS_FRAMEWORK_WEB_PERSISTENT_SERVICE)
-  persistentService: PersistentService
+  private getPrisma (ctx: HTTPMiddlewareContext) {
+    const { input: { params: { app } } } = ctx
 
-  get persistent () {
-    return this.persistentService.getClient<AccountPersistentDataSource<PrismaPluginDataSourceName.MONGO>>(
+    const prismaClient = app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
+
+    return prismaClient.getPrisma<DistributeCachePrismaInstance<PrismaPluginDataSourceName.MONGO>>(
       PrismaPluginDataSourceName.MONGO
     )
   }
@@ -191,16 +192,16 @@ export class AccountService {
     return cacheService.distribute.stale(this.calcDistributeCacheSessionKey(ctx, sessionKeyValue))
   }
 
-  async findInPersistent (_ctx: HTTPMiddlewareContext, condition: Pick<Account, 'email'>) {
-    return this.persistent.account.findFirst({ where: condition })
+  async findInPersistent (ctx: HTTPMiddlewareContext, condition: Pick<Account, 'email'>) {
+    return this.getPrisma(ctx).account.findFirst({ where: condition })
   }
 
   async updateOnPersistent (
-    _ctx: HTTPMiddlewareContext,
+    ctx: HTTPMiddlewareContext,
     condition: Pick<Account, 'email'>,
     data: Partial<Pick<Account, 'password' | 'name' | 'updatedAt' | 'inactive' | 'inactiveAt'>>
   ) {
-    return this.persistent.account.update({
+    return this.getPrisma(ctx).account.update({
       where: condition,
       data: _.merge({ updatedAt: dayjs.utc().toDate() }, data)
     })
@@ -211,10 +212,10 @@ export class AccountService {
     certification: Pick<Account, 'email' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
-    const validateResult = await validateAccountSignInPayload(certification)
+    const validateResult = await validateAccountSignInPayload(certification);
     if (!validateResult) {
       // @ts-ignore
-      const errors = validateAccountSignInPayload.errors
+      const errors = validateAccountSignInPayload.errors;
       return {
         account: null,
         code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
@@ -252,7 +253,7 @@ export class AccountService {
     }
 
     return {
-      account: _.pick(foundAccount, ACCOUNT_PERSISTENT_ACCESSIBLE_PROPERTIES),
+      account: _.pick(foundAccount, ACCESSIBLE_ACCOUNT_PROPERTIES),
       code: 'ERROR_SIGN_IN_SUCCESS',
       status: 'SUCCESS'
     }
@@ -263,10 +264,10 @@ export class AccountService {
     registration: Pick<Account, 'email' | 'name' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean, keepSignIn: boolean }>
   ) {
-    const validateResult = await validateAccountSignUpPayload(registration)
+    const validateResult = await validateAccountSignUpPayload(registration);
     if (!validateResult) {
       // @ts-ignore
-      const errors = validateAccountSignUpPayload.errors
+      const errors = validateAccountSignUpPayload.errors;
       return {
         account: null,
         code: 'ERROR_SIGN_UP_PAYLOAD_SCHEMA_INVALID',
@@ -302,12 +303,12 @@ export class AccountService {
       roles: [Roles.ANONYMOUS]
     }
     // Create user.
-    await this.persistent.account.create({
+    await this.getPrisma(ctx).account.create({
       data: accountData
     })
 
     return {
-      account: _.pick(accountData, ACCOUNT_PERSISTENT_ACCESSIBLE_PROPERTIES),
+      account: _.pick(accountData, ACCESSIBLE_ACCOUNT_PROPERTIES),
       code: 'SUCCESS_SIGN_UP_SUCCESS',
       status: 'SUCCESS'
     }
@@ -318,10 +319,10 @@ export class AccountService {
     certification: Pick<Account, 'email' | 'password'> & { oldPassword: string },
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
-    const validateResult = await validateAccountChangePwdPayload(certification)
+    const validateResult = await validateAccountChangePwdPayload(certification);
     if (!validateResult) {
       // @ts-ignore
-      const errors = validateAccountChangePwdPayload.errors
+      const errors = validateAccountChangePwdPayload.errors;
       return {
         account: null,
         code: 'ERROR_CHANGE_PWD_PAYLOAD_SCHEMA_INVALID',
@@ -366,7 +367,7 @@ export class AccountService {
     )
 
     return {
-      account: _.pick(finalAccount, ACCOUNT_PERSISTENT_ACCESSIBLE_PROPERTIES),
+      account: _.pick(finalAccount, ACCESSIBLE_ACCOUNT_PROPERTIES),
       code: 'SUCCESS_CHANGE_PWD_SUCCESS',
       status: 'SUCCESS'
     }

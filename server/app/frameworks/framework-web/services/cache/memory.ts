@@ -1,6 +1,6 @@
 import { Inject, Injectable, ScopeEnum } from '@artus/core'
-import { ARTUS_PLUGIN_CACHE_CLIENT } from '../../plugins/plugin-cache/types'
-import { CacheClient } from '../../plugins/plugin-cache/client'
+import { ARTUS_PLUGIN_CACHE_CLIENT } from '../../../../plugins/plugin-cache/types'
+import { CacheClient } from '../../../../plugins/plugin-cache/client'
 import {
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY,
   MemoryCacheDefaultOptions,
@@ -20,7 +20,7 @@ import _ from 'lodash'
   id: ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY,
   scope: ScopeEnum.SINGLETON
 })
-export class MemoryCacheService {
+export class MemoryCache {
   @Inject(ARTUS_PLUGIN_CACHE_CLIENT)
   private readonly cacheClient: CacheClient
 
