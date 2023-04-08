@@ -13,7 +13,8 @@ export type PrismaPluginClientConfigDataSourceItem = {
   enable: boolean // Use or not?
 }
 
-export type PrismaPluginClientDataSourceItemInstance = InstanceType<ReturnType<typeof getPrismaClient>>
+// The last 'any' is used for mute some weired ts annotation error infos.
+export type PrismaPluginClientDataSourceItemInstance = InstanceType<ReturnType<typeof getPrismaClient>> | any
 
 export type PrismaPluginDataSources = {
   [key: string]: {

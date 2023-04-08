@@ -4,8 +4,8 @@ import {
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE,
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY
 } from '../../types'
-import { DistributeCache } from './distribute'
-import { MemoryCache } from './memory'
+import { DistributeCacheService } from './distribute'
+import { MemoryCacheService } from './memory'
 
 @Injectable({
   id: ARTUS_FRAMEWORK_WEB_CACHE_SERVICE,
@@ -13,8 +13,8 @@ import { MemoryCache } from './memory'
 })
 export class CacheService {
   @Inject(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE)
-  readonly distribute: DistributeCache
+  readonly distribute: DistributeCacheService
 
   @Inject(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY)
-  readonly memory: MemoryCache
+  readonly memory: MemoryCacheService
 }

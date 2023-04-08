@@ -1,6 +1,6 @@
 import { Inject, Injectable, ScopeEnum } from '@artus/core'
-import { ARTUS_PLUGIN_REDIS_CLIENT } from '../../../../plugins/plugin-redis/types'
-import { RedisClient } from '../../../../plugins/plugin-redis/client'
+import { ARTUS_PLUGIN_REDIS_CLIENT } from '../../plugins/plugin-redis/types'
+import { RedisClient } from '../../plugins/plugin-redis/client'
 import {
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE,
   DistributeCacheDefaultOptions,
@@ -26,7 +26,7 @@ import {
   id: ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE,
   scope: ScopeEnum.SINGLETON
 })
-export class DistributeCache {
+export class DistributeCacheService {
   @Inject(ARTUS_PLUGIN_REDIS_CLIENT)
   private readonly redisClient: RedisClient
 
