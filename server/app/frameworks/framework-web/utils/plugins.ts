@@ -1,5 +1,5 @@
 import _ from 'lodash'
-import { AppConfig } from '../types'
+import { AppConfig } from '../../../types'
 import { RESERVED_PLUGIN_PROPS } from '../constants'
 
 export function filterPluginConfig (config: AppConfig['plugin'][keyof AppConfig['plugin']]) {

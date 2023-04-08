@@ -6,10 +6,10 @@ import {
   LifecycleHook,
   LifecycleHookUnit
 } from '@artus/core'
-import { AppConfig } from '../../types'
-import { filterPluginConfig } from '../../utils/plugins'
-import { CacheClient } from '../../plugins/plugin-cache/client'
-import { ARTUS_PLUGIN_CACHE_CLIENT } from '../../plugins/plugin-cache/types'
+import { AppConfig } from '../../../types'
+import { filterPluginConfig } from '../utils/plugins'
+import { CacheClient } from '../../../plugins/plugin-cache/client'
+import { ARTUS_PLUGIN_CACHE_CLIENT } from '../../../plugins/plugin-cache/types'
 
 @LifecycleHookUnit()
 export default class CacheLifecycle implements ApplicationLifecycle {
