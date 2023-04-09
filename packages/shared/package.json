@@ -45,6 +45,18 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "exports": {
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": {
+        "default": "./dist/types/index.mjs"
+      },
+      "require": {
+        "default": "./dist/types/index.cjs"
+      },
+      "browser": {
+        "default": "./dist/types/index.esm.js"
+      }
+    },
     ".": {
       "import": {
         "node": "./dist/index.cjs",
@@ -53,11 +65,11 @@
       },
       "require": {
         "node": "./dist/index.cjs",
-        "default": "./dist/index.umd.js",
+        "default": "./dist/index.esm.js",
         "module": "./dist/index.mjs"
       },
       "browser": {
-        "default": "./dist/index.umd.js"
+        "default": "./dist/index.esm.js"
       },
       "types": "./dist/index.d.ts"
     }

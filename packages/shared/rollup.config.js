@@ -5,15 +5,6 @@ import { globSync } from 'glob'
 
 export default defineConfig([
   {
-    input: './index.ts',
-    output: {
-      file: './dist/index.esm.js',
-      format: 'esm',
-      sourcemap: true
-    },
-    plugins: [nodeResolve({ preferBuiltins: true, browser: true }), typescript({ tsconfig: './tsconfig.json' })]
-  },
-  {
     input: globSync(['*.ts', '!(node_modules|dist)/*.ts']),
     output: {
       dir: './dist',
@@ -48,6 +39,19 @@ export default defineConfig([
     ]
   },
   {
+    input: globSync(['*.ts', '!(node_modules|dist)/*.ts']),
+    output: {
+      dir: './dist',
+      format: 'esm',
+      preserveModules: true,
+      preserveModulesRoot: './',
+      sourcemap: true,
+      // Rename all ts files to .mjs
+      entryFileNames: i => i.name + '.esm.js'
+    },
+    plugins: [nodeResolve({ preferBuiltins: true, browser: true }), typescript({ tsconfig: './tsconfig.json' })]
+  },
+  {
     input: './index.ts',
     output: {
       file: './dist/index.umd.js',
@@ -56,7 +60,7 @@ export default defineConfig([
       name: 'index.umd.js'
     },
     plugins: [
-      nodeResolve({ preferBuiltins: true, browser: false }),
+      nodeResolve({ preferBuiltins: true, browser: true }),
       typescript({ tsconfig: './tsconfig.json' })
     ]
   }
