@@ -12,5 +12,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
-  base: shared.utils.judgeBuildModeInProduction() ? shared.constants.FILE_BASE_PATH : '/'
+  base: shared.utils.judgeBuildModeInProduction() ? shared.constants.FILE_BASE_PATH : '/',
+  server: {
+    port: shared.constants.CLIENT_PORT,
+    proxy: {
+      '^/api': {
+        target: `http://127.0.0.1:${ shared.constants.SERVER_PORT }`,
+        changeOrigin: true
+      }
+    }
+  }
 })
