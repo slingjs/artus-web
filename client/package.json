@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vite",
     "build": "rimraf ./dist && run-p type-check build-only",
-    "build:release": "rimraf ./dist && run-p type-check build-only",
+    "build:release": "rimraf ./dist && vite build",
     "preview": "vite preview",
     "test:unit": "vitest",
     "test:e2e": "playwright test",
