@@ -10,7 +10,7 @@ export default {
   plugin: {
     http: {
       host: process.env.HTTP_HOST || '0.0.0.0',
-      port: +process.env.HTTP_PORT! || 9527, // Will use this.
+      port: +process.env.HTTP_PORT! || shared.constants.SERVER_PORT, // Will use this.
       cacheDir: path.resolve(cacheDir, 'plugins/http')
     },
     redis: {
