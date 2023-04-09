@@ -8,6 +8,11 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "lib": [
+      "ESNext",
+      "DOM",
+      "DOM.Iterable"
+    ],
     "verbatimModuleSyntax": true,
     "importsNotUsedAsValues": "remove",
     "preserveValueImports": false
