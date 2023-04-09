@@ -1,5 +1,5 @@
 import { JSONSchemaType } from 'ajv'
-import { AccountChangePwdPayload, AccountSignInPayload, AccountSignUpPayload, Roles } from '../types'
+import { AccountChangePwdPayload, AccountSignInPayload, AccountSignUpPayload } from '../types'
 import shared from '@sling/artus-web-shared'
 
 export const accountSignUpPayloadSchema: JSONSchemaType<AccountSignUpPayload> = {
@@ -8,7 +8,7 @@ export const accountSignUpPayloadSchema: JSONSchemaType<AccountSignUpPayload> = 
     password: { type: 'string', pattern: shared.constants.accountPasswordPatternString },
     email: { type: 'string', format: 'email' },
     name: { type: 'string', pattern: shared.constants.accountNamePatternString },
-    roles: { type: 'array', items: { type: 'string', enum: Object.values(Roles) }, nullable: true }
+    roles: { type: 'array', items: { type: 'string', enum: Object.values(shared.types.Roles) }, nullable: true }
   },
   required: ['name', 'password', 'email'],
   additionalProperties: false

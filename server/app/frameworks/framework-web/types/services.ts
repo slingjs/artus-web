@@ -1,10 +1,10 @@
-import { Roles } from './roles'
 import { PrismaClient as PrismaClientMongo } from '../models/mongo/generated/client'
 import { PrismaClient as PrismaClientMysql } from '../models/mysql/generated/client'
 import {
   PrismaPluginClientDataSourceItemInstance,
   PrismaPluginDataSourceName
 } from '../../../plugins/plugin-prisma/types'
+import { Roles } from '@sling/artus-web-shared/types'
 
 export const ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE = 'ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE'
 export const ARTUS_FRAMEWORK_WEB_FILE_SERVICE = 'ARTUS_FRAMEWORK_WEB_FILE_SERVICE'
@@ -12,15 +12,6 @@ export const ARTUS_FRAMEWORK_WEB_PAGE_SERVICE = 'ARTUS_FRAMEWORK_WEB_PAGE_SERVIC
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE'
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE'
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY'
-
-export interface UserSession {
-  name: string
-  roles: Array<Roles>
-  signedIn: boolean
-  id: string
-  email: string
-  _sessionId: string
-}
 
 export type DistributeCacheKey = string
 

@@ -2,10 +2,11 @@ import { ArtusApplication, ArtusInjectEnum, Inject } from '@artus/core'
 import { HTTPController, Post, Use } from '../../../../plugins/plugin-http/decorator'
 import { AccountService } from '../../services/account'
 import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE } from '../../types'
-import { initUser, userAuthMiddleware } from '../../middlewares/business/account'
+import { initUser } from '../../middlewares/business/account'
 import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
 import _ from 'lodash'
+import { PAGE_PROHIBIT_ACCOUNT_PROPERTIES } from '../../constants'
 
 @HTTPController('/api/account')
 @Use([executionTimeMiddleware(), initUser()])
@@ -15,6 +16,32 @@ export default class AccountController {
 
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
+
+  @Post('/session')
+  async session (...args: Parameters<HTTPMiddleware>) {
+    const [ctx, _next] = args
+
+    const { output: { data } } = ctx
+    const ctxSession = await this.accountService.getCtxSession(ctx)
+
+    if (!ctxSession) {
+      data.status = 400
+      data.body = {
+        data: null,
+        code: 'ERROR_SESSION_UNEXPECTED_ERROR',
+        status: 'FAIL'
+      }
+
+      return
+    }
+
+    data.status = 200
+    data.body = {
+      data: _.omit(ctxSession, PAGE_PROHIBIT_ACCOUNT_PROPERTIES),
+      code: 'SUCCESS_SESSION_FOUND',
+      status: 'SUCCESS'
+    }
+  }
 
   @Post('/sign-in', { useBodyParser: true })
   async signIn (...args: Parameters<HTTPMiddleware>) {
@@ -38,7 +65,7 @@ export default class AccountController {
      *
      * Here only show an example. No matter password encrypted or not.
      *
-     * fetch('/api/account/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ' }) })
+     * fetch('/api/account/sign-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ' }) })
      */
     const result = await this.accountService.signIn(ctx, req.body, { passwordPreEncrypt: true })
     if (!result.account) {
@@ -109,7 +136,7 @@ export default class AccountController {
 
   // Need signed in.
   @Post('/change-pwd', { useBodyParser: true })
-  @Use([userAuthMiddleware()])
+  // @Use([userAuthMiddleware()])
   async changePwd (...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args
     const { input: { params: { req } }, output: { data } } = ctx
@@ -121,7 +148,7 @@ export default class AccountController {
      *
      * Here only show an example. No matter password encrypted or not.
      *
-     * fetch('/api/account/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', oldPassword: '1qaz!QAZ' }) })
+     * fetch('/api/account/change-pwd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', oldPassword: '1qaz!QAZ' }) })
      */
     const result = await this.accountService.changePwd(ctx, req.body, { passwordPreEncrypt: true })
       .catch(e => {

@@ -4,9 +4,7 @@ import {
   ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE,
   ARTUS_FRAMEWORK_WEB_USER_NAMESPACE,
-  DistributeCachePrismaInstance,
-  Roles,
-  UserSession
+  DistributeCachePrismaInstance
 } from '../types'
 import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
 import { CacheService } from './cache'
@@ -29,6 +27,7 @@ import {
   validateAccountSignInPayload,
   validateAccountSignUpPayload
 } from '../utils/validation'
+import { UserSession, Roles } from '@sling/artus-web-shared/types'
 
 dayjs.extend(dayjsUtc)
 
@@ -212,10 +211,8 @@ export class AccountService {
     certification: Pick<Account, 'email' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
-    const validateResult = await validateAccountSignInPayload(certification);
-    if (!validateResult) {
-      // @ts-ignore
-      const errors = validateAccountSignInPayload.errors;
+    const password = _.get(certification, 'password')
+    if (!(password && typeof password === 'string')) {
       return {
         account: null,
         code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
@@ -223,7 +220,29 @@ export class AccountService {
       }
     }
 
-    const foundAccount = await this.findInPersistent(ctx, { email: certification.email })
+    const rectifiedPassword = rectifyPassword(
+      password,
+      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
+    )
+    const rectifiedCertification = _.merge(
+      {},
+      certification,
+      {
+        password: rectifiedPassword
+      }
+    )
+    const validateResult = await validateAccountSignInPayload(rectifiedCertification)
+    if (!validateResult) {
+      // @ts-ignore
+      const errors = validateAccountSignInPayload.errors
+      return {
+        account: null,
+        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
+        status: 'FAIL'
+      }
+    }
+
+    const foundAccount = await this.findInPersistent(ctx, { email: rectifiedCertification.email })
     if (!foundAccount) {
       return {
         account: null,
@@ -232,10 +251,6 @@ export class AccountService {
       }
     }
 
-    const rectifiedPassword = rectifyPassword(
-      certification.password,
-      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
-    )
     if (encryptPassword(rectifiedPassword, foundAccount.salt) !== foundAccount.password) {
       return {
         account: null,
@@ -264,10 +279,30 @@ export class AccountService {
     registration: Pick<Account, 'email' | 'name' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean, keepSignIn: boolean }>
   ) {
-    const validateResult = await validateAccountSignUpPayload(registration);
+    const password = _.get(registration, 'password')
+    if (!(password && typeof password === 'string')) {
+      return {
+        account: null,
+        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
+        status: 'FAIL'
+      }
+    }
+
+    const rectifiedPassword = rectifyPassword(
+      password,
+      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
+    )
+    const rectifiedRegistration = _.merge(
+      {},
+      registration,
+      {
+        password: rectifiedPassword
+      }
+    )
+    const validateResult = await validateAccountSignUpPayload(rectifiedRegistration)
     if (!validateResult) {
       // @ts-ignore
-      const errors = validateAccountSignUpPayload.errors;
+      const errors = validateAccountSignUpPayload.errors
       return {
         account: null,
         code: 'ERROR_SIGN_UP_PAYLOAD_SCHEMA_INVALID',
@@ -319,10 +354,45 @@ export class AccountService {
     certification: Pick<Account, 'email' | 'password'> & { oldPassword: string },
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
-    const validateResult = await validateAccountChangePwdPayload(certification);
+    const password = _.get(certification, 'password')
+    if (!(password && typeof password === 'string')) {
+      return {
+        account: null,
+        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
+        status: 'FAIL'
+      }
+    }
+
+    const oldPassword = _.get(certification, 'oldPassword')
+    if (!(oldPassword && typeof oldPassword === 'string')) {
+      return {
+        account: null,
+        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
+        status: 'FAIL'
+      }
+    }
+
+    const rectifiedPassword = rectifyPassword(
+      password,
+      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
+    )
+    // Currently, we tolerate that new password is the same as the old one.
+    const rectifiedOldPassword = rectifyPassword(
+      oldPassword,
+      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
+    )
+    const rectifiedCertification = _.merge(
+      {},
+      certification,
+      {
+        password: rectifiedPassword,
+        oldPassword: rectifiedOldPassword
+      }
+    )
+    const validateResult = await validateAccountChangePwdPayload(rectifiedCertification)
     if (!validateResult) {
       // @ts-ignore
-      const errors = validateAccountChangePwdPayload.errors;
+      const errors = validateAccountChangePwdPayload.errors
       return {
         account: null,
         code: 'ERROR_CHANGE_PWD_PAYLOAD_SCHEMA_INVALID',
@@ -330,7 +400,7 @@ export class AccountService {
       }
     }
 
-    const foundAccount = await this.findInPersistent(ctx, { email: certification.email })
+    const foundAccount = await this.findInPersistent(ctx, { email: rectifiedCertification.email })
     if (!foundAccount) {
       return {
         account: null,
@@ -339,12 +409,7 @@ export class AccountService {
       }
     }
 
-    // Currently, we tolerate that new password is the same as the old one.
-    const rectifiedOldPasswordPassword = rectifyPassword(
-      certification.oldPassword,
-      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
-    )
-    if (encryptPassword(rectifiedOldPasswordPassword, foundAccount.salt) !== foundAccount.password) {
+    if (encryptPassword(rectifiedOldPassword, foundAccount.salt) !== foundAccount.password) {
       return {
         account: null,
         code: 'ERROR_CHANGE_PWD_ACCOUNT_WRONG_OLD_PASSWORD',
@@ -353,14 +418,10 @@ export class AccountService {
     }
 
     // Update.
-    const rectifiedPassword = rectifyPassword(
-      certification.password,
-      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
-    )
     const finalPassword = encryptPassword(rectifiedPassword, foundAccount.salt)
     const finalAccount = await this.updateOnPersistent(
       ctx,
-      { email: certification.email },
+      { email: rectifiedCertification.email },
       {
         password: finalPassword
       }

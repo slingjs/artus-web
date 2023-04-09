@@ -1,10 +1,11 @@
-import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, Roles } from '../../types'
+import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE } from '../../types'
 import { AccountService } from '../../services/account'
 import cookie from 'cookie'
 import shared from '@sling/artus-web-shared'
 import _ from 'lodash'
 import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 import { USER_SESSION_COOKIE_MAX_AGE } from '../../constants'
+import { Roles } from '@sling/artus-web-shared/types'
 
 export const initUser = (): HTTPMiddleware => {
   return async function initUser (ctx, next) {
