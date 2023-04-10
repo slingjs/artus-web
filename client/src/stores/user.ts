@@ -23,7 +23,7 @@ export const useUserStore = defineStore('user', {
     async fetchSession (...args: Parameters<typeof fetchAccountSession>) {
       const sessionResult = await fetchAccountSession()
 
-      this.setSession(sessionResult.data)
+      this.setSession(_.get(sessionResult.data, 'account'))
     },
     async fetchSignIn (...args: Parameters<typeof fetchAccountSignIn>) {
       await fetchAccountSignIn(...args)
