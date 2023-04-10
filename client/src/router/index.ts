@@ -29,6 +29,11 @@ const router = createRouter({
           component: () => import('../views/account/change-pwd.vue')
         }
       ]
+    },
+    {
+      name: '404',
+      path: '/:pathMatch(.*)*',
+      redirect: { name: 'home' }
     }
   ]
 })
