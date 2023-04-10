@@ -1,15 +1,18 @@
 import { Injectable, ScopeEnum } from '@artus/core'
 import shared from '@sling/artus-web-shared'
 import {
+  AccountResponseData,
+  AccountResponseDataCode,
   ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE,
   ARTUS_FRAMEWORK_WEB_USER_NAMESPACE,
-  DistributeCachePrismaInstance
+  DistributeCachePrismaInstance,
+  ResponseDataStatus
 } from '../types'
 import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
 import { CacheService } from './cache'
 import {
-  ACCESSIBLE_ACCOUNT_PROPERTIES,
+  ACCESSIBLE_ACCOUNT_PROPERTIES, PAGE_PROHIBIT_ACCOUNT_PROPERTIES,
   USER_DISTRIBUTE_CACHE_DEFAULT_TTL,
   USER_SESSION_COOKIE_MAX_AGE,
   USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
@@ -27,7 +30,8 @@ import {
   validateAccountSignInPayload,
   validateAccountSignUpPayload
 } from '../utils/validation'
-import { UserSession, Roles } from '@sling/artus-web-shared/types'
+import { PromiseFulfilledResult, Roles, UserSession } from '@sling/artus-web-shared/types'
+import { formatResponseData } from '../utils/services'
 
 dayjs.extend(dayjsUtc)
 
@@ -43,6 +47,35 @@ export class AccountService {
 
     return prismaClient.getPrisma<DistributeCachePrismaInstance<PrismaPluginDataSourceName.MONGO>>(
       PrismaPluginDataSourceName.MONGO
+    )
+  }
+
+  formatResponseData (
+    data: Partial<AccountResponseData>,
+    account: PromiseFulfilledResult<ReturnType<AccountService['findInPersistent']>> | UserSession = null,
+    options?: Partial<{ useCtxAccount: boolean }>
+  ) {
+    if (account) {
+      return formatResponseData(
+        _.merge(data, {
+          data: {
+            account: _.get(options, 'useCtxAccount')
+              ? _.omit(account as UserSession, PAGE_PROHIBIT_ACCOUNT_PROPERTIES)
+              : _.pick(
+                account as PromiseFulfilledResult<ReturnType<AccountService['findInPersistent']>>,
+                ACCESSIBLE_ACCOUNT_PROPERTIES
+              )
+          }
+        })
+      )
+    }
+
+    return formatResponseData<AccountResponseData>(
+      _.merge(data, {
+        data: {
+          account: null
+        }
+      })
     )
   }
 
@@ -213,11 +246,10 @@ export class AccountService {
   ) {
     const password = _.get(certification, 'password')
     if (!(password && typeof password === 'string')) {
-      return {
-        account: null,
-        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     const rectifiedPassword = rectifyPassword(
@@ -235,43 +267,41 @@ export class AccountService {
     if (!validateResult) {
       // @ts-ignore
       const errors = validateAccountSignInPayload.errors
-      return {
-        account: null,
-        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     const foundAccount = await this.findInPersistent(ctx, { email: rectifiedCertification.email })
     if (!foundAccount) {
-      return {
-        account: null,
-        code: 'ERROR_SIGN_IN_ACCOUNT_NOT_FOUND',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_IN_ACCOUNT_NOT_FOUND,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     if (encryptPassword(rectifiedPassword, foundAccount.salt) !== foundAccount.password) {
-      return {
-        account: null,
-        code: 'ERROR_SIGN_IN_ACCOUNT_WRONG_PASSWORD',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_IN_ACCOUNT_WRONG_PASSWORD,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     if (foundAccount.inactive) {
-      return {
-        account: null,
-        code: 'ERROR_SIGN_IN_ACCOUNT_INACTIVE',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_IN_ACCOUNT_INACTIVE,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
-    return {
-      account: _.pick(foundAccount, ACCESSIBLE_ACCOUNT_PROPERTIES),
-      code: 'ERROR_SIGN_IN_SUCCESS',
-      status: 'SUCCESS'
-    }
+    return this.formatResponseData(
+      {
+        code: AccountResponseDataCode.SUCCESS_SIGN_IN_SUCCESS,
+        status: ResponseDataStatus.SUCCESS
+      },
+      foundAccount
+    )
   }
 
   async signUp (
@@ -281,11 +311,10 @@ export class AccountService {
   ) {
     const password = _.get(registration, 'password')
     if (!(password && typeof password === 'string')) {
-      return {
-        account: null,
-        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_UP_PAYLOAD_SCHEMA_INVALID,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     const rectifiedPassword = rectifyPassword(
@@ -303,20 +332,18 @@ export class AccountService {
     if (!validateResult) {
       // @ts-ignore
       const errors = validateAccountSignUpPayload.errors
-      return {
-        account: null,
-        code: 'ERROR_SIGN_UP_PAYLOAD_SCHEMA_INVALID',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_UP_PAYLOAD_SCHEMA_INVALID,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     const foundAccount = await this.findInPersistent(ctx, { email: registration.email })
     if (foundAccount) {
-      return {
-        account: null,
-        code: 'ERROR_SIGN_UP_DUPLICATE',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_UP_DUPLICATE,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     const salt = shared.utils.calcUUID()
@@ -336,17 +363,19 @@ export class AccountService {
       salt,
       userId: shared.utils.calcUUID(),
       roles: [Roles.ANONYMOUS]
-    }
+    } as Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistent']>>, null>
     // Create user.
     await this.getPrisma(ctx).account.create({
       data: accountData
     })
 
-    return {
-      account: _.pick(accountData, ACCESSIBLE_ACCOUNT_PROPERTIES),
-      code: 'SUCCESS_SIGN_UP_SUCCESS',
-      status: 'SUCCESS'
-    }
+    return this.formatResponseData(
+      {
+        code: AccountResponseDataCode.SUCCESS_SIGN_UP_SUCCESS,
+        status: ResponseDataStatus.SUCCESS
+      },
+      accountData
+    )
   }
 
   async changePwd (
@@ -356,20 +385,18 @@ export class AccountService {
   ) {
     const password = _.get(certification, 'password')
     if (!(password && typeof password === 'string')) {
-      return {
-        account: null,
-        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_CHANGE_PWD_PAYLOAD_SCHEMA_INVALID,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     const oldPassword = _.get(certification, 'oldPassword')
     if (!(oldPassword && typeof oldPassword === 'string')) {
-      return {
-        account: null,
-        code: 'ERROR_SIGN_IN_PAYLOAD_SCHEMA_INVALID',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_CHANGE_PWD_PAYLOAD_SCHEMA_INVALID,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     const rectifiedPassword = rectifyPassword(
@@ -393,28 +420,25 @@ export class AccountService {
     if (!validateResult) {
       // @ts-ignore
       const errors = validateAccountChangePwdPayload.errors
-      return {
-        account: null,
-        code: 'ERROR_CHANGE_PWD_PAYLOAD_SCHEMA_INVALID',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_CHANGE_PWD_PAYLOAD_SCHEMA_INVALID,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     const foundAccount = await this.findInPersistent(ctx, { email: rectifiedCertification.email })
     if (!foundAccount) {
-      return {
-        account: null,
-        code: 'ERROR_CHANGE_PWD_ACCOUNT_NOT_FOUND',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_CHANGE_PWD_ACCOUNT_NOT_FOUND,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     if (encryptPassword(rectifiedOldPassword, foundAccount.salt) !== foundAccount.password) {
-      return {
-        account: null,
-        code: 'ERROR_CHANGE_PWD_ACCOUNT_WRONG_OLD_PASSWORD',
-        status: 'FAIL'
-      }
+      return this.formatResponseData({
+        code: AccountResponseDataCode.ERROR_CHANGE_PWD_ACCOUNT_WRONG_OLD_PASSWORD,
+        status: ResponseDataStatus.FAIL
+      })
     }
 
     // Update.
@@ -427,10 +451,12 @@ export class AccountService {
       }
     )
 
-    return {
-      account: _.pick(finalAccount, ACCESSIBLE_ACCOUNT_PROPERTIES),
-      code: 'SUCCESS_CHANGE_PWD_SUCCESS',
-      status: 'SUCCESS'
-    }
+    return this.formatResponseData(
+      {
+        code: AccountResponseDataCode.SUCCESS_CHANGE_PWD_SUCCESS,
+        status: ResponseDataStatus.SUCCESS
+      },
+      finalAccount
+    )
   }
 }
