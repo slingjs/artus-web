@@ -116,7 +116,7 @@ function handleSubmit () {
       .then(res => {
         message.success('Success!')
         setTimeout(
-          () => router.replace({ name: 'accountLandingSignIn', query: { email: formConfig.model.email } }),
+          () => router.replace({ name: 'home', query: { email: formConfig.model.email } }),
           500
         )
       })
