@@ -118,14 +118,14 @@ export class AccountService {
     const ctxPreviousSession = await this.getCtxSession(ctx)
     const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
     const ctxPreviousSessionKeyValue = _.get(ctxPreviousSession, '_sessionId')
-    const sessionKeyValue = sessionCookieValue || ctxPreviousSessionKeyValue || shared.utils.calcUUID()
+    const sessionKeyValue = ctxPreviousSessionKeyValue || sessionCookieValue || shared.utils.calcUUID()
     const session = await this.initSession(ctx, signedInAccount, { _sessionId: sessionKeyValue })
     await this.setCtxSession(ctx, session)
 
     await this.setDistributeSession(ctx, sessionKeyValue, session)
 
     // If already set.
-    if (!([ctxPreviousSessionKeyValue, sessionCookieValue].includes(sessionKeyValue))) {
+    if (sessionCookieValue !== sessionKeyValue) {
       res.setHeader(
         'set-cookie',
         cookie.serialize(
@@ -148,7 +148,7 @@ export class AccountService {
     const ctxPreviousSession = await this.getCtxSession(ctx)
     const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
     const ctxPreviousSessionKeyValue = _.get(ctxPreviousSession, '_sessionId')
-    const sessionKeyValue = sessionCookieValue || ctxPreviousSessionKeyValue
+    const sessionKeyValue = ctxPreviousSessionKeyValue || sessionCookieValue
 
     if (!sessionKeyValue) {
       return
