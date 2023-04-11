@@ -155,11 +155,11 @@ export class PluginHTTPClient {
           const pipeline = new Pipeline()
 
           // For body-parser.
-          if (_.get(routeMetadata.options, 'useBodyParser')) {
-            const bodyParserOptions = _.get(routeMetadata.options, 'bodyParserOptions') ??
+          if (_.get(routeMetadata.options || {}, 'useBodyParser')) {
+            const bodyParserOptions = _.get(routeMetadata.options || {}, 'bodyParserOptions') ??
               HTTP_DEFAULT_BODY_PARSER_OPTIONS
 
-            const bodyParserType = _.get(routeMetadata.options, 'bodyParserType') ||
+            const bodyParserType = _.get(routeMetadata.options || {}, 'bodyParserType') ||
               HTTP_DEFAULT_BODY_PARSER_TYPE
 
             await pipeline.use(async function httpBodyParser (_ctx, next) {
