@@ -1,15 +1,19 @@
 import { ArtusApplication, ArtusInjectEnum, Inject } from '@artus/core'
-import { HTTPController, Post, Use } from '../../../../plugins/plugin-http/decorator'
+import { HTTPController, HTTPRoute, Post, Use } from '../../../../plugins/plugin-http/decorator'
 import { AccountService } from '../../services/account'
 import { AccountResponseDataCode, ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, ResponseDataStatus } from '../../types'
 import { initUser } from '../../middlewares/business/account'
-import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
+import { HTTPMethod, HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
 import _ from 'lodash'
 import status from 'http-status'
+import { bypassInitUserMiddlewareFilter } from '../../utils/business/account'
 
 @HTTPController('/api/account')
-@Use([executionTimeMiddleware(), initUser()])
+@Use([
+  executionTimeMiddleware(),
+  initUser({ bypassFilter: bypassInitUserMiddlewareFilter })
+])
 export default class AccountController {
   @Inject(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE)
   accountService: AccountService
@@ -153,6 +157,20 @@ export default class AccountController {
       code: AccountResponseDataCode.SUCCESS_SIGN_UP_SUCCESS,
       status: ResponseDataStatus.SUCCESS
     })
+  }
+
+  @HTTPRoute({
+    path: '/sign-out',
+    method: [HTTPMethod.POST, HTTPMethod.GET]
+  })
+  async signOut (...args: Parameters<HTTPMiddleware>) {
+    const [ctx, _next] = args
+    const { output: { data } } = ctx
+
+    await this.accountService.signOut(ctx)
+
+    data.status = status.OK
+    data.body = 'OK.'
   }
 
   // Need signed in.

@@ -1,5 +1,6 @@
 import crypto from 'crypto'
 import _ from 'lodash'
+import { HTTPMiddlewareContext } from '../../../../plugins/plugin-http/types'
 
 export function encryptPassword (password: string, salt: string) {
   const hash = crypto.createHash(
@@ -24,4 +25,11 @@ export function rectifyPassword (password: string, options?: Partial<{ preEncryp
     // Base64 decrypt.
     ? Buffer.from(password, 'base64').toString()
     : password
+}
+
+export function bypassInitUserMiddlewareFilter (ctx: HTTPMiddlewareContext) {
+  const { input: { params: { req } } } = ctx
+
+  return typeof req.url === 'string' &&
+    req.url.toLowerCase().includes('/sign-out'.toLowerCase())
 }

@@ -12,10 +12,12 @@ import {
 import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
 import { CacheService } from './cache'
 import {
-  ACCESSIBLE_ACCOUNT_PROPERTIES, PAGE_PROHIBIT_ACCOUNT_PROPERTIES,
+  ACCESSIBLE_ACCOUNT_PROPERTIES,
+  PAGE_PROHIBIT_ACCOUNT_PROPERTIES,
   USER_DISTRIBUTE_CACHE_DEFAULT_TTL,
   USER_SESSION_COOKIE_MAX_AGE,
-  USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
+  USER_SESSION_COOKIE_MAX_AGE_REMEMBERED,
+  USER_SESSION_COOKIE_MAX_AGE_REMOVED
 } from '../constants'
 import { Account } from '../models/mongo/generated/client'
 import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
@@ -164,7 +166,8 @@ export class AccountService {
         shared.constants.USER_SESSION_KEY,
         '',
         {
-          path: '/' // Must set this. Otherwise, it will be req.path as default.
+          path: '/', // Must set this. Otherwise, it will be req.path as default.
+          maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
         }
       )
     )
@@ -376,6 +379,10 @@ export class AccountService {
       },
       accountData
     )
+  }
+
+  async signOut (ctx: HTTPMiddlewareContext) {
+    return this.handleCertificatedSessionTampered(ctx)
   }
 
   async changePwd (

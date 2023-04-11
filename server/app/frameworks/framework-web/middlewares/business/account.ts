@@ -3,13 +3,22 @@ import { AccountService } from '../../services/account'
 import cookie from 'cookie'
 import shared from '@sling/artus-web-shared'
 import _ from 'lodash'
-import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
+import { HTTPMiddleware, HTTPMiddlewareContext } from '../../../../plugins/plugin-http/types'
 import { USER_SESSION_COOKIE_MAX_AGE } from '../../constants'
 import { Roles } from '@sling/artus-web-shared/types'
 
-export const initUser = (): HTTPMiddleware => {
+export const initUser = (
+  options?: Partial<{
+    bypassFilter: (ctx: HTTPMiddlewareContext) => boolean
+  }>
+): HTTPMiddleware => {
   return async function initUser (ctx, next) {
     const { input: { params: { app, req, res } } } = ctx
+
+    const bypassFilter = _.get(options, 'bypassFilter')
+    if (typeof bypassFilter === 'function' && await bypassFilter(ctx)) {
+      return await next()
+    }
 
     const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
     const userService = app
