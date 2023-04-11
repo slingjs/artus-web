@@ -15,3 +15,5 @@ export const accountPasswordPattern = new RegExp(accountPasswordPatternString, '
  */
 export const accountNamePatternString = '^[a-zA-Z\d]{6,60}$'
 export const accountNamePattern = new RegExp(accountNamePatternString, 'u')
+
+export const accountSignOutCallbackSearchParamKey = 'callback'
