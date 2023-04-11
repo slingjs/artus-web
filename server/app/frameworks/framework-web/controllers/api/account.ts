@@ -8,6 +8,8 @@ import { executionTimeMiddleware } from '../../middlewares/common/execution-time
 import _ from 'lodash'
 import status from 'http-status'
 import { bypassInitUserMiddlewareFilter } from '../../utils/business/account'
+import { filterXSS } from 'xss'
+import shared from '@sling/artus-web-shared'
 
 @HTTPController('/api/account')
 @Use([
@@ -165,9 +167,21 @@ export default class AccountController {
   })
   async signOut (...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args
-    const { output: { data } } = ctx
+    const { input: { params: { searchParams, res } }, output: { data } } = ctx
 
     await this.accountService.signOut(ctx)
+
+    // If callback.
+    const callback = filterXSS(_.get(searchParams, shared.constants.accountSignOutCallbackSearchParamKey) || '');
+    if (callback) {
+      // Redirect.
+      data.status = status.FOUND;
+      res.setHeader(
+        'Location',
+        callback
+      );
+      return;
+    }
 
     data.status = status.OK
     data.body = 'OK.'
