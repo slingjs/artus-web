@@ -6,10 +6,10 @@ import {
   LifecycleHook,
   LifecycleHookUnit
 } from '@artus/core'
-import { ARTUS_PLUGIN_PRISMA_CLIENT } from '../../../plugins/plugin-prisma/types'
-import { PluginPrismaClient } from '../../../plugins/plugin-prisma/client'
-import { filterPluginConfig } from '../utils/plugins'
-import { AppConfig } from '../../../types'
+import { ARTUS_PLUGIN_PRISMA_CLIENT } from './types'
+import { PluginPrismaClient } from './client'
+import { filterPluginConfig } from '../../utils/plugins'
+import { AppConfig } from '../../types'
 
 @LifecycleHookUnit()
 export default class PrismaLifecycle implements ApplicationLifecycle {

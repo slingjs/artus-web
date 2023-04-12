@@ -6,10 +6,10 @@ import {
   LifecycleHook,
   LifecycleHookUnit
 } from '@artus/core'
-import { AppConfig } from '../../../types'
-import { ARTUS_PLUGIN_REDIS_CLIENT } from '../../../plugins/plugin-redis/types'
-import { RedisClient } from '../../../plugins/plugin-redis/client'
-import { filterPluginConfig } from '../utils/plugins'
+import { AppConfig } from '../../types'
+import { ARTUS_PLUGIN_REDIS_CLIENT } from './types'
+import { RedisClient } from './client'
+import { filterPluginConfig } from '../../utils/plugins'
 
 @LifecycleHookUnit()
 export default class RedisLifecycle implements ApplicationLifecycle {

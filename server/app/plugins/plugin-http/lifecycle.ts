@@ -6,10 +6,10 @@ import {
   LifecycleHook,
   LifecycleHookUnit
 } from '@artus/core'
-import { ARTUS_PLUGIN_HTTP_CLIENT, HTTPConfig } from '../../../plugins/plugin-http/types'
-import { PluginHTTPClient } from '../../../plugins/plugin-http/client'
-import { AppConfig } from '../../../types'
-import { filterPluginConfig } from '../utils/plugins'
+import { ARTUS_PLUGIN_HTTP_CLIENT, HTTPConfig } from './types'
+import { PluginHTTPClient } from './client'
+import { AppConfig } from '../../types'
+import { filterPluginConfig } from '../../utils/plugins'
 
 @LifecycleHookUnit()
 export default class HTTPLifecycle implements ApplicationLifecycle {
