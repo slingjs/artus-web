@@ -7,6 +7,7 @@ import {
   CONTROLLER_METADATA,
   HTTPConfig,
   HTTPControllerMetadata,
+  HTTPMiddleware,
   HTTPMiddlewareContext,
   HTTPRouteMetadata,
   HTTPRouteMiddlewaresMetadata,
@@ -16,7 +17,7 @@ import {
 } from './types'
 import url from 'url'
 import { HTTPTrigger } from './trigger'
-import { Input, Output, Middleware, Pipeline } from '@artus/pipeline'
+import { Input, Output, Pipeline } from '@artus/pipeline'
 import _ from 'lodash'
 import bodyParser from 'body-parser'
 import { HTTP_DEFAULT_BODY_PARSER_OPTIONS, HTTP_DEFAULT_BODY_PARSER_TYPE } from './constants'
@@ -109,7 +110,7 @@ export class PluginHTTPClient {
     controllerMetadata: HTTPControllerMetadata,
     routeMetadataList: HTTPRouteMetadata,
     routeMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata,
-    handler: Middleware
+    handler: HTTPMiddleware
   ) {
     for (const routeMetadata of routeMetadataList) {
       const routePath = (controllerMetadata.prefix ?? '/') + routeMetadata.path

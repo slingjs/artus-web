@@ -1,8 +1,8 @@
 import dayjs from 'dayjs'
-import { Middleware } from '@artus/pipeline'
 import { ARTUS_FRAMEWORK_WEB_EXECUTION_NAMESPACE } from '../../types'
+import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 
-export const executionTimeMiddleware = function executionTimeMiddleware (): Middleware {
+export const executionTimeMiddleware = function executionTimeMiddleware (): HTTPMiddleware {
   return async function executionTimeMiddleware (ctx, next) {
     const storage = ctx.namespace(ARTUS_FRAMEWORK_WEB_EXECUTION_NAMESPACE)
 
