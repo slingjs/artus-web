@@ -58,7 +58,7 @@ export interface DistributeCacheExpireOptions {
   ttl: number // ms.
 }
 
-export  type DistributeCachePrismaInstance<T extends PrismaPluginDataSourceName = any> = T extends PrismaPluginDataSourceName.MONGO
+export  type PersistentDBInstance<T extends PrismaPluginDataSourceName = any> = T extends PrismaPluginDataSourceName.MONGO
   ? PrismaClientMongo
   : T extends PrismaPluginDataSourceName.MYSQL
     ? PrismaClientMysql

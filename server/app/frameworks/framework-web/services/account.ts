@@ -47,14 +47,14 @@ export class AccountService {
 
     const prismaClient = app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
 
-    return prismaClient.getPrisma<DistributeCachePrismaInstance<PrismaPluginDataSourceName.MONGO>>(
+    return prismaClient.getPrisma<PersistentDBInstance<PrismaPluginDataSourceName.MONGO>>(
       PrismaPluginDataSourceName.MONGO
     )
   }
 
   formatResponseData (
     data: Partial<AccountResponseData>,
-    account: PromiseFulfilledResult<ReturnType<AccountService['findInPersistent']>> | UserSession = null,
+    account: PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>> | UserSession = null,
     options?: Partial<{ useCtxAccount: boolean }>
   ) {
     if (account) {
@@ -64,7 +64,7 @@ export class AccountService {
             account: _.get(options, 'useCtxAccount')
               ? _.omit(account as UserSession, PAGE_PROHIBIT_ACCOUNT_PROPERTIES)
               : _.pick(
-                account as PromiseFulfilledResult<ReturnType<AccountService['findInPersistent']>>,
+                account as PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>,
                 ACCESSIBLE_ACCOUNT_PROPERTIES
               )
           }
@@ -227,11 +227,11 @@ export class AccountService {
     return cacheService.distribute.stale(this.calcDistributeCacheSessionKey(ctx, sessionKeyValue))
   }
 
-  async findInPersistent (ctx: HTTPMiddlewareContext, condition: Pick<Account, 'email'>) {
+  async findInPersistentDB (ctx: HTTPMiddlewareContext, condition: Pick<Account, 'email'>) {
     return this.getPrisma(ctx).account.findFirst({ where: condition })
   }
 
-  async updateOnPersistent (
+  async updateOnPersistentDB (
     ctx: HTTPMiddlewareContext,
     condition: Pick<Account, 'email'>,
     data: Partial<Pick<Account, 'password' | 'name' | 'updatedAt' | 'inactive' | 'inactiveAt'>>
@@ -276,7 +276,7 @@ export class AccountService {
       })
     }
 
-    const foundAccount = await this.findInPersistent(ctx, { email: rectifiedCertification.email })
+    const foundAccount = await this.findInPersistentDB(ctx, { email: rectifiedCertification.email })
     if (!foundAccount) {
       return this.formatResponseData({
         code: AccountResponseDataCode.ERROR_SIGN_IN_ACCOUNT_NOT_FOUND,
@@ -341,7 +341,7 @@ export class AccountService {
       })
     }
 
-    const foundAccount = await this.findInPersistent(ctx, { email: registration.email })
+    const foundAccount = await this.findInPersistentDB(ctx, { email: registration.email })
     if (foundAccount) {
       return this.formatResponseData({
         code: AccountResponseDataCode.ERROR_SIGN_UP_DUPLICATE,
@@ -366,7 +366,7 @@ export class AccountService {
       salt,
       userId: shared.utils.calcUUID(),
       roles: [Roles.ANONYMOUS]
-    } as Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistent']>>, null>
+    } as Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>
     // Create user.
     await this.getPrisma(ctx).account.create({
       data: accountData
@@ -433,7 +433,7 @@ export class AccountService {
       })
     }
 
-    const foundAccount = await this.findInPersistent(ctx, { email: rectifiedCertification.email })
+    const foundAccount = await this.findInPersistentDB(ctx, { email: rectifiedCertification.email })
     if (!foundAccount) {
       return this.formatResponseData({
         code: AccountResponseDataCode.ERROR_CHANGE_PWD_ACCOUNT_NOT_FOUND,
@@ -450,7 +450,7 @@ export class AccountService {
 
     // Update.
     const finalPassword = encryptPassword(rectifiedPassword, foundAccount.salt)
-    const finalAccount = await this.updateOnPersistent(
+    const finalAccount = await this.updateOnPersistentDB(
       ctx,
       { email: rectifiedCertification.email },
       {
