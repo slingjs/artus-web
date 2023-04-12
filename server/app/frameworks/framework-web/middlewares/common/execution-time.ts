@@ -17,7 +17,12 @@ export const executionTimeMiddleware = function executionTimeMiddleware (): HTTP
     storage.set(elapsedTime + 'ms', 'elapsedTime')
 
     // Show time.
-    const { input: { params: { app } } } = ctx
-    app.logger.info('Pipeline elapsed', storage.get('elapsedTime'))
+    const { input: { params: { app, req } } } = ctx
+    app.logger.info(
+      'Pipeline elapsed %s, method: %s, path: %s',
+      storage.get('elapsedTime'),
+      req.method,
+      req.url
+    )
   }
 }
