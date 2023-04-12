@@ -95,8 +95,16 @@ export default class AccountController {
       return
     }
 
+    const relatedConfig = await this.accountService.getConfig(ctx)
     // @ts-ignore
-    await this.accountService.handleSessionCertificated(ctx, accountData)
+    await this.accountService.handleSessionCertificated(
+      ctx,
+      accountData,
+      {
+        enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
+        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
+      }
+    )
 
     data.status = status.OK
     data.body = this.accountService.formatResponseData(
@@ -151,8 +159,16 @@ export default class AccountController {
       return
     }
 
+    const relatedConfig = await this.accountService.getConfig(ctx)
     // @ts-ignore
-    await this.accountService.handleSessionCertificated(ctx, accountData)
+    await this.accountService.handleSessionCertificated(
+      ctx,
+      accountData,
+      {
+        enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
+        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
+      }
+    )
 
     data.status = status.OK
     data.body = this.accountService.formatResponseData({
@@ -169,7 +185,14 @@ export default class AccountController {
     const [ctx, _next] = args
     const { input: { params: { searchParams, res } }, output: { data } } = ctx
 
-    await this.accountService.signOut(ctx)
+    const relatedConfig = await this.accountService.getConfig(ctx)
+    await this.accountService.signOut(
+      ctx,
+      {
+        enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
+        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
+      }
+    )
 
     // If callback.
     const callback = filterXSS(_.get(searchParams, shared.constants.accountSignOutCallbackSearchParamKey) || '');
@@ -220,7 +243,15 @@ export default class AccountController {
       return
     }
 
-    await this.accountService.handleCertificatedSessionTampered(ctx)
+    const relatedConfig = await this.accountService.getConfig(ctx)
+    await this.accountService.handleCertificatedSessionTampered(
+      ctx,
+      {
+        enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
+        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
+      }
+    )
+
     data.status = status.OK
     data.body = this.accountService.formatResponseData({
       code: AccountResponseDataCode.SUCCESS_CHANGE_PWD_SUCCESS,

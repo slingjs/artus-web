@@ -4,7 +4,7 @@ import {
   PrismaPluginClientDataSourceItemInstance,
   PrismaPluginDataSourceName
 } from '../../../plugins/plugin-prisma/types'
-import { Roles } from '@sling/artus-web-shared/types'
+import { Roles, UserSession } from '@sling/artus-web-shared/types'
 
 export const ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE = 'ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE'
 export const ARTUS_FRAMEWORK_WEB_FILE_SERVICE = 'ARTUS_FRAMEWORK_WEB_FILE_SERVICE'
@@ -150,3 +150,5 @@ export interface AccountResponseData<AccountType = any> extends ResponseData {
     account: AccountType
   }
 }
+
+export type UserSessionRecords = Array<UserSession['_sessionId']>

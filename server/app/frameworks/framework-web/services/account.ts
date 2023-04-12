@@ -6,8 +6,9 @@ import {
   ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE,
   ARTUS_FRAMEWORK_WEB_USER_NAMESPACE,
-  DistributeCachePrismaInstance,
-  ResponseDataStatus
+  PersistentDBInstance,
+  ResponseDataStatus,
+  UserSessionRecords
 } from '../types'
 import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
 import { CacheService } from './cache'
@@ -34,6 +35,7 @@ import {
 } from '../utils/validation'
 import { PromiseFulfilledResult, Roles, UserSession } from '@sling/artus-web-shared/types'
 import { formatResponseData } from '../utils/services'
+import { AppConfig } from '../../../types'
 
 dayjs.extend(dayjsUtc)
 
@@ -42,6 +44,18 @@ dayjs.extend(dayjsUtc)
   scope: ScopeEnum.SINGLETON
 })
 export class AccountService {
+  async getConfig (ctx: HTTPMiddlewareContext) {
+    const { input: { params: { app } } } = ctx
+    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+    const cacheKey = 'framework.web.api.account.config'
+    let result = await cacheService.memory.get(cacheKey)
+    if (!result) {
+      result = _.get(app.config as AppConfig, 'framework.web.api.account')
+    }
+
+    return result
+  }
+
   private getPrisma (ctx: HTTPMiddlewareContext) {
     const { input: { params: { app } } } = ctx
 
@@ -113,7 +127,11 @@ export class AccountService {
   async handleSessionCertificated (
     ctx: HTTPMiddlewareContext,
     signedInAccount: Account,
-    options?: Partial<{ keepSignedIn: boolean }>
+    options?: Partial<{
+      keepSignedIn: boolean,
+      enableMultipleSignedInSessions: boolean,
+      enableRecordMultipleSignedInSessions: boolean
+    }>
   ) {
     const { input: { params: { res, req } } } = ctx
 
@@ -123,6 +141,50 @@ export class AccountService {
     const sessionKeyValue = ctxPreviousSessionKeyValue || sessionCookieValue || shared.utils.calcUUID()
     const session = await this.initSession(ctx, signedInAccount, { _sessionId: sessionKeyValue })
     await this.setCtxSession(ctx, session)
+
+    const enableMultipleSignedInSessions = _.get(options, 'enableMultipleSignedInSessions')
+    const enableRecordMultipleSignedInSessions = _.get(options, 'enableRecordMultipleSignedInSessions')
+    if (!enableMultipleSignedInSessions) {
+      const foundSessionRecordsString = await this.getDistributeSessionRecords(ctx, session.id)
+      let foundSessionRecords: UserSessionRecords | null = null
+      if (foundSessionRecordsString != null) {
+        try {
+          foundSessionRecords = JSON.parse(foundSessionRecordsString || '')
+        } catch (e) {}
+      }
+
+      // Stale all related sessions.
+      if (Array.isArray(foundSessionRecords)) {
+        await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(ctx, r)))
+
+        // Rest entirely..
+        foundSessionRecords = []
+      }
+
+      // Currently no need always to store the records.
+      // Only we didn't enable multiple signed-in sessions.
+      await this.setDistributeSessionRecords(
+        ctx,
+        session.id,
+        (foundSessionRecords || []).concat(sessionKeyValue)
+      )
+    } else {
+      if (enableRecordMultipleSignedInSessions) {
+        const foundSessionRecordsString = await this.getDistributeSessionRecords(ctx, session.id)
+        let foundSessionRecords: UserSessionRecords | null = null
+        if (foundSessionRecordsString != null) {
+          try {
+            foundSessionRecords = JSON.parse(foundSessionRecordsString || '')
+          } catch (e) {}
+        }
+
+        await this.setDistributeSessionRecords(
+          ctx,
+          session.id,
+          (foundSessionRecords || []).concat(sessionKeyValue)
+        )
+      }
+    }
 
     await this.setDistributeSession(ctx, sessionKeyValue, session)
 
@@ -144,7 +206,10 @@ export class AccountService {
     }
   }
 
-  async handleCertificatedSessionTampered (ctx: HTTPMiddlewareContext) {
+  async handleCertificatedSessionTampered (
+    ctx: HTTPMiddlewareContext,
+    options?: Partial<{ enableMultipleSignedInSessions: boolean, enableRecordMultipleSignedInSessions: boolean }>
+  ) {
     const { input: { params: { res, req } } } = ctx
 
     const ctxPreviousSession = await this.getCtxSession(ctx)
@@ -154,6 +219,57 @@ export class AccountService {
 
     if (!sessionKeyValue) {
       return
+    }
+
+    const enableMultipleSignedInSessions = _.get(options, 'enableMultipleSignedInSessions')
+    const enableRecordMultipleSignedInSessions = _.get(options, 'enableRecordMultipleSignedInSessions')
+    if (!enableMultipleSignedInSessions) {
+      let foundSession = ctxPreviousSession
+      try {
+        foundSession = JSON.parse(await this.getDistributeSession(ctx, sessionKeyValue) || '')
+      } catch (e) {}
+
+      if (foundSession) {
+        const foundSessionRecordsString = await this.getDistributeSessionRecords(ctx, foundSession.id)
+        if (foundSessionRecordsString != null) {
+          let foundSessionRecords: UserSessionRecords | null = null
+          try {
+            foundSessionRecords = JSON.parse(foundSessionRecordsString || '')
+          } catch (e) {}
+
+          // Stale all related sessions.
+          if (Array.isArray(foundSessionRecords)) {
+            await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(ctx, r)))
+          }
+
+          // Stale records.
+          await this.staleDistributeSessionRecords(ctx, foundSession.id)
+        }
+      }
+    } else {
+      if (enableRecordMultipleSignedInSessions) {
+        let foundSession = ctxPreviousSession
+        try {
+          foundSession = JSON.parse(await this.getDistributeSession(ctx, sessionKeyValue) || '')
+        } catch (e) {}
+
+        const foundSessionRecordsString = await this.getDistributeSessionRecords(ctx, foundSession.id)
+        let foundSessionRecords: UserSessionRecords | null = null
+        if (foundSessionRecordsString != null) {
+          try {
+            foundSessionRecords = JSON.parse(foundSessionRecordsString || '')
+          } catch (e) {}
+        }
+
+        if (Array.isArray(foundSessionRecords)) {
+          _.remove(foundSessionRecords!, r => r === sessionKeyValue)
+          await this.staleDistributeSession(ctx, sessionKeyValue)
+
+          foundSessionRecords!.length
+            ? await this.setDistributeSessionRecords(ctx, foundSession.id, foundSessionRecords)
+            : await this.staleDistributeSessionRecords(ctx, foundSession.id)
+        }
+      }
     }
 
     await this.staleCtxSession(ctx)
@@ -196,6 +312,13 @@ export class AccountService {
     return 'USER.' + sessionKeyValue
   }
 
+  calcDistributeCacheSessionRecordsKey (
+    _ctx: HTTPMiddlewareContext,
+    userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
+  ) {
+    return 'USER-SESSIONS.' + userId
+  }
+
   async getDistributeSession (ctx: HTTPMiddlewareContext, sessionKeyValue: string) {
     const { input: { params: { app } } } = ctx
 
@@ -203,6 +326,20 @@ export class AccountService {
 
     return cacheService.distribute.get(
       this.calcDistributeCacheSessionKey(ctx, sessionKeyValue),
+      { needRefresh: true, ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
+    )
+  }
+
+  async getDistributeSessionRecords (
+    ctx: HTTPMiddlewareContext,
+    userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
+  ) {
+    const { input: { params: { app } } } = ctx
+
+    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+
+    return cacheService.distribute.get(
+      this.calcDistributeCacheSessionRecordsKey(ctx, userId),
       { needRefresh: true, ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
     )
   }
@@ -219,12 +356,39 @@ export class AccountService {
     )
   }
 
+  async setDistributeSessionRecords (
+    ctx: HTTPMiddlewareContext,
+    userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId'],
+    sessionRecords: UserSessionRecords
+  ) {
+    const { input: { params: { app } } } = ctx
+
+    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+
+    return cacheService.distribute.set(
+      this.calcDistributeCacheSessionRecordsKey(ctx, userId),
+      JSON.stringify(sessionRecords),
+      { ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
+    )
+  }
+
   async staleDistributeSession (ctx: HTTPMiddlewareContext, sessionKeyValue: string) {
     const { input: { params: { app } } } = ctx
 
     const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
     return cacheService.distribute.stale(this.calcDistributeCacheSessionKey(ctx, sessionKeyValue))
+  }
+
+  async staleDistributeSessionRecords (
+    ctx: HTTPMiddlewareContext,
+    userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
+  ) {
+    const { input: { params: { app } } } = ctx
+
+    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+
+    return cacheService.distribute.stale(this.calcDistributeCacheSessionRecordsKey(ctx, userId))
   }
 
   async findInPersistentDB (ctx: HTTPMiddlewareContext, condition: Pick<Account, 'email'>) {
@@ -245,7 +409,7 @@ export class AccountService {
   async signIn (
     ctx: HTTPMiddlewareContext,
     certification: Pick<Account, 'email' | 'password'>,
-    options?: Partial<{ passwordPreEncrypt: boolean }>
+    options?: Partial<{ passwordPreEncrypt: boolean, enableMultipleSignedInSessions: boolean }>
   ) {
     const password = _.get(certification, 'password')
     if (!(password && typeof password === 'string')) {
@@ -310,7 +474,7 @@ export class AccountService {
   async signUp (
     ctx: HTTPMiddlewareContext,
     registration: Pick<Account, 'email' | 'name' | 'password'>,
-    options?: Partial<{ passwordPreEncrypt: boolean, keepSignIn: boolean }>
+    options?: Partial<{ passwordPreEncrypt: boolean, enableMultipleSignedInSessions: boolean }>
   ) {
     const password = _.get(registration, 'password')
     if (!(password && typeof password === 'string')) {
@@ -381,8 +545,8 @@ export class AccountService {
     )
   }
 
-  async signOut (ctx: HTTPMiddlewareContext) {
-    return this.handleCertificatedSessionTampered(ctx)
+  async signOut (...args: Parameters<AccountService['handleCertificatedSessionTampered']>) {
+    return this.handleCertificatedSessionTampered(...args)
   }
 
   async changePwd (

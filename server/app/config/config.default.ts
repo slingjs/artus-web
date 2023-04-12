@@ -53,7 +53,17 @@ export default {
   framework: {
     web: {
       cacheDir: path.resolve(cacheDir, 'frameworks/web'),
-      distDir
+      distDir,
+      api: {
+        account: {
+          // Should one account sign in multiple time at the mean time that last session didn't expire?
+          enableMultipleSignedInSessions: !!(process.env.WEB_API_ACCOUNT_ENABLE_MULTIPLE_SIGNED_IN_SESSION ?? false),
+          enableRecordMultipleSignedInSessions: !!(
+            process.env.WEB_API_ACCOUNT_ENABLE_RECORDS_MULTIPLE_SIGNED_IN_SESSIONS ??
+            false
+          )
+        }
+      }
     }
   }
 } as AppConfig

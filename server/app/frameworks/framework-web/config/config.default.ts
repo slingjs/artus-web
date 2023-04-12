@@ -44,6 +44,13 @@ export default {
     }
   },
   framework: {
-    web: {}
+    web: {
+      api: {
+        account: {
+          enableMultipleSignedInSessions: true,
+          enableRecordMultipleSignedInSessions: false
+        }
+      }
+    }
   }
 } as AppConfig
