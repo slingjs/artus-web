@@ -6,7 +6,7 @@ import { PageService } from '../services/page'
 import shared from '@sling/artus-web-shared'
 import { initUser } from '../middlewares/business/account'
 
-@HTTPController('', -1)
+@HTTPController('', { order: -1 })
 @Use(initUser())
 export class PageController {
   @Inject(ARTUS_FRAMEWORK_WEB_PAGE_SERVICE)
