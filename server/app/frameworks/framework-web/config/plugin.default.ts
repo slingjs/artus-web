@@ -14,6 +14,10 @@ export default {
     enable: true,
     path: path.resolve(__dirname, '../../../plugins/plugin-cache')
   },
+  websocket: {
+    enable: true,
+    path: path.resolve(__dirname, '../../../plugins/plugin-websocket')
+  },
   prisma: {
     enable: true,
     path: path.resolve(__dirname, '../../../plugins/plugin-prisma')

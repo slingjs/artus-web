@@ -47,6 +47,10 @@ export default {
           }
         }
       }
+    },
+    websocket: {
+      host: process.env.WEBSOCKET_HOST || '0.0.0.0',
+      port: +process.env.WEBSOCKET_HOST! || shared.constants.SERVER_PORT
     }
   },
 

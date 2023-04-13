@@ -57,6 +57,7 @@
     "lru-cache": "^8.0.4",
     "reflect-metadata": "^0.1.13",
     "send": "^0.18.0",
+    "ws": "^8.13.0",
     "xss": "^1.0.14"
   },
   "devDependencies": {
@@ -67,6 +68,7 @@
     "@types/glob": "^8.1.0",
     "@types/node": "^18.14.2",
     "@types/send": "^0.17.1",
+    "@types/ws": "^8.5.4",
     "glob": "^9.3.4",
     "nodemon": "^2.0.22",
     "prisma": "^4.12.0",

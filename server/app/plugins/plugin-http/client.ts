@@ -93,10 +93,13 @@ export class PluginHTTPClient {
       this.router.lookup(req, res)
     })
 
-    const { host, port } = config
-    this.server.listen(port, host, () => {
-      // @ts-ignore
-      this.app.logger.info(`Server listening on: ${ url.format({ hostname: host, port, protocol: 'http' }) }`)
+    await new Promise(resolve => {
+      const { host, port } = config
+      this.server.listen(port, host, () => {
+        // @ts-ignore
+        this.app.logger.info(`Server listening on: ${ url.format({ hostname: host, port, protocol: 'http' }) }`)
+        resolve(this.server)
+      })
     })
 
     return this.server
