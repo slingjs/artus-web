@@ -112,10 +112,11 @@ export class PluginHTTPClient {
     routeMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata,
     handler: HTTPMiddleware
   ) {
+    const trigger = this.app.container.get(ARTUS_PLUGIN_HTTP_TRIGGER) as HTTPTrigger
+    const app = this.app
+
     for (const routeMetadata of routeMetadataList) {
       const routePath = (controllerMetadata.prefix ?? '/') + routeMetadata.path
-      const trigger = this.app.container.get(ARTUS_PLUGIN_HTTP_TRIGGER) as HTTPTrigger
-      const app = this.app
       this.router.on(
         routeMetadata.method,
         routePath,
