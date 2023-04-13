@@ -4,16 +4,16 @@ import Router from 'find-my-way'
 import {
   ARTUS_PLUGIN_HTTP_CLIENT,
   ARTUS_PLUGIN_HTTP_TRIGGER,
-  CONTROLLER_METADATA,
+  HTTP_CONTROLLER_METADATA,
   HTTPConfig,
   HTTPControllerMetadata,
   HTTPMiddleware,
   HTTPMiddlewareContext,
   HTTPRouteMetadata,
   HTTPRouteMiddlewaresMetadata,
-  ROUTER_METADATA,
-  WEB_CONTROLLER_TAG,
-  WEB_MIDDLEWARE_METADATA
+  HTTP_ROUTER_METADATA,
+  HTTP_CONTROLLER_TAG,
+  HTTP_MIDDLEWARE_METADATA
 } from './types'
 import url from 'url'
 import { HTTPTrigger } from './trigger'
@@ -37,9 +37,9 @@ export class PluginHTTPClient {
   // Handle on retrieving registered route metadata.
   public async init (config: HTTPConfig) {
     const controllerClazzList = _.orderBy(
-      this.app.container.getInjectableByTag(WEB_CONTROLLER_TAG),
+      this.app.container.getInjectableByTag(HTTP_CONTROLLER_TAG),
       function(controllerClazz) {
-        const controllerMetadata = Reflect.getMetadata(CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
+        const controllerMetadata = Reflect.getMetadata(HTTP_CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
 
         return controllerMetadata.order
       },
@@ -48,12 +48,12 @@ export class PluginHTTPClient {
 
     for (const controllerClazz of controllerClazzList) {
       // Retrieve the registered metadata from the controller's generator..
-      const controllerMetadata = Reflect.getMetadata(CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
+      const controllerMetadata = Reflect.getMetadata(HTTP_CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
       const controller = this.app.container.get(controllerClazz) as FunctionConstructor
       // Controller Middlewares.
       const controllerMiddlewaresMetadata = (
         Reflect.getMetadata(
-          WEB_MIDDLEWARE_METADATA,
+          HTTP_MIDDLEWARE_METADATA,
           controllerClazz
         ) ?? []
       ) as HTTPRouteMiddlewaresMetadata
@@ -64,7 +64,7 @@ export class PluginHTTPClient {
         const handlerDescriptor = handlerDescriptorList[key]
 
         const routeMetadataList = (
-          Reflect.getMetadata(ROUTER_METADATA, handlerDescriptor.value) ?? []
+          Reflect.getMetadata(HTTP_ROUTER_METADATA, handlerDescriptor.value) ?? []
         ) as HTTPRouteMetadata
         if (!routeMetadataList.length) {
           continue
@@ -73,7 +73,7 @@ export class PluginHTTPClient {
         // Route Middlewares.
         const routeMiddlewaresMetadata = (
           Reflect.getMetadata(
-            WEB_MIDDLEWARE_METADATA,
+            HTTP_MIDDLEWARE_METADATA,
             handlerDescriptor.value
           ) ?? []
         ) as HTTPRouteMiddlewaresMetadata

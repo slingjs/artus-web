@@ -1,10 +1,10 @@
 import { MiddlewareInput } from '@artus/pipeline/src/base'
 import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
 
-export const ROUTER_METADATA = Symbol.for('ROUTER_METADATA')
-export const CONTROLLER_METADATA = Symbol.for('CONTROLLER_METADATA')
-export const WEB_MIDDLEWARE_METADATA = Symbol.for('WEB_MIDDLEWARE_METADATA')
-export const WEB_CONTROLLER_TAG = 'WEB_CONTROLLER_TAG'
+export const HTTP_ROUTER_METADATA = 'HTTP_ROUTER_METADATA'
+export const HTTP_CONTROLLER_METADATA = 'HTTP_CONTROLLER_METADATA'
+export const HTTP_MIDDLEWARE_METADATA = 'HTTP_MIDDLEWARE_METADATA'
+export const HTTP_CONTROLLER_TAG = 'HTTP_CONTROLLER_TAG'
 
 export enum HTTPMethod {
   GET = 'GET',

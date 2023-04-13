@@ -1,15 +1,15 @@
 import { addTag, Injectable, ScopeEnum } from '@artus/core'
 import {
-  CONTROLLER_METADATA,
+  HTTP_CONTROLLER_METADATA,
   HTTPControllerMetadata,
   HTTPDecoratorOptions,
   HTTPMethod,
   HTTPMethodDecoratorOptions,
   HTTPRouteMetadata,
   HTTPRouteMiddlewaresMetadata,
-  ROUTER_METADATA,
-  WEB_CONTROLLER_TAG,
-  WEB_MIDDLEWARE_METADATA
+  HTTP_ROUTER_METADATA,
+  HTTP_CONTROLLER_TAG,
+  HTTP_MIDDLEWARE_METADATA
 } from './types'
 import { Middleware, MiddlewareInput } from '@artus/pipeline/src/base'
 
@@ -20,8 +20,8 @@ export function HTTPController (prefix: string = '', order: number = 0): ClassDe
       order
     } as HTTPControllerMetadata
 
-    Reflect.defineMetadata(CONTROLLER_METADATA, controllerMetaData, target)
-    addTag(WEB_CONTROLLER_TAG, target)
+    Reflect.defineMetadata(HTTP_CONTROLLER_METADATA, controllerMetaData, target)
+    addTag(HTTP_CONTROLLER_TAG, target)
     Injectable({ scope: ScopeEnum.EXECUTION })(target)
   }
 }
@@ -32,10 +32,10 @@ export function Get (path: string = '', options: Partial<HTTPDecoratorOptions> =
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<Middleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.GET, options })
 
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -45,10 +45,10 @@ export function Post (path: string = '', options: Partial<HTTPDecoratorOptions> 
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<Middleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.POST, options })
 
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -58,10 +58,10 @@ export function Delete (path: string = '', options: Partial<HTTPDecoratorOptions
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<Middleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.DELETE, options })
 
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -71,10 +71,10 @@ export function Put (path: string = '', options: Partial<HTTPDecoratorOptions> =
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<Middleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.PUT, options })
 
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -84,10 +84,10 @@ export function Patch (path: string = '', options: Partial<HTTPDecoratorOptions>
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<Middleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.PATCH, options })
 
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -97,10 +97,10 @@ export function Head (path: string = '', options: Partial<HTTPDecoratorOptions> 
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<Middleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.HEAD, options })
 
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -110,10 +110,10 @@ export function Options (path: string = '', options: Partial<HTTPDecoratorOption
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<Middleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.OPTIONS, options })
 
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -126,7 +126,7 @@ export function All (path: string = '', options: Partial<HTTPDecoratorOptions> =
     const routeMetadataList = [
       { path, method: Object.values(HTTPMethod), options } // All support methods.
     ] as HTTPRouteMetadata
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -138,7 +138,7 @@ export function HTTPRoute (options: HTTPMethodDecoratorOptions) {
   ) {
     const routeMetadataList = ([] as HTTPRouteMetadata).concat(options)
 
-    Reflect.defineMetadata(ROUTER_METADATA, routeMetadataList, descriptor.value!)
+    Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
@@ -151,23 +151,23 @@ export function Use (middlewares: MiddlewareInput) {
     // Class Decorator.
     if (arguments.length === 1) {
       const clazzRouteMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata = Reflect.getMetadata(
-        WEB_MIDDLEWARE_METADATA,
+        HTTP_MIDDLEWARE_METADATA,
         target
       ) ?? []
 
       clazzRouteMiddlewaresMetadata.push(middlewares)
-      Reflect.defineMetadata(WEB_MIDDLEWARE_METADATA, clazzRouteMiddlewaresMetadata, target)
+      Reflect.defineMetadata(HTTP_MIDDLEWARE_METADATA, clazzRouteMiddlewaresMetadata, target)
 
       return
     }
 
     // Method Decorator.
     const methodRouteMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata = Reflect.getMetadata(
-      WEB_MIDDLEWARE_METADATA,
+      HTTP_MIDDLEWARE_METADATA,
       descriptor!.value!
     ) ?? []
 
     methodRouteMiddlewaresMetadata.push(middlewares)
-    Reflect.defineMetadata(WEB_MIDDLEWARE_METADATA, methodRouteMiddlewaresMetadata, descriptor!.value!)
+    Reflect.defineMetadata(HTTP_MIDDLEWARE_METADATA, methodRouteMiddlewaresMetadata, descriptor!.value!)
   }
 }

@@ -8,7 +8,7 @@ import {
 } from '@artus/core'
 import { ARTUS_PLUGIN_HTTP_CLIENT, HTTPConfig } from './types'
 import { PluginHTTPClient } from './client'
-import { AppConfig } from '../../types'
+import { AppConfig, ARTUS_WEB_SHARED_HTTP_SERVER } from '../../types'
 import { filterPluginConfig } from '../../utils/plugins'
 
 @LifecycleHookUnit()
@@ -23,6 +23,12 @@ export default class HTTPLifecycle implements ApplicationLifecycle {
 
     // const trigger = this.app.container.get(ARTUS_PLUGIN_HTTP_TRIGGER) as HTTPTrigger
     // await trigger.use(executionTimeMiddleware())
+
+    // Register shared http server.
+    this.app.container.set({
+      id: ARTUS_WEB_SHARED_HTTP_SERVER,
+      value: client.getServer()
+    })
   }
 
   @LifecycleHook()
