@@ -12,8 +12,6 @@ export const ARTUS_PLUGIN_HTTP_CLIENT = 'ARTUS_PLUGIN_HTTP_CLIENT'
 export const ARTUS_PLUGIN_HTTP_TRIGGER = 'ARTUS_PLUGIN_HTTP_TRIGGER'
 
 export type HTTPHandler = Handler<HTTPVersion.V1>
-export type HTTPHandlerAsync = AsyncGenerator<HTTPHandler>
-export type HTTPHandlerUnit = HTTPHandlerAsync | HTTPHandler
 
 export type HTTPHandlerArguments = Parameters<HTTPHandler>
 

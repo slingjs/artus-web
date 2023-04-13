@@ -39,4 +39,4 @@ export type HTTPRouteMetadata = Array<{
 
 export type HTTPMethodRouteDecoratorOptions = ArrayOrPrimitive<HTTPRouteMetadata>
 
-export type HTTPRouteMiddlewaresMetadata = Array<HTTPMiddleware>
+export type HTTPRouteMiddlewaresMetadata = Array<ArrayOrPrimitive<HTTPMiddleware>>
