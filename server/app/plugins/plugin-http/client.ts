@@ -22,6 +22,7 @@ import _ from 'lodash'
 import bodyParser from 'body-parser'
 import { HTTP_DEFAULT_BODY_PARSER_OPTIONS, HTTP_DEFAULT_BODY_PARSER_TYPE } from './constants'
 import shared from '@sling/artus-web-shared'
+import { trimEventPathRegExp } from './constants'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_CLIENT,
@@ -119,7 +120,9 @@ export class PluginHTTPClient {
     const app = this.app
 
     for (const routeMetadata of routeMetadataList) {
-      const routePath = (controllerMetadata.prefix ?? '/') + routeMetadata.path
+      const routePath = (
+        (controllerMetadata.prefix ?? '/') + routeMetadata.path
+      ).replace(trimEventPathRegExp, '') || '/'
       this.router.on(
         routeMetadata.method,
         routePath,
