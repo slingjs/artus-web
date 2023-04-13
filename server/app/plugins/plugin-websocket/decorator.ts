@@ -63,7 +63,7 @@ export function WebsocketUse (middlewares: ArrayOrPrimitive<WebsocketMiddleware>
       clazzControllerMiddlewaresMetadata.push(middlewares)
       Reflect.defineMetadata(WEBSOCKET_MIDDLEWARE_METADATA, clazzControllerMiddlewaresMetadata, target)
 
-      return;
+      return
     }
 
     // Method Decorator.

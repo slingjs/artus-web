@@ -1,5 +1,10 @@
 import { Injectable, ScopeEnum, Trigger } from '@artus/core'
-import { ARTUS_PLUGIN_WEBSOCKET_TRIGGER, WebsocketMiddleware } from './types'
+import {
+  ARTUS_PLUGIN_WEBSOCKET_TRIGGER,
+  WebsocketEventResponseBody,
+  WebsocketMiddleware,
+  WebsocketMiddlewareContext
+} from './types'
 import { Pipeline } from '@artus/pipeline'
 
 @Injectable({
@@ -15,22 +20,16 @@ export class WebsocketTrigger extends Trigger {
     const websocketTriggerRun: WebsocketMiddleware = async (ctx, next) => {
       await next()
 
-      const { output: { data: { __modified__: modified } } } = ctx
-
-      if (this.handlePipeline && !modified) {
+      if (this.handlePipeline) {
         await this.handlePipeline.run(ctx)
       }
-
-      await this.response(ctx, next)
     }
 
     this.use(websocketTriggerRun)
   }
 
-  async response (...args: Parameters<WebsocketMiddleware>) {
-    const [ctx, _next] = args
-
-    const { input: { params: { socket } }, output: { data: { body } } } = ctx
+  async response (ctx: WebsocketMiddlewareContext, body: WebsocketEventResponseBody) {
+    const { input: { params: { socket } } } = ctx
 
     if (Buffer.isBuffer(body) || typeof body === 'string') {
       socket.send(body)

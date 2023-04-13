@@ -1,5 +1,5 @@
 import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
-import { WebsocketMiddleware } from './client'
+import { WebSocketEventNames, WebsocketMiddleware } from './client'
 
 export const WEBSOCKET_CONTROLLER_METADATA = 'WEBSOCKET_CONTROLLER_METADATA'
 export const WEBSOCKET_EVENT_METADATA = 'WEBSOCKET_EVENT_METADATA'
@@ -21,7 +21,7 @@ export type WebsocketEventDecoratorOptions = {
 }
 
 export interface WebsocketEventMetadata {
-  eventName: string
+  eventName: WebSocketEventNames
   options?: Partial<WebsocketEventDecoratorOptions>
 }
 

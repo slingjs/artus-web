@@ -21,6 +21,7 @@ import url from 'url'
 import { WebsocketTrigger } from './trigger'
 import { Input, Output, Pipeline } from '@artus/pipeline'
 import type { AddressInfo } from 'net'
+import { trimEventPathRegExp } from './constants'
 
 @Injectable({
   id: ARTUS_PLUGIN_WEBSOCKET_CLIENT,
@@ -55,7 +56,7 @@ export class WebsocketClient {
     const address = server.address() as AddressInfo
     // @ts-ignore
     this.app.logger.info(
-      `Server listening on: ${ url.format({ hostname: address.address, port: address.port, protocol: 'ws' }) }`
+      `Websocket server listening on: ${ url.format({ hostname: address.address, port: address.port, protocol: 'ws' }) }`
     )
 
     this.wsServer = new ws.WebSocketServer({ server })
@@ -117,7 +118,9 @@ export class WebsocketClient {
         ) ?? []
 
         // Get the registered data with the target path.
-        const eventPath = (controllerMetadata.prefix ?? '/') + (_.get(eventMetadata, 'options.path') ?? '')
+        const eventPath = (
+          (controllerMetadata.prefix ?? '/') + (_.get(eventMetadata, 'options.path') ?? '')
+        ).replace(trimEventPathRegExp, '') || '/'
         let eventPathRuleItemWithEventPath = eventRules.get(eventPath)
         // Non existent -> Initialize.
         if (!(eventPathRuleItemWithEventPath instanceof Map)) {
@@ -127,16 +130,28 @@ export class WebsocketClient {
 
         // Get the registered data with the target event name.
         const eventName = eventMetadata.eventName
+        let eventPathRuleItemWithEventName = eventPathRuleItemWithEventPath.get(eventName)
+        if (!eventPathRuleItemWithEventName) {
+          eventPathRuleItemWithEventName = { event: eventName, metadata: [] }
+          eventPathRuleItemWithEventPath.set(eventName, eventPathRuleItemWithEventName)
+        }
+
         // Register.
-        eventPathRuleItemWithEventPath.set(
-          eventName,
-          {
-            handler: controller[key].bind(controller),
-            middlewares: controllerMiddlewaresMetadata.concat(eventMiddlewaresMetadata),
-            options: eventMetadata.options,
-            event: eventName
-          }
-        )
+        eventPathRuleItemWithEventName.metadata.push({
+          handler: controller[key].bind(controller),
+          middlewares: controllerMiddlewaresMetadata.concat(eventMiddlewaresMetadata),
+          options: eventMetadata.options
+        })
+
+        // Order.
+        if (eventPathRuleItemWithEventName.metadata.length > 1) {
+          eventPathRuleItemWithEventName.metadata = _.orderBy(
+            eventPathRuleItemWithEventName.metadata,
+            function(metadata) {
+              return _.get(metadata, 'options.order') ?? 0
+            }
+          )
+        }
       }
     }
 
@@ -170,37 +185,31 @@ export class WebsocketClient {
           return function noop () {}
         }
 
-        return async (...args: any[]) => {
+        const dispatchEvent = async (...args: any[]) => {
           const input = new Input() as WebsocketMiddlewareContext['input']
           input.params = {
             app,
             req,
             socket,
+            trigger,
             socketServer: this.wsServer,
             arguments: args
           }
 
           const output = new Output() as WebsocketMiddlewareContext['output']
-          output.data = {
-            get body () {
-              return this.__body__
-            },
-            set body (val: any) {
-              this.__body__ = val
-              this.__modified__ = true
-            },
-            __body__: undefined,
-            __modified__: false
-          }
+          output.data = {}
 
           const ctx = await trigger.initContext(input, output)
           const pipeline = new Pipeline()
 
-          for (const middleware of matchedEventRuleItemData.middlewares) {
-            pipeline.use(middleware)
+          for (const metadata of matchedEventRuleItemData.metadata) {
+            for (const middleware of metadata.middlewares) {
+              await pipeline.use(middleware)
+            }
+
+            pipeline.use(metadata.handler)
           }
 
-          pipeline.use(matchedEventRuleItemData.handler)
           trigger.setHandlePipeline(pipeline)
 
           await trigger.startPipeline(ctx)
@@ -211,8 +220,11 @@ export class WebsocketClient {
               trigger.setHandlePipeline(null)
             })
         }
+
+        return dispatchEvent
       }
 
+      // Dispatch connection events.
       dispatchEvent(WebSocketEventNames.CONNECTION)()
 
       // Observe other events.
