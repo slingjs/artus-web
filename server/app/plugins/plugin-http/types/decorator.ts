@@ -1,5 +1,5 @@
-import { MiddlewareInput } from '@artus/pipeline/src/base'
 import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
+import { HTTPMiddleware } from './client'
 
 export const HTTP_ROUTER_METADATA = 'HTTP_ROUTER_METADATA'
 export const HTTP_CONTROLLER_METADATA = 'HTTP_CONTROLLER_METADATA'
@@ -39,4 +39,4 @@ export type HTTPRouteMetadata = Array<{
 
 export type HTTPMethodRouteDecoratorOptions = ArrayOrPrimitive<HTTPRouteMetadata>
 
-export type HTTPRouteMiddlewaresMetadata = Array<MiddlewareInput>
+export type HTTPRouteMiddlewaresMetadata = Array<HTTPMiddleware>

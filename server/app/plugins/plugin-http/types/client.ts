@@ -1,6 +1,5 @@
 import { Handler, HTTPVersion } from 'find-my-way'
-import { BaseContext, Middleware } from '@artus/pipeline'
-import { BaseInput, BaseOutput } from '@artus/pipeline/src/types'
+import { BaseContext, Middleware, BaseInput, BaseOutput } from '@artus/pipeline'
 import { Stream } from 'stream'
 import { ArtusApplication } from '@artus/core'
 
