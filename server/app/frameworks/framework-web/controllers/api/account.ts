@@ -16,7 +16,7 @@ import shared from '@sling/artus-web-shared'
   executionTimeMiddleware(),
   initUser({ bypassFilter: bypassInitUserMiddlewareFilter })
 ])
-export default class AccountController {
+export default class AccountApiController {
   @Inject(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE)
   accountService: AccountService
 
