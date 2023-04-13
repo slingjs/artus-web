@@ -22,7 +22,7 @@ export default class HTTPLifecycle implements ApplicationLifecycle {
     await client.init(filterPluginConfig((this.app.config as AppConfig).plugin.http as HTTPConfig) as AppConfig['plugin']['http'])
 
     // const trigger = this.app.container.get(ARTUS_PLUGIN_HTTP_TRIGGER) as HTTPTrigger
-    // await trigger.use(executionTimeMiddleware())
+    // await trigger.use(httpExecutionTimeMiddleware())
 
     // Register shared http server.
     this.app.container.set({

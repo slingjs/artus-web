@@ -4,7 +4,7 @@ import { AccountService } from '../../services/account'
 import { AccountResponseDataCode, ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, ResponseDataStatus } from '../../types'
 import { initUser } from '../../middlewares/business/account'
 import { HTTPMethod, HTTPMiddleware } from '../../../../plugins/plugin-http/types'
-import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
+import { httpExecutionTimeMiddleware } from '../../middlewares/common/execution-time'
 import _ from 'lodash'
 import status from 'http-status'
 import { bypassInitUserMiddlewareFilter } from '../../utils/business/account'
@@ -13,7 +13,7 @@ import shared from '@sling/artus-web-shared'
 
 @HTTPController('/api/account')
 @Use([
-  executionTimeMiddleware(),
+  httpExecutionTimeMiddleware(),
   initUser({ bypassFilter: bypassInitUserMiddlewareFilter })
 ])
 export default class AccountApiController {
