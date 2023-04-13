@@ -15,7 +15,7 @@ import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
 
 export function WebsocketController (
   prefix: string,
-  options: Partial<WebsocketControllerDecoratorOptions> = {}
+  options: Partial<WebsocketControllerDecoratorOptions> = { order: 0 }
 ): ClassDecorator {
   return function(target) {
     const controllerMetadata = {

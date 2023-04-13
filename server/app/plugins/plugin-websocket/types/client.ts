@@ -11,7 +11,14 @@ export const ARTUS_PLUGIN_WEBSOCKET_TRIGGER = 'ARTUS_PLUGIN_WEBSOCKET_TRIGGER'
 
 export enum WebSocketEventNames {
   CONNECTION = 'connection',
-  MESSAGE = 'message'
+  MESSAGE = 'message',
+  PING = 'ping',
+  PONG = 'pong',
+  UNEXPECTED_RESPONSE = 'unexpected-response',
+  OPEN = 'open',
+  UPGRADE = 'upgrade',
+  ERROR = 'error',
+  CLOSE = 'close'
 }
 
 export interface WebsocketConfig {
@@ -25,7 +32,8 @@ export type WebsocketHandlerArgumentsRecord = {
   socket: ws.WebSocket,
   socketServer: ws.WebSocketServer,
   arguments: any[],
-  trigger: WebsocketTrigger
+  trigger: WebsocketTrigger,
+  eventName: WebsocketEventMetadata['eventName']
 }
 
 export type WebsocketHandlerOutputData = {}
@@ -43,7 +51,10 @@ export type WebsocketEventRuleItemData = {
     handler: WebsocketMiddleware,
     options: WebsocketEventMetadata['options'],
     middlewares: WebsocketEventMiddlewaresMetadata
-  }>
+  }>,
+  global: {
+    middlewares: WebsocketEventMiddlewaresMetadata
+  }
 }
 
 export type WebsocketEventRuleItem = Map<WebsocketEventRuleItemData['event'], WebsocketEventRuleItemData>

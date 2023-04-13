@@ -34,6 +34,11 @@ export class WebsocketClient {
   private server: http.Server
   private wsServer: ws.WebSocketServer
 
+  get supportedSocketEventNames () {
+    return Object.values(WebSocketEventNames)
+      .filter(eventName => eventName !== WebSocketEventNames.CONNECTION)
+  }
+
   async init (config: WebsocketConfig, options?: Partial<{ existedServer: http.Server }>) {
     const serverListen = () => {
       const { host, port } = config
@@ -76,7 +81,7 @@ export class WebsocketClient {
     const eventRules: WebsocketEventRules = new Map()
 
     const wsControllerClazzList = _.orderBy(
-      this.app.container.getByTag(WEBSOCKET_CONTROLLER_TAG) as Array<FunctionConstructor>,
+      this.app.container.getInjectableByTag(WEBSOCKET_CONTROLLER_TAG) as Array<FunctionConstructor>,
       function(controllerClazz) {
         const controllerMetadata = Reflect.getMetadata(
           WEBSOCKET_CONTROLLER_METADATA,
@@ -132,14 +137,20 @@ export class WebsocketClient {
         const eventName = eventMetadata.eventName
         let eventPathRuleItemWithEventName = eventPathRuleItemWithEventPath.get(eventName)
         if (!eventPathRuleItemWithEventName) {
-          eventPathRuleItemWithEventName = { event: eventName, metadata: [] }
+          eventPathRuleItemWithEventName = {
+            event: eventName,
+            metadata: [],
+            global: {
+              middlewares: controllerMiddlewaresMetadata
+            }
+          }
           eventPathRuleItemWithEventPath.set(eventName, eventPathRuleItemWithEventName)
         }
 
         // Register.
         eventPathRuleItemWithEventName.metadata.push({
           handler: controller[key].bind(controller),
-          middlewares: controllerMiddlewaresMetadata.concat(eventMiddlewaresMetadata),
+          middlewares: eventMiddlewaresMetadata,
           options: eventMetadata.options
         })
 
@@ -164,22 +175,34 @@ export class WebsocketClient {
     const trigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
     this.wsServer.on('connection', async (socket, req) => {
+      const handleOnException = function(message: string = 'Something went wrong.') {
+        socket.send(message)
+        socket.send('Socket shutting down...')
+        socket.close()
+      }
+
       const reqUrl = req.url
       if (reqUrl == null) {
+        handleOnException()
         return
       }
 
       const reqUrlObj = url.parse(reqUrl || '/')
       if (!reqUrlObj.path) {
+        handleOnException()
         return
       }
 
       const matchedEventRuleItem = eventRules.get(reqUrlObj.path)
       if (!(matchedEventRuleItem && matchedEventRuleItem.size)) {
+        handleOnException(`No registered handler for such path: ${ reqUrlObj.path }`)
         return
       }
 
-      const dispatchEvent = (eventName: WebsocketEventMetadata['eventName']) => {
+      const enabledSocketEventNames = (Array.from(matchedEventRuleItem.keys()) as typeof this.supportedSocketEventNames)
+        .filter(eventName => this.supportedSocketEventNames.includes(eventName))
+
+      const dispatchEventGenerator = (eventName: WebsocketEventMetadata['eventName']) => {
         const matchedEventRuleItemData = matchedEventRuleItem.get(eventName)
         if (!(matchedEventRuleItemData)) {
           return function noop () {}
@@ -193,7 +216,8 @@ export class WebsocketClient {
             socket,
             trigger,
             socketServer: this.wsServer,
-            arguments: args
+            arguments: args,
+            eventName
           }
 
           const output = new Output() as WebsocketMiddlewareContext['output']
@@ -201,6 +225,10 @@ export class WebsocketClient {
 
           const ctx = await trigger.initContext(input, output)
           const pipeline = new Pipeline()
+
+          for (const globalMiddleware of matchedEventRuleItemData.global.middlewares) {
+            await pipeline.use(globalMiddleware)
+          }
 
           for (const metadata of matchedEventRuleItemData.metadata) {
             for (const middleware of metadata.middlewares) {
@@ -225,14 +253,12 @@ export class WebsocketClient {
       }
 
       // Dispatch connection events.
-      dispatchEvent(WebSocketEventNames.CONNECTION)()
+      dispatchEventGenerator(WebSocketEventNames.CONNECTION)()
 
-      // Observe other events.
-      Object.values(WebSocketEventNames)
-        .filter(eventName => eventName !== WebSocketEventNames.CONNECTION)
-        .forEach(eventName => {
-          this.wsServer.on(eventName, dispatchEvent(eventName))
-        })
+      // Observe socket events.
+      enabledSocketEventNames.forEach(eventName => {
+        socket.on(eventName, dispatchEventGenerator(eventName))
+      })
     })
   }
 }
