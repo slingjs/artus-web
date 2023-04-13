@@ -220,6 +220,9 @@ importers:
       typescript:
         specifier: ^5.0.2
         version: 5.0.2
+      ws:
+        specifier: ^8.13.0
+        version: 8.13.0
       xss:
         specifier: ^1.0.14
         version: 1.0.14
@@ -242,6 +245,9 @@ importers:
       '@types/send':
         specifier: ^0.17.1
         version: 0.17.1
+      '@types/ws':
+        specifier: ^8.5.4
+        version: 8.5.4
       glob:
         specifier: ^9.3.4
         version: 9.3.4
@@ -1158,6 +1164,12 @@ packages:
 
   /@types/uuid@9.0.1:
     resolution: {integrity: sha512-rFT3ak0/2trgvp4yYZo5iKFEPsET7vKydKF+VRCxlQ9bpheehyAJH89dAkaLEq/j/RZXJIqcgsmPJKUP1Z28HA==}
+    dev: true
+
+  /@types/ws@8.5.4:
+    resolution: {integrity: sha512-zdQDHKUgcX/zBc4GrwsE/7dVdAD8JR4EuiAXiiUhhfyIJXXb2+PrGshFyeXWQPMmmZ2XxgaqclgpIC7eTXc1mg==}
+    dependencies:
+      '@types/node': 18.14.2
     dev: true
 
   /@typescript-eslint/eslint-plugin@5.57.0(@typescript-eslint/parser@5.57.0)(eslint@8.34.0)(typescript@5.0.2):
@@ -4745,7 +4757,6 @@ packages:
         optional: true
       utf-8-validate:
         optional: true
-    dev: true
 
   /xml-name-validator@4.0.0:
     resolution: {integrity: sha512-ICP2e+jsHvAj2E2lIHxa5tjXRlKDJo4IdvPvCXbXQGdzSfmSpNVyIKMvoZHjDY9DP0zV17iI85o90vRFXNccRw==}
