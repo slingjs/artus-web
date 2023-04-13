@@ -10,15 +10,18 @@ import {
   HTTP_ROUTER_METADATA,
   HTTP_CONTROLLER_TAG,
   HTTP_MIDDLEWARE_METADATA,
-  HTTPMiddleware
+  HTTPMiddleware, HTTPControllerDecoratorOptions
 } from './types'
 import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
 
-export function HTTPController (prefix: string = '', order: number = 0): ClassDecorator {
+export function HTTPController (
+  prefix: string = '',
+  options: Partial<HTTPControllerDecoratorOptions> = { order: 0 }
+): ClassDecorator {
   return target => {
     const controllerMetaData = {
       prefix,
-      order
+      options
     } as HTTPControllerMetadata
 
     Reflect.defineMetadata(HTTP_CONTROLLER_METADATA, controllerMetaData, target)

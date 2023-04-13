@@ -41,7 +41,7 @@ export class PluginHTTPClient {
       function(controllerClazz) {
         const controllerMetadata = Reflect.getMetadata(HTTP_CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
 
-        return controllerMetadata.order
+        return _.get(controllerMetadata, 'options.order') ?? 0
       },
       'desc'
     )

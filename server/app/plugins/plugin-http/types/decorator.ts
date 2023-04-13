@@ -16,9 +16,13 @@ export enum HTTPMethod {
   PUT = 'PUT'
 }
 
+export type HTTPControllerDecoratorOptions = {
+  order: number
+}
+
 export interface HTTPControllerMetadata {
   prefix: string
-  order: number
+  options?: Partial<HTTPControllerDecoratorOptions>
 }
 
 export type HTTPRouteDecoratorOptions = {
