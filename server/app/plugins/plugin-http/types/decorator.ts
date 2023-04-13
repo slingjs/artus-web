@@ -21,7 +21,7 @@ export interface HTTPControllerMetadata {
   order: number
 }
 
-export type HTTPDecoratorOptions = {
+export type HTTPRouteDecoratorOptions = {
   useBodyParser: boolean
   bodyParserOptions: any
   bodyParserType: 'json' | 'raw' | 'text' | 'urlencoded'
@@ -30,9 +30,9 @@ export type HTTPDecoratorOptions = {
 export type HTTPRouteMetadata = Array<{
   path: string
   method: ArrayOrPrimitive<HTTPMethod[]>,
-  options?: Partial<HTTPDecoratorOptions>
+  options?: Partial<HTTPRouteDecoratorOptions>
 }>
 
-export type HTTPMethodDecoratorOptions = ArrayOrPrimitive<HTTPRouteMetadata>
+export type HTTPMethodRouteDecoratorOptions = ArrayOrPrimitive<HTTPRouteMetadata>
 
 export type HTTPRouteMiddlewaresMetadata = Array<MiddlewareInput>

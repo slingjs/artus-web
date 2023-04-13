@@ -2,9 +2,9 @@ import { addTag, Injectable, ScopeEnum } from '@artus/core'
 import {
   HTTP_CONTROLLER_METADATA,
   HTTPControllerMetadata,
-  HTTPDecoratorOptions,
+  HTTPRouteDecoratorOptions,
   HTTPMethod,
-  HTTPMethodDecoratorOptions,
+  HTTPMethodRouteDecoratorOptions,
   HTTPRouteMetadata,
   HTTPRouteMiddlewaresMetadata,
   HTTP_ROUTER_METADATA,
@@ -27,7 +27,7 @@ export function HTTPController (prefix: string = '', order: number = 0): ClassDe
   }
 }
 
-export function Get (path: string = '', options: Partial<HTTPDecoratorOptions> = {}) {
+export function Get (path: string = '', options: Partial<HTTPRouteDecoratorOptions> = {}) {
   return function(
     _target: Object,
     _key: string | symbol,
@@ -40,7 +40,7 @@ export function Get (path: string = '', options: Partial<HTTPDecoratorOptions> =
   }
 }
 
-export function Post (path: string = '', options: Partial<HTTPDecoratorOptions> = {}) {
+export function Post (path: string = '', options: Partial<HTTPRouteDecoratorOptions> = {}) {
   return function(
     _target: Object,
     _key: string | symbol,
@@ -53,7 +53,7 @@ export function Post (path: string = '', options: Partial<HTTPDecoratorOptions> 
   }
 }
 
-export function Delete (path: string = '', options: Partial<HTTPDecoratorOptions> = {}) {
+export function Delete (path: string = '', options: Partial<HTTPRouteDecoratorOptions> = {}) {
   return function(
     _target: Object,
     _key: string | symbol,
@@ -66,7 +66,7 @@ export function Delete (path: string = '', options: Partial<HTTPDecoratorOptions
   }
 }
 
-export function Put (path: string = '', options: Partial<HTTPDecoratorOptions> = {}) {
+export function Put (path: string = '', options: Partial<HTTPRouteDecoratorOptions> = {}) {
   return function(
     _target: Object,
     _key: string | symbol,
@@ -79,7 +79,7 @@ export function Put (path: string = '', options: Partial<HTTPDecoratorOptions> =
   }
 }
 
-export function Patch (path: string = '', options: Partial<HTTPDecoratorOptions> = {}) {
+export function Patch (path: string = '', options: Partial<HTTPRouteDecoratorOptions> = {}) {
   return function(
     _target: Object,
     _key: string | symbol,
@@ -92,7 +92,7 @@ export function Patch (path: string = '', options: Partial<HTTPDecoratorOptions>
   }
 }
 
-export function Head (path: string = '', options: Partial<HTTPDecoratorOptions> = {}) {
+export function Head (path: string = '', options: Partial<HTTPRouteDecoratorOptions> = {}) {
   return function(
     _target: Object,
     _key: string | symbol,
@@ -105,7 +105,7 @@ export function Head (path: string = '', options: Partial<HTTPDecoratorOptions> 
   }
 }
 
-export function Options (path: string = '', options: Partial<HTTPDecoratorOptions> = {}) {
+export function Options (path: string = '', options: Partial<HTTPRouteDecoratorOptions> = {}) {
   return function(
     _target: Object,
     _key: string | symbol,
@@ -118,7 +118,7 @@ export function Options (path: string = '', options: Partial<HTTPDecoratorOption
   }
 }
 
-export function All (path: string = '', options: Partial<HTTPDecoratorOptions> = {}) {
+export function All (path: string = '', options: Partial<HTTPRouteDecoratorOptions> = {}) {
   return function(
     _target: Object,
     _key: string | symbol,
@@ -131,7 +131,7 @@ export function All (path: string = '', options: Partial<HTTPDecoratorOptions> =
   }
 }
 
-export function HTTPRoute (options: HTTPMethodDecoratorOptions) {
+export function HTTPRoute (options: HTTPMethodRouteDecoratorOptions) {
   return function(
     _target: Object,
     _key: string | symbol,
