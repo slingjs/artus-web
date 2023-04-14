@@ -13,7 +13,8 @@ export interface UserSession {
 }
 
 export enum WebsocketUserSessionClientCommandType {
-  SET_COOKIE = 'set-cookie'
+  SET_COOKIE = 'set-cookie',
+  SESSION_EVICT = 'session-evict'
 }
 
 export enum WebsocketUserSessionClientCommandTrigger {
@@ -25,4 +26,10 @@ export interface WebsocketUserSessionClientCommandInfo {
   trigger: WebsocketUserSessionClientCommandTrigger
   command: WebsocketUserSessionClientCommandType
   value: string
+}
+
+export enum UserSessionSignOutCausedBy {
+  DISABLE_MULTIPLE_SIGNED_IN_SESSIONS = 'DISABLE_MULTIPLE_SIGNED_IN_SESSIONS',
+  MANUALLY = 'MANUALLY',
+  SESSION_DISTRIBUTE_EXPIRED = 'SESSION_DISTRIBUTE_EXPIRED'
 }
