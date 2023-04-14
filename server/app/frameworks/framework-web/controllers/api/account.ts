@@ -2,7 +2,7 @@ import { ArtusApplication, ArtusInjectEnum, Inject } from '@artus/core'
 import { HTTPController, HTTPRoute, Post, Use } from '../../../../plugins/plugin-http/decorator'
 import { AccountService } from '../../services/account'
 import { AccountResponseDataCode, ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, ResponseDataStatus } from '../../types'
-import { initUser } from '../../middlewares/business/account'
+import { httpInitUser } from '../../middlewares/business/account'
 import { HTTPMethod, HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 import { httpExecutionTimeMiddleware } from '../../middlewares/common/execution-time'
 import _ from 'lodash'
@@ -14,7 +14,7 @@ import shared from '@sling/artus-web-shared'
 @HTTPController('/api/account')
 @Use([
   httpExecutionTimeMiddleware(),
-  initUser({ bypassFilter: bypassInitUserMiddlewareFilter })
+  httpInitUser({ bypassFilter: bypassInitUserMiddlewareFilter })
 ])
 export default class AccountApiController {
   @Inject(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE)

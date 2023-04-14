@@ -4,10 +4,10 @@ import { ARTUS_FRAMEWORK_WEB_PAGE_SERVICE } from '../types'
 import { HTTPMiddleware } from '../../../plugins/plugin-http/types'
 import { PageService } from '../services/page'
 import shared from '@sling/artus-web-shared'
-import { initUser } from '../middlewares/business/account'
+import { httpInitUser } from '../middlewares/business/account'
 
 @HTTPController('', { order: -1 })
-@Use(initUser())
+@Use(httpInitUser())
 export class PageController {
   @Inject(ARTUS_FRAMEWORK_WEB_PAGE_SERVICE)
   pageService: PageService

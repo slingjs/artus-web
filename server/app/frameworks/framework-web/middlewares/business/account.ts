@@ -8,12 +8,12 @@ import { USER_SESSION_COOKIE_MAX_AGE } from '../../constants'
 import { Roles } from '@sling/artus-web-shared/types'
 import status from 'http-status'
 
-export const initUser = (
+export const httpInitUser = (
   options?: Partial<{
     bypassFilter: (ctx: HTTPMiddlewareContext) => boolean
   }>
 ): HTTPMiddleware => {
-  return async function initUser (ctx, next) {
+  return async function httpInitUser (ctx, next) {
     const { input: { params: { app, req, res } } } = ctx
 
     const bypassFilter = _.get(options, 'bypassFilter')
@@ -73,7 +73,7 @@ export const initUser = (
   }
 }
 
-export const userAuthMiddleware = (roles?: Roles[]): HTTPMiddleware => {
+export const httpAuthUser = (roles?: Roles[]): HTTPMiddleware => {
   return async function userAuthMiddleware (ctx, next) {
     const { input: { params: { app } } } = ctx
     const userService = app
