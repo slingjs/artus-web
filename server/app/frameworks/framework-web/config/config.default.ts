@@ -1,5 +1,6 @@
 import { AppConfig } from '../../../types'
 import path from 'path'
+import { get__dirname } from '../../../utils/compatibility'
 
 export default {
   plugin: {
@@ -27,7 +28,7 @@ export default {
       dataSources: {
         mongo: {
           enable: true,
-          schemaOutputPath: path.resolve(__dirname, '../models/mongo/generated/client'),
+          schemaOutputPath: path.resolve(get__dirname(), '../models/mongo/generated/client'),
           envs: {
             // https://www.mongodb.com/compatibility/deploying-a-mongodb-cluster-with-docker
             MONGO_URI: 'mongodb://localhost:27017/test?replicaSet=rs0'
@@ -35,7 +36,7 @@ export default {
         },
         mysql: {
           enable: true,
-          schemaOutputPath: path.resolve(__dirname, '../models/mysql/generated/client'),
+          schemaOutputPath: path.resolve(get__dirname(), '../models/mysql/generated/client'),
           envs: {
             // https://hub.docker.com/_/mysql
             MYSQL_URI: 'mysql://root:123456@localhost:3306/test'

@@ -1,5 +1,6 @@
 import path from 'path'
+import { get__dirname } from '../utils/compatibility'
 
 export default {
-  path: path.resolve(__dirname, '../frameworks/framework-web')
+  path: path.resolve(get__dirname(), '../frameworks/framework-web')
 }

@@ -1,6 +1,7 @@
 import path from 'path'
 import { AppConfig } from '../types'
 import shared from '@sling/artus-web-shared'
+import { get__dirname } from '../utils/compatibility'
 
 const cacheDir = path.resolve(process.cwd(), './.cache')
 const distDir = path.resolve(process.cwd(), './node_modules/@sling/artus-web-client', shared.constants.FILE_BASE_DIR)
@@ -33,7 +34,7 @@ export default {
       dataSources: {
         mongo: {
           enable: true,
-          schemaOutputPath: path.resolve(__dirname, '../frameworks/framework-web/models/mongo/generated/client'),
+          schemaOutputPath: path.resolve(get__dirname(), '../frameworks/framework-web/models/mongo/generated/client'),
           envs: {
             // https://www.mongodb.com/compatibility/deploying-a-mongodb-cluster-with-docker
             MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/test?replicaSet=rs0'
@@ -41,7 +42,7 @@ export default {
         },
         mysql: {
           enable: true,
-          schemaOutputPath: path.resolve(__dirname, '../frameworks/framework-web/models/mysql/generated/client'),
+          schemaOutputPath: path.resolve(get__dirname(), '../frameworks/framework-web/models/mysql/generated/client'),
           envs: {
             // https://hub.docker.com/_/mysql
             MYSQL_URI: process.env.MYSQL_URI || 'mysql://root:123456@localhost:3306/test'

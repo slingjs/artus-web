@@ -1,6 +1,7 @@
 import 'reflect-metadata'
 import { ArtusApplication, Scanner } from '@artus/core'
 import dotEnv from 'dotenv'
+import { get__dirname } from './utils/compatibility'
 
 dotEnv.config()
 
@@ -10,11 +11,11 @@ export async function start (options: any = {}) {
     needWriteFile: false,
     extensions: ['.ts'],
     configDir: 'config',
-    framework: options.framework || { path: __dirname },
+    framework: options.framework || { path: get__dirname() },
     exclude: options.exclude || ['test']
   })
 
-  const baseDir = options.baseDir || __dirname
+  const baseDir = options.baseDir || get__dirname()
   const manifest = await scanner.scan(baseDir)
 
   // Start app.
