@@ -25,6 +25,7 @@ import { useRoute, useRouter } from 'vue-router'
 import _ from 'lodash'
 import { preEncryptPassword } from '@/utils/string'
 import { validatePassword } from '@/utils/form'
+import { getUserSessionSignOutCausedByMessage } from '@/utils/user'
 
 /* Data START */
 const userStore = useUserStore()
@@ -97,6 +98,12 @@ onBeforeMount(() => {
   const routeEmail = (route.query).email
   if (typeof routeEmail === 'string' && routeEmail) {
     formConfig.model.email = routeEmail
+  }
+
+  // If sign out with some reason.
+  const signOutCausedBy = getUserSessionSignOutCausedByMessage()
+  if (signOutCausedBy) {
+    message.warning(signOutCausedBy, { closable: true, duration: 0 })
   }
 })
 

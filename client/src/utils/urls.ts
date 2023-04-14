@@ -1,3 +1,5 @@
+import shared from '@sling/artus-web-shared'
+
 let tempAnchor: HTMLAnchorElement | undefined
 let tempFragment: DocumentFragment | undefined
 
@@ -25,4 +27,8 @@ export function formatWebsocketUrlWithFragment (urlFragment: string) {
   href.protocol = 'ws'
 
   return href.toString()
+}
+
+export function getQueryString (name: string, ignoreCase: boolean = false) {
+  return shared.utils.getQueryStringFormTargetSearch(location.search, name, ignoreCase)
 }

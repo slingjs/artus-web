@@ -6,6 +6,9 @@ import type { UserSession } from '@sling/artus-web-shared/types'
 import type { WsHandler, WsHandlers } from '@/types'
 import { wsCommunicateAccountObserve } from '@/wss'
 import { handleAccountObserveWsMessage } from '@/utils/wss'
+import shared from '@sling/artus-web-shared'
+import * as urls from '@/apis/urls'
+import { getUserSessionSignOutCausedBy, setUserSessionSignOutCausedBy } from '@/utils/user'
 
 export const useUserStore = defineStore('user', {
   state () {
@@ -49,10 +52,23 @@ export const useUserStore = defineStore('user', {
       await fetchAccountChangePwd(...args)
       await this.fetchSession()
     },
+    fetchSignOut (params?: Record<string, string>) {
+      if (!getUserSessionSignOutCausedBy()) {
+        setUserSessionSignOutCausedBy(shared.types.UserSessionSignOutCausedBy.MANUALLY)
+      }
+
+      location.href = shared.utils.updateQueryStringParam(
+        urls.account.signOut,
+        shared.constants.accountSignOutCallbackSearchParamKey,
+        params
+          ? shared.utils.updateQueryParam('/', params)
+          : '/'
+      )
+    },
     async wsCommunicateAccountObserve (...args: Parameters<typeof wsCommunicateAccountObserve>) {
       const handler = await wsCommunicateAccountObserve()
 
-      handler.ws.onmessage = handleAccountObserveWsMessage
+      handler.ws.onmessage = handleAccountObserveWsMessage.bind(handler.ws, this)
 
       await this.setWsHandler(handler)
     },
