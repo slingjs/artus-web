@@ -29,11 +29,16 @@ const signOutHref = computed(() => {
   )
 })
 
-if (!isSessionValid.value) {
+if (isSessionValid.value) {
+  userStore.wsCommunicateAccountObserve()
+} else {
   userStore.fetchSession().finally(() => {
     if (!isSessionValid.value) {
       router.replace({ name: 'accountLandingSignIn' })
+      return
     }
+
+    userStore.wsCommunicateAccountObserve()
   })
 }
 </script>

@@ -6,11 +6,16 @@ import {
   NLayoutHeader,
   NLayoutContent,
   NLayout,
-  NSpace,
   NMessageProvider,
   NLayoutFooter
 } from 'naive-ui'
+import { useUserStore } from '@/stores/user'
 
+const userStore = useUserStore()
+
+window.addEventListener('beforeunload', function() {
+  userStore.beforeUnload()
+})
 // import shared from '@sling/artus-web-shared'
 //
 // const random = shared.utils.calcRandomString()
