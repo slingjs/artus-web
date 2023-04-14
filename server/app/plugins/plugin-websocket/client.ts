@@ -220,7 +220,7 @@ export class WebsocketClient {
     const app = this.app
     const trigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
-    this.wsServer.on('connection', async (socket, req) => {
+    this.wsServer.on(WebSocketEventNames.CONNECTION, async (socket, req) => {
       const handleOnException = function(message: string = 'Something went wrong.') {
         socket.send(message)
         socket.send('Socket shutting down...')
