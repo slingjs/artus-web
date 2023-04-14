@@ -18,7 +18,7 @@ import {
   USER_DISTRIBUTE_CACHE_DEFAULT_TTL,
   USER_SESSION_COOKIE_MAX_AGE,
   USER_SESSION_COOKIE_MAX_AGE_REMEMBERED,
-  USER_SESSION_COOKIE_MAX_AGE_REMOVED
+  USER_SESSION_COOKIE_MAX_AGE_REMOVED, WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH
 } from '../constants'
 import { Account } from '../models/mongo/generated/client'
 import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
@@ -37,15 +37,23 @@ import {
   PromiseFulfilledResult,
   Roles,
   UserSession,
+  UserSessionSignOutCausedBy,
   WebsocketUserSessionClientCommandInfo,
   WebsocketUserSessionClientCommandTrigger,
   WebsocketUserSessionClientCommandType
 } from '@sling/artus-web-shared/types'
 import { formatResponseData } from '../utils/services'
 import { AppConfig } from '../../../types'
-import { ARTUS_PLUGIN_WEBSOCKET_CLIENT, WebsocketMiddlewareContext } from '../../../plugins/plugin-websocket/types'
+import {
+  ARTUS_PLUGIN_WEBSOCKET_CLIENT,
+  ARTUS_PLUGIN_WEBSOCKET_TRIGGER, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY,
+  WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY,
+  WebsocketMiddlewareContext
+} from '../../../plugins/plugin-websocket/types'
 import { judgeCtxIsFromHTTP } from '../utils/middlewares'
 import { WebsocketClient } from '../../../plugins/plugin-websocket/client'
+import { WebsocketTrigger } from '../../../plugins/plugin-websocket/trigger'
+import url from 'url'
 
 dayjs.extend(dayjsUtc)
 
@@ -153,19 +161,22 @@ export class AccountService {
     // Websocket.
     const { input: { params: { trigger, socket } } } = ctx
     if (!session) {
+      const cookieValue = cookie.parse(
+        cookie.serialize(
+          shared.constants.USER_SESSION_KEY,
+          '',
+          {
+            path: '/', // Must set this. Otherwise, it will be req.path as default.
+            maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
+          }
+        )
+      )
       await trigger.send(
         socket,
         {
           trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
           command: WebsocketUserSessionClientCommandType.SET_COOKIE,
-          value: cookie.serialize(
-            shared.constants.USER_SESSION_KEY,
-            '',
-            {
-              path: '/', // Must set this. Otherwise, it will be req.path as default.
-              maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
-            }
-          )
+          value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
         } as WebsocketUserSessionClientCommandInfo
       )
 
@@ -177,41 +188,60 @@ export class AccountService {
         ? USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
         : USER_SESSION_COOKIE_MAX_AGE
       : USER_SESSION_COOKIE_MAX_AGE
+    const cookieValue = cookie.serialize(
+      shared.constants.USER_SESSION_KEY,
+      session._sessionId,
+      {
+        path: '/', // Must set this. Otherwise, it will be req.path as default.
+        maxAge
+      }
+    )
     await trigger.send(socket, {
       trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
       command: WebsocketUserSessionClientCommandType.SET_COOKIE,
-      value: cookie.serialize(
-        shared.constants.USER_SESSION_KEY,
-        session._sessionId,
-        {
-          path: '/', // Must set this. Otherwise, it will be req.path as default.
-          maxAge
-        }
-      )
+      value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
     })
   }
 
-  async broadcastStaleClientSessions (ctx: HTTPMiddlewareContext | WebsocketMiddlewareContext) {
-    if (judgeCtxIsFromHTTP(ctx)) {
-      return
-    }
-
-    const { input: { params: { app, socket, trigger } } } = ctx
+  async broadcastStaleClientSessions (ctx: HTTPMiddlewareContext, sessionRecords: UserSessionRecords) {
+    const { input: { params: { app } } } = ctx
     const websocketClient = app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
+    const websocketClientTrigger = app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
-    websocketClient.getWsServerSameReqPathSockets(socket).forEach(s => {
-      trigger.send(s, {
+    websocketClient.filterWsServerSockets({
+      filter: (s) => {
+        const socketReqUrlObj = _.get(s, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY) as url.UrlWithStringQuery
+        if (!socketReqUrlObj) {
+          return false
+        }
+
+        // Find the same account signed-in session's related sockets.
+        return socketReqUrlObj.path === WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH &&
+          sessionRecords.includes(this.getWsSocketSessionKey(s))
+      }
+    }).forEach(s => {
+      websocketClientTrigger.send(s, {
         trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-        command: WebsocketUserSessionClientCommandType.SET_COOKIE,
-        value: cookie.serialize(
-          shared.constants.USER_SESSION_KEY,
-          '',
-          {
-            path: '/', // Must set this. Otherwise, it will be req.path as default.
-            maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
-          }
-        )
+        command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+        value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
       } as WebsocketUserSessionClientCommandInfo)
+
+      // No need this.
+      // const cookieValue = cookie.parse(
+      //   cookie.serialize(
+      //     shared.constants.USER_SESSION_KEY,
+      //     '',
+      //     {
+      //       path: '/', // Must set this. Otherwise, it will be req.path as default.
+      //       maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
+      //     }
+      //   )
+      // )
+      // websocketClientTrigger.send(s, {
+      //   trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+      //   command: WebsocketUserSessionClientCommandType.SET_COOKIE,
+      //   value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
+      // } as WebsocketUserSessionClientCommandInfo)
     })
   }
 
@@ -275,8 +305,8 @@ export class AccountService {
 
       // Stale all related sessions.
       if (Array.isArray(foundSessionRecords)) {
+        await this.broadcastStaleClientSessions(ctx, foundSessionRecords)
         await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(ctx, r)))
-        await this.broadcastStaleClientSessions(ctx)
 
         // Rest entirely..
         foundSessionRecords = []
@@ -348,8 +378,8 @@ export class AccountService {
 
           // Stale all related sessions.
           if (Array.isArray(foundSessionRecords)) {
+            await this.broadcastStaleClientSessions(ctx, foundSessionRecords)
             await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(ctx, r)))
-            await this.broadcastStaleClientSessions(ctx)
           }
 
           // Stale records.
@@ -389,9 +419,26 @@ export class AccountService {
     await this.setClientSession(ctx, null)
   }
 
+  getWsSocketSessionKey (
+    socket: WebsocketMiddlewareContext['input']['params']['socket']
+  ) {
+    return _.get(socket, WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY) as UserSession['_sessionId']
+  }
+
   async getCtxSession (ctx: HTTPMiddlewareContext) {
     const storage = ctx.namespace(ARTUS_FRAMEWORK_WEB_USER_NAMESPACE)
     return storage.get('session') as UserSession
+  }
+
+  setWsSocketSessionKey (
+    socket: WebsocketMiddlewareContext['input']['params']['socket'],
+    session: UserSession | null
+  ) {
+    if (!session) {
+      return
+    }
+
+    _.set(socket, WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY, session._sessionId)
   }
 
   async setCtxSession (ctx: HTTPMiddlewareContext, session: UserSession | null) {

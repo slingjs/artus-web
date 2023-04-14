@@ -15,3 +15,5 @@ export const PAGE_PROHIBIT_ACCOUNT_PROPERTIES = ['_sessionId', 'roles']
 
 export const SERVICE_DEFAULT_RESPONSE_CODE = 'SUCCESS'
 export const SERVICE_DEFAULT_RESPONSE_MESSAGE = 'ok'
+
+export const WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH = '/ws/account/observe'

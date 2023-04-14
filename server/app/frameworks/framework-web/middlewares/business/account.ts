@@ -8,6 +8,7 @@ import { Roles } from '@sling/artus-web-shared/types'
 import status from 'http-status'
 import { Middleware } from '@artus/pipeline'
 import { WebsocketMiddleware } from '../../../../plugins/plugin-websocket/types'
+import { judgeCtxIsFromHTTP } from '../../utils/middlewares'
 
 export const initUser = <T extends Middleware = HTTPMiddleware> (
   options?: Partial<{
@@ -30,6 +31,8 @@ export const initUser = <T extends Middleware = HTTPMiddleware> (
       .container
       .get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
 
+    const isCtxFromHTTP = judgeCtxIsFromHTTP(ctx)
+
     const initNewSession = async function initNewSession (sessionCookieValue?: string) {
       const newSession = await userService.initSession(ctx, undefined, { _sessionId: sessionCookieValue })
       await userService.setDistributeSession(
@@ -39,6 +42,11 @@ export const initUser = <T extends Middleware = HTTPMiddleware> (
       )
       await userService.setCtxSession(ctx, newSession)
       await userService.setClientSession(ctx, newSession)
+
+      if (!isCtxFromHTTP) {
+        const { input: { params: { socket } } } = ctx
+        await userService.setWsSocketSessionKey(socket, newSession)
+      }
     }
 
     if (!sessionCookieValue) {
@@ -57,6 +65,11 @@ export const initUser = <T extends Middleware = HTTPMiddleware> (
     try {
       const session = JSON.parse(sessionString)
       await userService.setCtxSession(ctx, session)
+
+      if (!isCtxFromHTTP) {
+        const { input: { params: { socket } } } = ctx
+        await userService.setWsSocketSessionKey(socket, session)
+      }
     } catch (e) {
       await initNewSession()
 

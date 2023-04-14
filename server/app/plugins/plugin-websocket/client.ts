@@ -79,7 +79,7 @@ export class WebsocketClient {
     return this.wsServer
   }
 
-  getWsServerSockets (options?: Partial<{ filter: Parameters<Array<ws.WebSocket>['filter']>[0] }>) {
+  filterWsServerSockets (options?: Partial<{ filter: Parameters<Array<ws.WebSocket>['filter']>[0] }>) {
     const currentAllClients = Array.from(this.wsServer.clients.values())
 
     const condition = _.get(options, 'filter')
@@ -90,8 +90,19 @@ export class WebsocketClient {
     return currentAllClients.filter(condition)
   }
 
+  findWsServerSocket (options: { find: Parameters<Array<ws.WebSocket>['filter']>[0] }) {
+    const currentAllClients = Array.from(this.wsServer.clients.values())
+
+    const condition = _.get(options, 'filter')
+    if (typeof condition !== 'function') {
+      return currentAllClients
+    }
+
+    return currentAllClients.find(condition)
+  }
+
   getWsServerSameReqPathSockets (targetSocket: ws.WebSocket, options?: Partial<{ reqPathCaseInsensitive: boolean }>) {
-    return this.getWsServerSockets({
+    return this.filterWsServerSockets({
       filter (socket) {
         if (socket === targetSocket) {
           return false

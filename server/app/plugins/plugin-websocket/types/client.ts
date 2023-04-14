@@ -11,6 +11,8 @@ export const ARTUS_PLUGIN_WEBSOCKET_TRIGGER = 'ARTUS_PLUGIN_WEBSOCKET_TRIGGER'
 
 export const WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY = Symbol.for('websocket#request#urlObj')
 
+export const WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY = Symbol.for('websocket#request#userSessionKey')
+
 export enum WebSocketEventNames {
   CONNECTION = 'connection',
   MESSAGE = 'message',
