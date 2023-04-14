@@ -26,6 +26,8 @@ export enum WebSocketEventNames {
 export interface WebsocketConfig {
   host: string
   port: number
+  useSharedHTTPServer: boolean
+  requestPathCaseSensitive: boolean
 }
 
 export type WebsocketHandlerArgumentsRecord = {

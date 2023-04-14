@@ -52,7 +52,8 @@ export default {
     websocket: {
       host: process.env.WEBSOCKET_HOST || '0.0.0.0',
       port: +process.env.WEBSOCKET_HOST! || shared.constants.SERVER_PORT,
-      useSharedHTTPServer: true // Use shared http server or not. The 'http' plugin may register that server.
+      useSharedHTTPServer: true, // Use shared http server or not. The 'http' plugin may register that server.
+      requestPathCaseSensitive: false
     }
   },
 

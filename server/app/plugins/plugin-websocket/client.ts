@@ -68,7 +68,7 @@ export class WebsocketClient {
 
     this.wsServer = new ws.WebSocketServer({ server })
 
-    this.registerEvents()
+    this.registerEvents({ requestPathCaseSensitive: !!_.get(config, 'requestPathCaseSensitive') })
   }
 
   getServer () {
@@ -119,7 +119,7 @@ export class WebsocketClient {
     })
   }
 
-  initializeEventRules () {
+  initializeEventRules (options?: Partial<{ requestPathCaseSensitive: boolean }>) {
     const eventRules: WebsocketEventRules = new Map()
 
     const wsControllerClazzList = _.orderBy(
@@ -165,9 +165,13 @@ export class WebsocketClient {
         ) ?? []
 
         // Get the registered data with the target path.
-        const eventPath = (
+        let eventPath = (
           (controllerMetadata.prefix ?? '/') + (_.get(eventMetadata, 'options.path') ?? '')
         ).replace(trimEventPathRegExp, '') || '/'
+        if (!_.get(options, 'requestPathCaseSensitive')) {
+          eventPath = eventPath.toLowerCase()
+        }
+
         let eventPathRuleItemWithEventPath = eventRules.get(eventPath)
         // Non existent -> Initialize.
         if (!(eventPathRuleItemWithEventPath instanceof Map)) {
@@ -211,8 +215,8 @@ export class WebsocketClient {
     return eventRules
   }
 
-  registerEvents () {
-    const eventRules = this.initializeEventRules()
+  registerEvents (options?: Partial<{ requestPathCaseSensitive: boolean }>) {
+    const eventRules = this.initializeEventRules(options)
     const app = this.app
     const trigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
@@ -238,7 +242,10 @@ export class WebsocketClient {
       // Store some vital metrics.
       _.set(socket, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY, reqUrlObj);
 
-      const matchedEventRuleItem = eventRules.get(reqUrlObj.path)
+      const eventRuleTargetPath = _.get(options, 'requestPathCaseSensitive')
+        ? reqUrlObj.path
+        : (reqUrlObj.path).toLowerCase()
+      const matchedEventRuleItem = eventRules.get(eventRuleTargetPath)
       if (!(matchedEventRuleItem && matchedEventRuleItem.size)) {
         handleOnException(`No registered handler for such path: ${ reqUrlObj.path }`)
         return
