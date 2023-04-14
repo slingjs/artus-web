@@ -12,10 +12,14 @@ import {
 } from './types'
 import { addTag, Injectable, ScopeEnum } from '@artus/core'
 import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
+import {
+  websocketControllerDecoratorDefaultOptions,
+  websocketEventDecoratorDefaultOptions
+} from './constants/decorator'
 
 export function WebsocketController (
   prefix: string,
-  options: Partial<WebsocketControllerDecoratorOptions> = { order: 0 }
+  options: Partial<WebsocketControllerDecoratorOptions> = websocketControllerDecoratorDefaultOptions
 ): ClassDecorator {
   return function(target) {
     const controllerMetadata = {
@@ -31,7 +35,7 @@ export function WebsocketController (
 
 export function WebsocketEvent (
   eventName: WebsocketEventMetadata['eventName'],
-  options: Partial<WebsocketEventDecoratorOptions> = {}
+  options: Partial<WebsocketEventDecoratorOptions> = websocketEventDecoratorDefaultOptions
 ) {
   return function(
     _target: Object,
