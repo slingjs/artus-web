@@ -11,3 +11,18 @@ export interface UserSession {
   email: string
   _sessionId: string
 }
+
+export enum WebsocketUserSessionClientCommandType {
+  SET_COOKIE = 'set-cookie'
+}
+
+export enum WebsocketUserSessionClientCommandTrigger {
+  SYSTEM = 'system',
+  CLIENT = 'client'
+}
+
+export interface WebsocketUserSessionClientCommandInfo {
+  trigger: WebsocketUserSessionClientCommandTrigger
+  command: WebsocketUserSessionClientCommandType
+  value: string
+}
