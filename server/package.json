@@ -8,11 +8,11 @@
     "start": "node .",
     "start:dev": "ts-node index.ts",
     "dev": "nodemon",
-    "build": "rimraf ./dist && tsc -d && node ./.build/build-fix.js && node ./.build/generate-dist-prisma.js",
-    "build:release": "rimraf ./dist && tsc -d && node ./.build/build-fix.js",
-    "postinstall": "node ./.build/generate-app-prisma.js && node ./.build/generate-dist-prisma.js",
-    "generate-dist-prisma": "node ./.build/generate-dist-prisma.js",
-    "generate-app-prisma": "node ./.build/generate-app-prisma.js"
+    "build": "rimraf ./dist && tsc -d && ts-node ./.build/build-fix.ts && ts-node ./.build/generate-dist-prisma.ts",
+    "build:release": "rimraf ./dist && tsc -d && ts-node ./.build/build-fix.ts",
+    "postinstall": "ts-node ./.build/generate-app-prisma.ts && ts-node ./.build/generate-dist-prisma.ts",
+    "generate-dist-prisma": "ts-node ./.build/generate-dist-prisma.ts",
+    "generate-app-prisma": "ts-node ./.build/generate-app-prisma.ts"
   },
   "keywords": [
     "nodejs",

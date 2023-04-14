@@ -9,6 +9,7 @@
     "moduleResolution": "Node"
   },
   "include": [
+    "./.build/*.ts",
     "./**/*.ts",
     "./**/*.json"
   ],

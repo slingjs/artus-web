@@ -1,6 +1,6 @@
-const { execSync } = require('child_process')
-const fs = require('fs-extra')
-const path = require('path')
+import { execSync } from 'child_process'
+import fs from 'fs-extra'
+import path from 'path'
 
 const job = function() {
   // If not exists

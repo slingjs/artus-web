@@ -1,6 +1,6 @@
-const fs = require('fs-extra')
-const path = require('path')
-const { globSync } = require('glob')
+import fs from 'fs-extra'
+import path from 'path'
+import { globSync } from 'glob'
 
 // Copy the models.
 globSync(
@@ -9,7 +9,7 @@ globSync(
 ).forEach(p => {
   const fullPath = path.resolve(__dirname, '../app/frameworks/framework-web/models', p)
   if (fs.statSync(fullPath).isDirectory()) {
-    return;
+    return
   }
 
   const targetPath = path.resolve(__dirname, '../dist/app/frameworks/framework-web/models', p)
