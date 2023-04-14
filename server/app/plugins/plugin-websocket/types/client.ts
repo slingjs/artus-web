@@ -44,6 +44,7 @@ export type WebsocketEventResponseBody = undefined | string | object
 
 export type WebsocketHandlerOutputData = {
   lastMessage: WebsocketEventResponseBody
+  status: number | undefined
 }
 
 export interface WebsocketMiddlewareContext extends Required<BaseContext> {

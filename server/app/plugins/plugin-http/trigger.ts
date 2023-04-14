@@ -2,7 +2,7 @@ import { Injectable, ScopeEnum, Trigger } from '@artus/core'
 import { Stream } from 'stream'
 import { ARTUS_PLUGIN_HTTP_TRIGGER, HTTPMiddleware } from './types'
 import { Pipeline } from '@artus/pipeline'
-import { DEFAULT_HTTP_STATUS, SUCCESS_HTTP_STATUS } from '../../frameworks/framework-web/constants'
+import { DEFAULT_HTTP_STATUS, SUCCESS_HTTP_STATUS } from './constants'
 
 @Injectable({
   id: ARTUS_PLUGIN_HTTP_TRIGGER,

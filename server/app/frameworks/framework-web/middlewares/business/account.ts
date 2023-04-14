@@ -6,6 +6,7 @@ import _ from 'lodash'
 import { HTTPMiddleware, HTTPMiddlewareContext } from '../../../../plugins/plugin-http/types'
 import { USER_SESSION_COOKIE_MAX_AGE } from '../../constants'
 import { Roles } from '@sling/artus-web-shared/types'
+import status from 'http-status'
 
 export const initUser = (
   options?: Partial<{
@@ -81,7 +82,7 @@ export const userAuthMiddleware = (roles?: Roles[]): HTTPMiddleware => {
 
     const session = await userService.getCtxSession(ctx)
     if (!(session && session.signedIn)) {
-      ctx.output.data.status = 401
+      ctx.output.data.status = status.UNAUTHORIZED
 
       return
     }
@@ -92,7 +93,7 @@ export const userAuthMiddleware = (roles?: Roles[]): HTTPMiddleware => {
     }
 
     if (!roles.every(r => session.roles.some(sR => shared.utils.compareIgnoreCase(sR, r)))) {
-      ctx.output.data.status = 401
+      ctx.output.data.status = status.UNAUTHORIZED
 
       return
     }

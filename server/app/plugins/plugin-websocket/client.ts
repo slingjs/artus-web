@@ -22,7 +22,7 @@ import url from 'url'
 import { WebsocketTrigger } from './trigger'
 import { Input, Output, Pipeline } from '@artus/pipeline'
 import type { AddressInfo } from 'net'
-import { trimEventPathRegExp } from './constants'
+import { DEFAULT_WEBSOCKET_STATUS, trimEventPathRegExp } from './constants'
 import shared from '@sling/artus-web-shared'
 
 @Injectable({
@@ -275,7 +275,10 @@ export class WebsocketClient {
           }
 
           const output = new Output() as WebsocketMiddlewareContext['output']
-          output.data = { lastMessage: undefined }
+          output.data = {
+            lastMessage: undefined,
+            status: DEFAULT_WEBSOCKET_STATUS
+          }
 
           const ctx = await trigger.initContext(input, output)
           const pipeline = new Pipeline()
