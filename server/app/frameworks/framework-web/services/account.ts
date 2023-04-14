@@ -33,9 +33,18 @@ import {
   validateAccountSignInPayload,
   validateAccountSignUpPayload
 } from '../utils/validation'
-import { PromiseFulfilledResult, Roles, UserSession } from '@sling/artus-web-shared/types'
+import {
+  PromiseFulfilledResult,
+  Roles,
+  UserSession,
+  WebsocketUserSessionClientCommandInfo,
+  WebsocketUserSessionClientCommandTrigger,
+  WebsocketUserSessionClientCommandType
+} from '@sling/artus-web-shared/types'
 import { formatResponseData } from '../utils/services'
 import { AppConfig } from '../../../types'
+import { WebsocketMiddlewareContext } from '../../../plugins/plugin-websocket/types'
+import { judgeCtxIsFromHTTP } from '../utils/middlewares'
 
 dayjs.extend(dayjsUtc)
 
@@ -95,8 +104,94 @@ export class AccountService {
     )
   }
 
+  async setClientSession (
+    ctx: HTTPMiddlewareContext | WebsocketMiddlewareContext,
+    session: UserSession | null,
+    options?: Partial<{
+      keepSignedIn: boolean
+    }>
+  ) {
+    // HTTP.
+    if (judgeCtxIsFromHTTP(ctx)) {
+      const { input: { params: { res } } } = ctx
+      if (!session) {
+        res.setHeader(
+          'set-cookie',
+          cookie.serialize(
+            shared.constants.USER_SESSION_KEY,
+            '',
+            {
+              path: '/', // Must set this. Otherwise, it will be req.path as default.
+              maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
+            }
+          )
+        )
+
+        return
+      }
+
+      const maxAge = session.signedIn
+        ? _.get(options, 'keepSignedIn')
+          ? USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
+          : USER_SESSION_COOKIE_MAX_AGE
+        : USER_SESSION_COOKIE_MAX_AGE
+      res.setHeader(
+        'set-cookie',
+        cookie.serialize(
+          shared.constants.USER_SESSION_KEY,
+          session._sessionId,
+          {
+            path: '/', // Must set this. Otherwise, it will be req.path as default.
+            maxAge
+          }
+        )
+      )
+      return
+    }
+
+    // Websocket.
+    const { input: { params: { trigger, socket } } } = ctx
+    if (!session) {
+      await trigger.send(
+        socket,
+        {
+          trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+          command: WebsocketUserSessionClientCommandType.SET_COOKIE,
+          value: cookie.serialize(
+            shared.constants.USER_SESSION_KEY,
+            '',
+            {
+              path: '/', // Must set this. Otherwise, it will be req.path as default.
+              maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
+            }
+          )
+        } as WebsocketUserSessionClientCommandInfo
+      )
+
+      return
+    }
+
+    const maxAge = session.signedIn
+      ? _.get(options, 'keepSignedIn')
+        ? USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
+        : USER_SESSION_COOKIE_MAX_AGE
+      : USER_SESSION_COOKIE_MAX_AGE
+    await trigger.send(socket, {
+      trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+      command: WebsocketUserSessionClientCommandType.SET_COOKIE,
+      value: cookie.serialize(
+        shared.constants.USER_SESSION_KEY,
+        session._sessionId,
+        {
+          path: '/', // Must set this. Otherwise, it will be req.path as default.
+          maxAge
+        }
+      )
+    })
+  }
+
   async initSession (
-    _ctx: HTTPMiddlewareContext,
+    _ctx: HTTPMiddlewareContext | WebsocketMiddlewareContext,
     signedInAccount?: Account,
     options?: Partial<{ _sessionId: string }>
   ): Promise<UserSession> {
@@ -133,7 +228,7 @@ export class AccountService {
       enableRecordMultipleSignedInSessions: boolean
     }>
   ) {
-    const { input: { params: { res, req } } } = ctx
+    const { input: { params: { req } } } = ctx
 
     const ctxPreviousSession = await this.getCtxSession(ctx)
     const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
@@ -190,19 +285,7 @@ export class AccountService {
 
     // If already set.
     if (sessionCookieValue !== sessionKeyValue) {
-      res.setHeader(
-        'set-cookie',
-        cookie.serialize(
-          shared.constants.USER_SESSION_KEY,
-          sessionKeyValue,
-          {
-            path: '/', // Must set this. Otherwise, it will be req.path as default.
-            maxAge: _.get(options, 'keepSignedIn')
-              ? USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
-              : USER_SESSION_COOKIE_MAX_AGE
-          }
-        )
-      )
+      await this.setClientSession(ctx, session)
     }
   }
 
@@ -210,7 +293,7 @@ export class AccountService {
     ctx: HTTPMiddlewareContext,
     options?: Partial<{ enableMultipleSignedInSessions: boolean, enableRecordMultipleSignedInSessions: boolean }>
   ) {
-    const { input: { params: { res, req } } } = ctx
+    const { input: { params: { req } } } = ctx
 
     const ctxPreviousSession = await this.getCtxSession(ctx)
     const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
@@ -276,17 +359,7 @@ export class AccountService {
 
     await this.staleDistributeSession(ctx, sessionKeyValue)
 
-    res.setHeader(
-      'set-cookie',
-      cookie.serialize(
-        shared.constants.USER_SESSION_KEY,
-        '',
-        {
-          path: '/', // Must set this. Otherwise, it will be req.path as default.
-          maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
-        }
-      )
-    )
+    await this.setClientSession(ctx, null)
   }
 
   async getCtxSession (ctx: HTTPMiddlewareContext) {

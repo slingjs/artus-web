@@ -3,18 +3,22 @@ import { AccountService } from '../../services/account'
 import cookie from 'cookie'
 import shared from '@sling/artus-web-shared'
 import _ from 'lodash'
-import { HTTPMiddleware, HTTPMiddlewareContext } from '../../../../plugins/plugin-http/types'
-import { USER_SESSION_COOKIE_MAX_AGE } from '../../constants'
+import { HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 import { Roles } from '@sling/artus-web-shared/types'
 import status from 'http-status'
+import { Middleware } from '@artus/pipeline'
+import { WebsocketMiddleware } from '../../../../plugins/plugin-websocket/types'
 
-export const httpInitUser = (
+export const initUser = <T extends Middleware = HTTPMiddleware> (
   options?: Partial<{
-    bypassFilter: (ctx: HTTPMiddlewareContext) => boolean
+    bypassFilter: (ctx: Parameters<T>[0]) => boolean
   }>
-): HTTPMiddleware => {
-  return async function httpInitUser (ctx, next) {
-    const { input: { params: { app, req, res } } } = ctx
+) => {
+  return <any | (T extends HTTPMiddleware ? HTTPMiddleware : WebsocketMiddleware)>async function initUser (
+    ctx,
+    next
+  ) {
+    const { input: { params: { app, req } } } = ctx
 
     const bypassFilter = _.get(options, 'bypassFilter')
     if (typeof bypassFilter === 'function' && await bypassFilter(ctx)) {
@@ -34,17 +38,7 @@ export const httpInitUser = (
         newSession
       )
       await userService.setCtxSession(ctx, newSession)
-      res.setHeader(
-        'set-cookie',
-        cookie.serialize(
-          shared.constants.USER_SESSION_KEY,
-          newSession._sessionId,
-          {
-            path: '/', // Must set this. Otherwise, it will be req.path as default.
-            maxAge: USER_SESSION_COOKIE_MAX_AGE
-          }
-        )
-      )
+      await userService.setClientSession(ctx, newSession)
     }
 
     if (!sessionCookieValue) {
@@ -73,7 +67,7 @@ export const httpInitUser = (
   }
 }
 
-export const httpAuthUser = (roles?: Roles[]): HTTPMiddleware => {
+export const authUser = (roles?: Roles[]): HTTPMiddleware | WebsocketMiddleware => {
   return async function userAuthMiddleware (ctx, next) {
     const { input: { params: { app } } } = ctx
     const userService = app

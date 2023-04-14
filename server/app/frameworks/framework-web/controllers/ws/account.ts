@@ -4,11 +4,12 @@ import {
   WebSocketEventNames,
   WebsocketMiddleware
 } from '../../../../plugins/plugin-websocket/types'
-import { websocketExecutionTimeMiddleware } from '../../middlewares/common/execution-time'
+import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
 import { WebsocketClient } from '../../../../plugins/plugin-websocket/client'
+import { initUser } from '../../middlewares/business/account'
 
 @WebsocketController('/ws/account')
-@WebsocketUse([websocketExecutionTimeMiddleware()])
+@WebsocketUse([executionTimeMiddleware<WebsocketMiddleware>(), initUser<WebsocketMiddleware>()])
 export default class AccountWsController {
   @WebsocketEvent(WebSocketEventNames.CONNECTION, { path: '/observe' })
   async handleConnection (...args: Parameters<WebsocketMiddleware>) {
