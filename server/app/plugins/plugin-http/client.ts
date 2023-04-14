@@ -33,10 +33,14 @@ export class PluginHTTPClient {
   private readonly app: ArtusApplication
 
   private server: http.Server
-  private readonly router = Router()
+  private router: ReturnType<typeof Router<Router.HTTPVersion.V1>>
 
   // Handle on retrieving registered route metadata.
   public async init (config: HTTPConfig) {
+    this.router = Router({
+      caseSensitive: !!_.get(config, 'requestPathCaseSensitive')
+    })
+
     const controllerClazzList = _.orderBy(
       this.app.container.getInjectableByTag(HTTP_CONTROLLER_TAG),
       function(controllerClazz) {

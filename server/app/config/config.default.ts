@@ -11,7 +11,8 @@ export default {
     http: {
       host: process.env.HTTP_HOST || '0.0.0.0',
       port: +process.env.HTTP_PORT! || shared.constants.SERVER_PORT, // Will use this.
-      cacheDir: path.resolve(cacheDir, 'plugins/http')
+      cacheDir: path.resolve(cacheDir, 'plugins/http'),
+      requestPathCaseSensitive: false
     },
     redis: {
       host: process.env.REDIS_HOST || 'localhost',

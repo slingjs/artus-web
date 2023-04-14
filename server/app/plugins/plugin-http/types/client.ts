@@ -6,6 +6,7 @@ import { ArtusApplication } from '@artus/core'
 export interface HTTPConfig {
   host: string
   port: number
+  requestPathCaseSensitive: boolean
 }
 
 export const ARTUS_PLUGIN_HTTP_CLIENT = 'ARTUS_PLUGIN_HTTP_CLIENT'
