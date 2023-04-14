@@ -20,16 +20,16 @@ export default class WebsocketLifecycle implements ApplicationLifecycle {
   @LifecycleHook()
   async didLoad () {
     const client = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
+    const relatedConfig = filterPluginConfig((this.app.config as AppConfig).plugin.websocket) as AppConfig['plugin']['websocket']
 
     let sharedServer: http.Server | undefined
-    try {
-      sharedServer = this.app.container.get(ARTUS_WEB_SHARED_HTTP_SERVER) as http.Server
-    } catch (e) {}
+    if (relatedConfig.useSharedHTTPServer) {
+      try {
+        sharedServer = this.app.container.get(ARTUS_WEB_SHARED_HTTP_SERVER) as http.Server
+      } catch (e) {}
+    }
 
-    await client.init(
-      filterPluginConfig((this.app.config as AppConfig).plugin.websocket) as AppConfig['plugin']['websocket'],
-      { existedServer: sharedServer }
-    )
+    await client.init(relatedConfig, { existedServer: sharedServer })
 
     if (!sharedServer) {
       const server = client.getServer()
