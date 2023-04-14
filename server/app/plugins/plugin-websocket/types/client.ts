@@ -9,6 +9,8 @@ export const ARTUS_PLUGIN_WEBSOCKET_CLIENT = 'ARTUS_PLUGIN_WEBSOCKET_CLIENT'
 
 export const ARTUS_PLUGIN_WEBSOCKET_TRIGGER = 'ARTUS_PLUGIN_WEBSOCKET_TRIGGER'
 
+export const WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY = Symbol.for('websocket#request#urlObj')
+
 export enum WebSocketEventNames {
   CONNECTION = 'connection',
   MESSAGE = 'message',
@@ -31,12 +33,16 @@ export type WebsocketHandlerArgumentsRecord = {
   req: IncomingMessage,
   socket: ws.WebSocket,
   socketServer: ws.WebSocketServer,
-  arguments: any[],
+  eventArgs: any[],
   trigger: WebsocketTrigger,
   eventName: WebsocketEventMetadata['eventName']
 }
 
-export type WebsocketHandlerOutputData = {}
+export type WebsocketEventResponseBody = undefined | string | object
+
+export type WebsocketHandlerOutputData = {
+  lastMessage: WebsocketEventResponseBody
+}
 
 export interface WebsocketMiddlewareContext extends Required<BaseContext> {
   input: Required<BaseInput<WebsocketHandlerArgumentsRecord>>
@@ -60,5 +66,3 @@ export type WebsocketEventRuleItemData = {
 export type WebsocketEventRuleItem = Map<WebsocketEventRuleItemData['event'], WebsocketEventRuleItemData>
 
 export type WebsocketEventRules = Map<WebsocketEventDecoratorOptions['path'], WebsocketEventRuleItem>
-
-export type WebsocketEventResponseBody = undefined | string | object

@@ -6,6 +6,7 @@ import {
   WebsocketMiddlewareContext
 } from './types'
 import { Pipeline } from '@artus/pipeline'
+import ws from 'ws'
 
 @Injectable({
   id: ARTUS_PLUGIN_WEBSOCKET_TRIGGER,
@@ -29,10 +30,16 @@ export class WebsocketTrigger extends Trigger {
   }
 
   async response (ctx: WebsocketMiddlewareContext, body: WebsocketEventResponseBody) {
-    const { input: { params: { socket } } } = ctx
+    const { input: { params: { socket } }, output: { data } } = ctx
 
+    data.lastMessage = body
+
+    return this.send(socket, body)
+  }
+
+  async send (socket: ws.WebSocket, body: WebsocketEventResponseBody) {
     if (Buffer.isBuffer(body) || typeof body === 'string') {
-      socket.send(body)
+      socket.send(body.toString())
 
       return
     }

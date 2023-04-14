@@ -6,6 +6,7 @@ import {
   WEBSOCKET_CONTROLLER_TAG,
   WEBSOCKET_EVENT_METADATA,
   WEBSOCKET_MIDDLEWARE_METADATA,
+  WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY,
   WebsocketConfig,
   WebsocketControllerMetadata,
   WebsocketEventMetadata,
@@ -22,6 +23,7 @@ import { WebsocketTrigger } from './trigger'
 import { Input, Output, Pipeline } from '@artus/pipeline'
 import type { AddressInfo } from 'net'
 import { trimEventPathRegExp } from './constants'
+import shared from '@sling/artus-web-shared'
 
 @Injectable({
   id: ARTUS_PLUGIN_WEBSOCKET_CLIENT,
@@ -75,6 +77,46 @@ export class WebsocketClient {
 
   getWsServer () {
     return this.wsServer
+  }
+
+  getWsServerSockets (options?: Partial<{ filter: Parameters<Array<ws.WebSocket>['filter']>[0] }>) {
+    const currentAllClients = Array.from(this.wsServer.clients.values())
+
+    const condition = _.get(options, 'filter')
+    if (typeof condition !== 'function') {
+      return currentAllClients
+    }
+
+    return currentAllClients.filter(condition)
+  }
+
+  getWsServerSameReqPathSockets (targetSocket: ws.WebSocket, options?: Partial<{ reqPathCaseInsensitive: boolean }>) {
+    return this.getWsServerSockets({
+      filter (socket) {
+        if (socket === targetSocket) {
+          return false
+        }
+
+        const targetSocketReqUrlObj = _.get(
+          targetSocket,
+          WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY
+        ) as url.UrlWithStringQuery
+        if (!targetSocketReqUrlObj) {
+          return false
+        }
+
+        const socketReqUrlObj = _.get(socket, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY) as url.UrlWithStringQuery
+        if (!socketReqUrlObj) {
+          return false
+        }
+
+        if (_.get(options, 'reqPathCaseInsensitive')) {
+          return shared.utils.compareIgnoreCase(socketReqUrlObj.path, targetSocketReqUrlObj.path)
+        }
+
+        return socketReqUrlObj.path === targetSocketReqUrlObj.path
+      }
+    })
   }
 
   initializeEventRules () {
@@ -193,11 +235,16 @@ export class WebsocketClient {
         return
       }
 
+      // Store some vital metrics.
+      _.set(socket, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY, reqUrlObj);
+
       const matchedEventRuleItem = eventRules.get(reqUrlObj.path)
       if (!(matchedEventRuleItem && matchedEventRuleItem.size)) {
         handleOnException(`No registered handler for such path: ${ reqUrlObj.path }`)
         return
       }
+
+      app.logger.info('New websocket connection arrived, request url: ', reqUrl)
 
       const enabledSocketEventNames = (Array.from(matchedEventRuleItem.keys()) as typeof this.supportedSocketEventNames)
         .filter(eventName => this.supportedSocketEventNames.includes(eventName))
@@ -208,7 +255,7 @@ export class WebsocketClient {
           return function noop () {}
         }
 
-        const dispatchEvent = async (...args: any[]) => {
+        const dispatchEvent = async (...eventArgs: any[]) => {
           const input = new Input() as WebsocketMiddlewareContext['input']
           input.params = {
             app,
@@ -216,12 +263,12 @@ export class WebsocketClient {
             socket,
             trigger,
             socketServer: this.wsServer,
-            arguments: args,
+            eventArgs,
             eventName
           }
 
           const output = new Output() as WebsocketMiddlewareContext['output']
-          output.data = {}
+          output.data = { lastMessage: undefined }
 
           const ctx = await trigger.initContext(input, output)
           const pipeline = new Pipeline()
