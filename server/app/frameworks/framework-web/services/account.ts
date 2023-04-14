@@ -43,8 +43,9 @@ import {
 } from '@sling/artus-web-shared/types'
 import { formatResponseData } from '../utils/services'
 import { AppConfig } from '../../../types'
-import { WebsocketMiddlewareContext } from '../../../plugins/plugin-websocket/types'
+import { ARTUS_PLUGIN_WEBSOCKET_CLIENT, WebsocketMiddlewareContext } from '../../../plugins/plugin-websocket/types'
 import { judgeCtxIsFromHTTP } from '../utils/middlewares'
+import { WebsocketClient } from '../../../plugins/plugin-websocket/client'
 
 dayjs.extend(dayjsUtc)
 
@@ -190,6 +191,30 @@ export class AccountService {
     })
   }
 
+  async broadcastStaleClientSessions (ctx: HTTPMiddlewareContext | WebsocketMiddlewareContext) {
+    if (judgeCtxIsFromHTTP(ctx)) {
+      return
+    }
+
+    const { input: { params: { app, socket, trigger } } } = ctx
+    const websocketClient = app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
+
+    websocketClient.getWsServerSameReqPathSockets(socket).forEach(s => {
+      trigger.send(s, {
+        trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+        command: WebsocketUserSessionClientCommandType.SET_COOKIE,
+        value: cookie.serialize(
+          shared.constants.USER_SESSION_KEY,
+          '',
+          {
+            path: '/', // Must set this. Otherwise, it will be req.path as default.
+            maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
+          }
+        )
+      } as WebsocketUserSessionClientCommandInfo)
+    })
+  }
+
   async initSession (
     _ctx: HTTPMiddlewareContext | WebsocketMiddlewareContext,
     signedInAccount?: Account,
@@ -251,6 +276,7 @@ export class AccountService {
       // Stale all related sessions.
       if (Array.isArray(foundSessionRecords)) {
         await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(ctx, r)))
+        await this.broadcastStaleClientSessions(ctx)
 
         // Rest entirely..
         foundSessionRecords = []
@@ -323,6 +349,7 @@ export class AccountService {
           // Stale all related sessions.
           if (Array.isArray(foundSessionRecords)) {
             await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(ctx, r)))
+            await this.broadcastStaleClientSessions(ctx)
           }
 
           // Stale records.
