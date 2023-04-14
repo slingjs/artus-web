@@ -41,6 +41,9 @@ importers:
       '@vicons/carbon':
         specifier: ^0.12.0
         version: 0.12.0
+      js-cookie:
+        specifier: ^3.0.1
+        version: 3.0.1
       naive-ui:
         specifier: ^2.34.3
         version: 2.34.3(vue@3.2.47)
@@ -60,6 +63,9 @@ importers:
       '@rushstack/eslint-patch':
         specifier: ^1.2.0
         version: 1.2.0
+      '@types/js-cookie':
+        specifier: ^3.0.3
+        version: 3.0.3
       '@types/jsdom':
         specifier: ^21.1.0
         version: 21.1.0
@@ -1101,6 +1107,10 @@ packages:
     dependencies:
       '@types/minimatch': 5.1.2
       '@types/node': 18.14.2
+
+  /@types/js-cookie@3.0.3:
+    resolution: {integrity: sha512-Xe7IImK09HP1sv2M/aI+48a20VX+TdRJucfq4vfRVy6nWN8PYPOEnlMRSgxJAgYQIXJVL8dZ4/ilAM7dWNaOww==}
+    dev: true
 
   /@types/jsdom@21.1.0:
     resolution: {integrity: sha512-leWreJOdnuIxq9Y70tBVm/bvTuh31DSlF/r4l7Cfi4uhVQqLHD0Q4v301GMisEMwwbMgF7ZKxuZ+Jbd4NcdmRw==}
@@ -3084,6 +3094,11 @@ packages:
       glob: 8.1.0
       nopt: 6.0.0
     dev: true
+
+  /js-cookie@3.0.1:
+    resolution: {integrity: sha512-+0rgsUXZu4ncpPxRL+lNEptWMOWl9etvPHc/koSRp6MPwpRYAhmk0dUG00J4bxVV3r9uUzfo24wW0knS07SKSw==}
+    engines: {node: '>=12'}
+    dev: false
 
   /js-sdsl@4.4.0:
     resolution: {integrity: sha512-FfVSdx6pJ41Oa+CF7RDaFmTnCaFhua+SNYQX74riGOpl96x+2jQCqEfQ2bnXu/5DPCqlRuiqyvTJM0Qjz26IVg==}
