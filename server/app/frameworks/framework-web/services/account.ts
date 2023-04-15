@@ -234,6 +234,8 @@ export class AccountService {
         value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
       } as WebsocketUserSessionClientCommandInfo)
 
+      await socket.terminate()
+
       // No need this.
       // const cookieValue = cookie.parse(
       //   cookie.serialize(
@@ -273,11 +275,13 @@ export class AccountService {
       return
     }
 
-    return websocketClientTrigger.send(wsServerSocket, {
+    await websocketClientTrigger.send(wsServerSocket, {
       trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
       command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
       value: UserSessionSignOutCausedBy.SESSION_DISTRIBUTE_EXPIRED
     } as WebsocketUserSessionClientCommandInfo)
+
+    await wsServerSocket.terminate()
 
     // No need this.
     // const cookieValue = cookie.parse(
