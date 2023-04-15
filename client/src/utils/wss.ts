@@ -1,9 +1,9 @@
 import type { WebsocketUserSessionClientCommandInfo } from '@sling/artus-web-shared/types'
 import {
   UserSessionSignOutCausedBy,
-  WebsocketUserSessionClientCommandMessageNotifyValue,
   WebsocketUserSessionClientCommandType
 } from '@sling/artus-web-shared/types'
+import type { WebsocketUserSessionClientCommandMessageNotifyValue } from '@sling/artus-web-shared/types'
 import Cookies from 'js-cookie'
 import shared from '@sling/artus-web-shared'
 import type { useUserStore } from '@/stores/user'
