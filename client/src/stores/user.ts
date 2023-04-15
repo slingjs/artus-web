@@ -9,15 +9,18 @@ import { handleAccountObserveWsMessage } from '@/utils/wss'
 import shared from '@sling/artus-web-shared'
 import * as urls from '@/apis/urls'
 import { getUserSessionSignOutCausedBy, setUserSessionSignOutCausedBy } from '@/utils/user'
+import type { useMessage } from 'naive-ui'
 
 export const useUserStore = defineStore('user', {
   state () {
     const session = reactive({} as UserSession)
     const wsHandlers = reactive({} as WsHandlers)
+    const messageHandler = undefined as ReturnType<typeof useMessage> | undefined
 
     return {
       session,
-      wsHandlers
+      wsHandlers,
+      messageHandler
     }
   },
   actions: {
@@ -31,6 +34,9 @@ export const useUserStore = defineStore('user', {
       }
 
       this.wsHandlers[wsHandler.handlerPath] = wsHandler
+    },
+    setMessageHandler (messageHandler: ReturnType<typeof useMessage>) {
+      this.messageHandler = messageHandler
     },
     judgeSessionSignedIn (session: typeof this.session) {
       return !!_.get(session, 'signedIn')

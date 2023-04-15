@@ -1,9 +1,14 @@
 import type { WebsocketUserSessionClientCommandInfo } from '@sling/artus-web-shared/types'
-import { UserSessionSignOutCausedBy, WebsocketUserSessionClientCommandType } from '@sling/artus-web-shared/types'
+import {
+  UserSessionSignOutCausedBy,
+  WebsocketUserSessionClientCommandMessageNotifyValue,
+  WebsocketUserSessionClientCommandType
+} from '@sling/artus-web-shared/types'
 import Cookies from 'js-cookie'
 import shared from '@sling/artus-web-shared'
 import type { useUserStore } from '@/stores/user'
 import { setUserSessionSignOutCausedBy } from '@/utils/user'
+import _ from 'lodash'
 
 export const handleAccountObserveWsMessage = function(
   userStore: ReturnType<typeof useUserStore>,
@@ -33,7 +38,18 @@ export const handleAccountObserveWsMessage = function(
       const value = commandInfo.value as UserSessionSignOutCausedBy
       if (value) {
         setUserSessionSignOutCausedBy(value)
-        userStore.fetchSignOut()
+      }
+
+      userStore.fetchSignOut()
+
+      break
+    }
+    case WebsocketUserSessionClientCommandType.MESSAGE_NOTIFY: {
+      if (userStore.messageHandler) {
+        const value = commandInfo.value as WebsocketUserSessionClientCommandMessageNotifyValue
+        typeof value === 'object'
+          ? userStore.messageHandler.create(value.message, _.omit(value, 'message'))
+          : userStore.messageHandler.info(value)
       }
 
       break
