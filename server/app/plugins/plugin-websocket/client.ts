@@ -235,7 +235,7 @@ export class WebsocketClient {
       const handleOnException = function(message: string = 'Something went wrong.') {
         socket.send(message)
         socket.send('Socket shutting down...')
-        socket.close()
+        socket.terminate()
       }
 
       const reqUrl = req.url
