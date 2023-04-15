@@ -8,24 +8,31 @@
       <n-form-item label='Password' path='password' first>
         <n-input v-model:value='formConfig.model.password' placeholder='' type='password' name='password' />
       </n-form-item>
-    </n-form>
-    <n-form-item>
-      <n-space>
+      <n-form-item :show-feedback='false'>
         <n-button type='primary' attr-type='button' @click.prevent='handleSubmit'>Submit</n-button>
+      </n-form-item>
+    </n-form>
+
+    <n-form-item :show-feedback='false'>
+      <n-space justify='space-between' style='width: 100%'>
+        <n-a @click='router.push({ name: "accountLandingSignUp" })'>Sign up.</n-a>
+        <n-a @click='router.push({ name: "accountLandingChangePwd" })'>Change Pwd.</n-a>
       </n-space>
     </n-form-item>
   </n-card>
 </template>
 
 <script lang='ts' setup>
-import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NH1, FormInst, useMessage } from 'naive-ui'
-import { onBeforeMount, reactive, ref } from 'vue'
+import { NCard, NForm, NFormItem, NInput, NButton, NH1, NA, NSpace, FormInst, useMessage } from 'naive-ui'
+import { reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import _ from 'lodash'
 import { preEncryptPassword } from '@/utils/string'
 import { validatePassword } from '@/utils/form'
 import { getUserSessionSignOutCausedByMessage } from '@/utils/user'
+import { sessionCache } from '@/utils/cache'
+import { USER_SIGN_IN_PRESET_EMAIL_KEY } from '@/constants'
 
 /* Data START */
 const userStore = useUserStore()
@@ -92,20 +99,16 @@ function handleSubmit () {
 /* Methods END */
 
 /* LifeCycle START */
-onBeforeMount(() => {
-  const route = useRoute()
+const presetEmail = sessionCache.getSessionCache(USER_SIGN_IN_PRESET_EMAIL_KEY, { autoRemove: true })
+if (typeof presetEmail === 'string' && presetEmail) {
+  formConfig.model.email = presetEmail
+}
 
-  const routeEmail = (route.query).email
-  if (typeof routeEmail === 'string' && routeEmail) {
-    formConfig.model.email = routeEmail
-  }
-
-  // If sign out with some reason.
-  const signOutCausedBy = getUserSessionSignOutCausedByMessage()
-  if (signOutCausedBy) {
-    message.warning(signOutCausedBy, { closable: true, duration: 0 })
-  }
-})
+// If sign out with some reason.
+const signOutCausedBy = getUserSessionSignOutCausedByMessage({ autoRemove: true })
+if (signOutCausedBy) {
+  message.warning(signOutCausedBy, { closable: true, duration: 0 })
+}
 
 /* LifeCycle END */
 </script>

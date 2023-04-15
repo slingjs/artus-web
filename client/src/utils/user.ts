@@ -1,26 +1,16 @@
 import { USER_SIGN_OUT_CAUSED_BY_KEY } from '@/constants'
-import _ from 'lodash'
 import { UserSessionSignOutCausedBy } from '@sling/artus-web-shared/types'
+import { sessionCache } from '@/utils/cache'
 
 export function setUserSessionSignOutCausedBy (causedBy: UserSessionSignOutCausedBy) {
-  return sessionStorage.setItem(USER_SIGN_OUT_CAUSED_BY_KEY, causedBy)
+  return sessionCache.setSessionCache(USER_SIGN_OUT_CAUSED_BY_KEY, causedBy)
 }
 
-export function getUserSessionSignOutCausedBy (options?: Partial<{ autoReset: boolean }>) {
-  const result = sessionStorage.getItem(USER_SIGN_OUT_CAUSED_BY_KEY) as UserSessionSignOutCausedBy | null
-
-  if (_.get(options, 'autoReset')) {
-    resetUserSessionSignOutCausedBy()
-  }
-
-  return result
+export function getUserSessionSignOutCausedBy (options?: Partial<{ autoRemove: boolean }>) {
+  return sessionCache.getSessionCache(USER_SIGN_OUT_CAUSED_BY_KEY, options) as UserSessionSignOutCausedBy | null
 }
 
-export function resetUserSessionSignOutCausedBy () {
-  return sessionStorage.removeItem(USER_SIGN_OUT_CAUSED_BY_KEY)
-}
-
-export function getUserSessionSignOutCausedByMessage (options?: Partial<{ autoReset: boolean }>) {
+export function getUserSessionSignOutCausedByMessage (options?: Partial<{ autoRemove: boolean }>) {
   const result = getUserSessionSignOutCausedBy(options)
 
   switch (result) {

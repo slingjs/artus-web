@@ -19,23 +19,39 @@
           name='confirmPassword'
         />
       </n-form-item>
-    </n-form>
-    <n-form-item>
-      <n-space>
+      <n-form-item :show-feedback='false'>
         <n-button type='primary' attr-type='button' @click.prevent='handleSubmit'>Submit</n-button>
+      </n-form-item>
+    </n-form>
+    <n-form-item :show-feedback='false'>
+      <n-space justify='space-between' style='width: 100%'>
+        <n-a @click='router.push({ name: "accountLandingSignIn" })'>Sign In.</n-a>
+        <n-a @click='router.push({ name: "accountLandingChangePwd" })'>Change Pwd.</n-a>
       </n-space>
     </n-form-item>
   </n-card>
 </template>
 
 <script lang='ts' setup>
-import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NH1, FormInst, useMessage } from 'naive-ui'
+import {
+  NCard,
+  NForm,
+  NFormItem,
+  NInput,
+  NButton,
+  NH1,
+  FormInst,
+  useMessage,
+  NA,
+  NSpace
+} from 'naive-ui'
 import { reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
 import { preEncryptPassword } from '@/utils/string'
 import _ from 'lodash'
 import { validateConfirmPasswordGenerator, validateName, validatePassword } from '@/utils/form'
+import { USER_SIGN_IN_PRESET_EMAIL_KEY } from '@/constants'
 
 /* Data START */
 const userStore = useUserStore()
@@ -115,8 +131,9 @@ function handleSubmit () {
     )
       .then(res => {
         message.success('Success!')
+        sessionStorage.setItem(USER_SIGN_IN_PRESET_EMAIL_KEY, formConfig.model.email)
         setTimeout(
-          () => router.replace({ name: 'home', query: { email: formConfig.model.email } }),
+          () => router.replace({ name: 'home' }),
           500
         )
       })

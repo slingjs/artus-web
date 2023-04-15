@@ -11,17 +11,32 @@
       <n-form-item label='OldPassword' path='oldPassword' first>
         <n-input v-model:value='formConfig.model.oldPassword' placeholder='' type='password' name='oldPassword' />
       </n-form-item>
-    </n-form>
-    <n-form-item>
-      <n-space>
+      <n-form-item :show-feedback='false'>
         <n-button type='primary' attr-type='button' @click.prevent='handleSubmit'>Submit</n-button>
+      </n-form-item>
+    </n-form>
+    <n-form-item :show-feedback='false'>
+      <n-space justify='space-between' style='width: 100%'>
+        <n-a @click='router.push({ name: "accountLandingSignIn" })'>Sign In.</n-a>
+        <n-a @click='router.push({ name: "accountLandingSignUp" })'>Sign Up.</n-a>
       </n-space>
     </n-form-item>
   </n-card>
 </template>
 
 <script lang='ts' setup>
-import { NCard, NForm, NFormItem, NInput, NButton, NSpace, NH1, FormInst, useMessage } from 'naive-ui'
+import {
+  NCard,
+  NForm,
+  NFormItem,
+  NInput,
+  NButton,
+  NH1,
+  FormInst,
+  useMessage,
+  NA,
+  NSpace
+} from 'naive-ui'
 import { reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
