@@ -34,12 +34,8 @@ export const initUser = <T extends Middleware = HTTPMiddleware> (
     const isCtxFromHTTP = judgeCtxIsFromHTTP(ctx)
 
     const initNewSession = async function initNewSession (sessionCookieValue?: string) {
-      const newSession = await userService.initSession(ctx, undefined, { _sessionId: sessionCookieValue })
-      await userService.setDistributeSession(
-        ctx,
-        newSession._sessionId,
-        newSession
-      )
+      const newSession = await userService.initSession(undefined, { _sessionId: sessionCookieValue })
+      await userService.setDistributeSession(newSession._sessionId, newSession)
       await userService.setCtxSession(ctx, newSession)
       await userService.setClientSession(ctx, newSession)
 
@@ -55,7 +51,7 @@ export const initUser = <T extends Middleware = HTTPMiddleware> (
       return await next()
     }
 
-    const sessionString = await userService.getDistributeSession(ctx, sessionCookieValue)
+    const sessionString = await userService.getDistributeSession(sessionCookieValue)
     if (!sessionString) {
       await initNewSession()
 

@@ -77,7 +77,7 @@ export default class AccountApiController {
      *
      * fetch('/api/account/sign-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ' }) })
      */
-    const result = await this.accountService.signIn(ctx, req.body, { passwordPreEncrypt: true })
+    const result = await this.accountService.signIn(req.body, { passwordPreEncrypt: true })
       .catch(e => {
         this.app.logger.error('[Error] Failed to sign in.', e)
 
@@ -95,7 +95,7 @@ export default class AccountApiController {
       return
     }
 
-    const relatedConfig = await this.accountService.getConfig(ctx)
+    const relatedConfig = await this.accountService.getConfig()
     // @ts-ignore
     await this.accountService.handleSessionCertificated(
       ctx,
@@ -142,7 +142,7 @@ export default class AccountApiController {
      *
      * fetch('/api/account/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', name: 'YouAreMySunShine' }) })
      */
-    const result = await this.accountService.signUp(ctx, req.body, { passwordPreEncrypt: true })
+    const result = await this.accountService.signUp(req.body, { passwordPreEncrypt: true })
       .catch(e => {
         this.app.logger.error('[Error] Failed to sign up.', e)
 
@@ -159,7 +159,7 @@ export default class AccountApiController {
       return
     }
 
-    const relatedConfig = await this.accountService.getConfig(ctx)
+    const relatedConfig = await this.accountService.getConfig()
     // @ts-ignore
     await this.accountService.handleSessionCertificated(
       ctx,
@@ -185,7 +185,7 @@ export default class AccountApiController {
     const [ctx, _next] = args
     const { input: { params: { searchParams, res } }, output: { data } } = ctx
 
-    const relatedConfig = await this.accountService.getConfig(ctx)
+    const relatedConfig = await this.accountService.getConfig()
     await this.accountService.signOut(
       ctx,
       {
@@ -226,7 +226,7 @@ export default class AccountApiController {
      *
      * fetch('/api/account/change-pwd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', oldPassword: '1qaz!QAZ' }) })
      */
-    const result = await this.accountService.changePwd(ctx, req.body, { passwordPreEncrypt: true })
+    const result = await this.accountService.changePwd(req.body, { passwordPreEncrypt: true })
       .catch(e => {
         this.app.logger.error('[Error] Failed to change pwd.', e)
 
@@ -243,7 +243,7 @@ export default class AccountApiController {
       return
     }
 
-    const relatedConfig = await this.accountService.getConfig(ctx)
+    const relatedConfig = await this.accountService.getConfig()
     await this.accountService.handleCertificatedSessionTampered(
       ctx,
       {

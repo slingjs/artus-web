@@ -72,22 +72,19 @@ export class AccountService {
   @Inject(ArtusInjectEnum.Application)
   private readonly app: ArtusApplication
 
-  async getConfig (ctx: HTTPMiddlewareContext) {
-    const { input: { params: { app } } } = ctx
-    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+  async getConfig () {
+    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
     const cacheKey = 'framework.web.api.account.config'
     let result = await cacheService.memory.get(cacheKey)
     if (!result) {
-      result = _.get(app.config as AppConfig, 'framework.web.api.account')
+      result = _.get(this.app.config as AppConfig, 'framework.web.api.account')
     }
 
     return result
   }
 
-  private getPrisma (ctx: HTTPMiddlewareContext) {
-    const { input: { params: { app } } } = ctx
-
-    const prismaClient = app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
+  private getPrisma () {
+    const prismaClient = this.app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
 
     return prismaClient.getPrisma<PersistentDBInstance<PrismaPluginDataSourceName.MONGO>>(
       PrismaPluginDataSourceName.MONGO
@@ -213,10 +210,9 @@ export class AccountService {
     })
   }
 
-  async broadcastStaleClientSessions (ctx: HTTPMiddlewareContext, sessionRecords: UserSessionRecords) {
-    const { input: { params: { app } } } = ctx
-    const websocketClient = app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
-    const websocketClientTrigger = app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
+  async broadcastStaleClientSessions (sessionRecords: UserSessionRecords) {
+    const websocketClient = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
+    const websocketClientTrigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
     const foundOtherSameReqPathSockets = websocketClient.filterWsServerSockets({
       filter: (s) => {
@@ -302,7 +298,6 @@ export class AccountService {
   }
 
   async initSession (
-    _ctx: HTTPMiddlewareContext | WebsocketMiddlewareContext,
     signedInAccount?: Account,
     options?: Partial<{ _sessionId: string }>
   ): Promise<UserSession> {
@@ -349,13 +344,13 @@ export class AccountService {
     const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
     const ctxPreviousSessionKeyValue = _.get(ctxPreviousSession, '_sessionId')
     const sessionKeyValue = ctxPreviousSessionKeyValue || sessionCookieValue || shared.utils.calcUUID()
-    const session = await this.initSession(ctx, signedInAccount, { _sessionId: sessionKeyValue })
+    const session = await this.initSession(signedInAccount, { _sessionId: sessionKeyValue })
     await this.setCtxSession(ctx, session)
 
     const enableMultipleSignedInSessions = _.get(options, 'enableMultipleSignedInSessions')
     const enableRecordMultipleSignedInSessions = _.get(options, 'enableRecordMultipleSignedInSessions')
     if (!enableMultipleSignedInSessions) {
-      const foundSessionRecordsString = await this.getDistributeSessionRecords(ctx, session.id)
+      const foundSessionRecordsString = await this.getDistributeSessionRecords(session.id)
       let foundSessionRecords: UserSessionRecords | null = null
       if (foundSessionRecordsString != null) {
         try {
@@ -365,8 +360,8 @@ export class AccountService {
 
       // Stale all related sessions.
       if (Array.isArray(foundSessionRecords)) {
-        await this.broadcastStaleClientSessions(ctx, foundSessionRecords)
-        await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(ctx, r)))
+        await this.broadcastStaleClientSessions(foundSessionRecords)
+        await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(r)))
 
         // Rest entirely..
         foundSessionRecords = []
@@ -375,13 +370,12 @@ export class AccountService {
       // Currently no need always to store the records.
       // Only we didn't enable multiple signed-in sessions.
       await this.setDistributeSessionRecords(
-        ctx,
         session.id,
         (foundSessionRecords || []).concat(sessionKeyValue)
       )
     } else {
       if (enableRecordMultipleSignedInSessions) {
-        const foundSessionRecordsString = await this.getDistributeSessionRecords(ctx, session.id)
+        const foundSessionRecordsString = await this.getDistributeSessionRecords(session.id)
         let foundSessionRecords: UserSessionRecords | null = null
         if (foundSessionRecordsString != null) {
           try {
@@ -390,14 +384,13 @@ export class AccountService {
         }
 
         await this.setDistributeSessionRecords(
-          ctx,
           session.id,
           (foundSessionRecords || []).concat(sessionKeyValue)
         )
       }
     }
 
-    await this.setDistributeSession(ctx, sessionKeyValue, session)
+    await this.setDistributeSession(sessionKeyValue, session)
 
     // If already set.
     if (sessionCookieValue !== sessionKeyValue) {
@@ -425,11 +418,11 @@ export class AccountService {
     if (!enableMultipleSignedInSessions) {
       let foundSession = ctxPreviousSession
       try {
-        foundSession = JSON.parse(await this.getDistributeSession(ctx, sessionKeyValue) || '')
+        foundSession = JSON.parse(await this.getDistributeSession(sessionKeyValue) || '')
       } catch (e) {}
 
       if (foundSession) {
-        const foundSessionRecordsString = await this.getDistributeSessionRecords(ctx, foundSession.id)
+        const foundSessionRecordsString = await this.getDistributeSessionRecords(foundSession.id)
         if (foundSessionRecordsString != null) {
           let foundSessionRecords: UserSessionRecords | null = null
           try {
@@ -438,22 +431,22 @@ export class AccountService {
 
           // Stale all related sessions.
           if (Array.isArray(foundSessionRecords)) {
-            await this.broadcastStaleClientSessions(ctx, foundSessionRecords)
-            await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(ctx, r)))
+            await this.broadcastStaleClientSessions(foundSessionRecords)
+            await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(r)))
           }
 
           // Stale records.
-          await this.staleDistributeSessionRecords(ctx, foundSession.id)
+          await this.staleDistributeSessionRecords(foundSession.id)
         }
       }
     } else {
       if (enableRecordMultipleSignedInSessions) {
         let foundSession = ctxPreviousSession
         try {
-          foundSession = JSON.parse(await this.getDistributeSession(ctx, sessionKeyValue) || '')
+          foundSession = JSON.parse(await this.getDistributeSession(sessionKeyValue) || '')
         } catch (e) {}
 
-        const foundSessionRecordsString = await this.getDistributeSessionRecords(ctx, foundSession.id)
+        const foundSessionRecordsString = await this.getDistributeSessionRecords(foundSession.id)
         let foundSessionRecords: UserSessionRecords | null = null
         if (foundSessionRecordsString != null) {
           try {
@@ -463,18 +456,18 @@ export class AccountService {
 
         if (Array.isArray(foundSessionRecords)) {
           _.remove(foundSessionRecords!, r => r === sessionKeyValue)
-          await this.staleDistributeSession(ctx, sessionKeyValue)
+          await this.staleDistributeSession(sessionKeyValue)
 
           foundSessionRecords!.length
-            ? await this.setDistributeSessionRecords(ctx, foundSession.id, foundSessionRecords)
-            : await this.staleDistributeSessionRecords(ctx, foundSession.id)
+            ? await this.setDistributeSessionRecords(foundSession.id, foundSessionRecords)
+            : await this.staleDistributeSessionRecords(foundSession.id)
         }
       }
     }
 
     await this.staleCtxSession(ctx)
 
-    await this.staleDistributeSession(ctx, sessionKeyValue)
+    await this.staleDistributeSession(sessionKeyValue)
 
     await this.setClientSession(ctx, null)
   }
@@ -515,106 +508,89 @@ export class AccountService {
     return storage
   }
 
-  calcDistributeCacheSessionKey (_ctx: HTTPMiddlewareContext, sessionKeyValue: string) {
+  calcDistributeCacheSessionKey (sessionKeyValue: string) {
     return 'USER.' + sessionKeyValue
   }
 
   calcDistributeCacheSessionRecordsKey (
-    _ctx: HTTPMiddlewareContext,
     userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
   ) {
     return 'USER-SESSIONS.' + userId
   }
 
-  async getDistributeSession (ctx: HTTPMiddlewareContext, sessionKeyValue: string) {
-    const { input: { params: { app } } } = ctx
-
-    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+  async getDistributeSession (sessionKeyValue: string) {
+    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
     return cacheService.distribute.get(
-      this.calcDistributeCacheSessionKey(ctx, sessionKeyValue),
+      this.calcDistributeCacheSessionKey(sessionKeyValue),
       { needRefresh: true, ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
     )
   }
 
   async getDistributeSessionRecords (
-    ctx: HTTPMiddlewareContext,
     userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
   ) {
-    const { input: { params: { app } } } = ctx
-
-    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
     return cacheService.distribute.get(
-      this.calcDistributeCacheSessionRecordsKey(ctx, userId),
+      this.calcDistributeCacheSessionRecordsKey(userId),
       { needRefresh: true, ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
     )
   }
 
-  async setDistributeSession (ctx: HTTPMiddlewareContext, sessionKeyValue: string, session: UserSession) {
-    const { input: { params: { app } } } = ctx
-
-    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+  async setDistributeSession (sessionKeyValue: string, session: UserSession) {
+    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
     return cacheService.distribute.set(
-      this.calcDistributeCacheSessionKey(ctx, sessionKeyValue),
+      this.calcDistributeCacheSessionKey(sessionKeyValue),
       JSON.stringify(session),
       { ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
     )
   }
 
   async setDistributeSessionRecords (
-    ctx: HTTPMiddlewareContext,
     userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId'],
     sessionRecords: UserSessionRecords
   ) {
-    const { input: { params: { app } } } = ctx
-
-    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
+    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
     return cacheService.distribute.set(
-      this.calcDistributeCacheSessionRecordsKey(ctx, userId),
+      this.calcDistributeCacheSessionRecordsKey(userId),
       JSON.stringify(sessionRecords),
       { ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
     )
   }
 
-  async staleDistributeSession (ctx: HTTPMiddlewareContext, sessionKeyValue: string) {
-    const { input: { params: { app } } } = ctx
+  async staleDistributeSession (sessionKeyValue: string) {
+    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
-    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
-
-    return cacheService.distribute.stale(this.calcDistributeCacheSessionKey(ctx, sessionKeyValue))
+    return cacheService.distribute.stale(this.calcDistributeCacheSessionKey(sessionKeyValue))
   }
 
   async staleDistributeSessionRecords (
-    ctx: HTTPMiddlewareContext,
     userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
   ) {
-    const { input: { params: { app } } } = ctx
+    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
-    const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
-
-    return cacheService.distribute.stale(this.calcDistributeCacheSessionRecordsKey(ctx, userId))
+    return cacheService.distribute.stale(this.calcDistributeCacheSessionRecordsKey(userId))
   }
 
-  async findInPersistentDB (ctx: HTTPMiddlewareContext, condition: Pick<Account, 'email'>) {
-    return this.getPrisma(ctx).account.findFirst({ where: condition })
+  async findInPersistentDB (condition: Pick<Account, 'email'>) {
+    return this.getPrisma().account.findFirst({ where: condition })
   }
 
   async updateOnPersistentDB (
-    ctx: HTTPMiddlewareContext,
     condition: Pick<Account, 'email'>,
     data: Partial<Pick<Account, 'password' | 'name' | 'updatedAt' | 'inactive' | 'inactiveAt' | 'lastSignedInAt'>>
   ) {
-    return this.getPrisma(ctx).account.update({
+    return this.getPrisma().account.update({
       where: condition,
       data
     })
   }
 
-  async createUponPersistentDB (ctx: HTTPMiddlewareContext, data: Account) {
-    return this.getPrisma(ctx).account.create({ data })
+  async createUponPersistentDB (data: Account) {
+    return this.getPrisma().account.create({ data })
   }
 
   @SubscribeDistributeCacheEvent(DistributeCacheEventSubscriberEventNames.KEY_EXPIRED)
@@ -627,7 +603,6 @@ export class AccountService {
   }
 
   async signIn (
-    ctx: HTTPMiddlewareContext,
     certification: Pick<Account, 'email' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean, enableMultipleSignedInSessions: boolean }>
   ) {
@@ -660,7 +635,7 @@ export class AccountService {
       })
     }
 
-    const foundAccount = await this.findInPersistentDB(ctx, { email: rectifiedCertification.email })
+    const foundAccount = await this.findInPersistentDB({ email: rectifiedCertification.email })
     if (!foundAccount) {
       return this.formatResponseData({
         code: AccountResponseDataCode.ERROR_SIGN_IN_ACCOUNT_NOT_FOUND,
@@ -683,7 +658,7 @@ export class AccountService {
     }
 
     // Update.
-    await this.updateOnPersistentDB(ctx, { email: foundAccount.email }, { lastSignedInAt: dayjs.utc().toDate() })
+    await this.updateOnPersistentDB({ email: foundAccount.email }, { lastSignedInAt: dayjs.utc().toDate() })
 
     return this.formatResponseData(
       {
@@ -695,7 +670,6 @@ export class AccountService {
   }
 
   async signUp (
-    ctx: HTTPMiddlewareContext,
     registration: Pick<Account, 'email' | 'name' | 'password'>,
     options?: Partial<{ passwordPreEncrypt: boolean, enableMultipleSignedInSessions: boolean }>
   ) {
@@ -728,7 +702,7 @@ export class AccountService {
       })
     }
 
-    const foundAccount = await this.findInPersistentDB(ctx, { email: registration.email })
+    const foundAccount = await this.findInPersistentDB({ email: registration.email })
     if (foundAccount) {
       return this.formatResponseData({
         code: AccountResponseDataCode.ERROR_SIGN_UP_DUPLICATE,
@@ -757,7 +731,7 @@ export class AccountService {
       updatedAt: dayjs.utc().toDate()
     } as Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>
     // Create user.
-    await this.createUponPersistentDB(ctx, accountData)
+    await this.createUponPersistentDB(accountData)
 
     return this.formatResponseData(
       {
@@ -773,7 +747,6 @@ export class AccountService {
   }
 
   async changePwd (
-    ctx: HTTPMiddlewareContext,
     certification: Pick<Account, 'email' | 'password'> & { oldPassword: string },
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
@@ -820,7 +793,7 @@ export class AccountService {
       })
     }
 
-    const foundAccount = await this.findInPersistentDB(ctx, { email: rectifiedCertification.email })
+    const foundAccount = await this.findInPersistentDB({ email: rectifiedCertification.email })
     if (!foundAccount) {
       return this.formatResponseData({
         code: AccountResponseDataCode.ERROR_CHANGE_PWD_ACCOUNT_NOT_FOUND,
@@ -838,7 +811,6 @@ export class AccountService {
     // Update.
     const finalPassword = encryptPassword(rectifiedPassword, foundAccount.salt)
     const finalAccount = await this.updateOnPersistentDB(
-      ctx,
       { email: rectifiedCertification.email },
       {
         password: finalPassword,
