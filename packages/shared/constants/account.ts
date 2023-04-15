@@ -13,7 +13,7 @@ export const accountPasswordPattern = new RegExp(accountPasswordPatternString, '
  * gte 6, lte 60 characters.
  * English letters and numbers.
  */
-export const accountNamePatternString = '^[a-zA-Z\d]{6,60}$'
+export const accountNamePatternString = '^[a-zA-Z\\d]{6,60}$'
 export const accountNamePattern = new RegExp(accountNamePatternString, 'u')
 
 export const accountSignOutCallbackSearchParamKey = 'callback'
