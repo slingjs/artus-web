@@ -1,3 +1,5 @@
+import { ISODateString } from './base'
+
 export enum Roles {
   ANONYMOUS = 'ANONYMOUS',
   SUPER_ADMIN = 'SUPER_ADMIN'
@@ -10,6 +12,7 @@ export interface UserSession {
   id: string
   email: string
   _sessionId: string
+  lastSignedInAt: ISODateString
 }
 
 export enum WebsocketUserSessionClientCommandType {
