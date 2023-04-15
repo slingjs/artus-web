@@ -1,4 +1,4 @@
-import { Injectable, ScopeEnum } from '@artus/core'
+import { ArtusApplication, ArtusInjectEnum, Inject, Injectable, ScopeEnum } from '@artus/core'
 import shared from '@sling/artus-web-shared'
 import {
   AccountResponseData,
@@ -6,6 +6,7 @@ import {
   ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
   ARTUS_FRAMEWORK_WEB_CACHE_SERVICE,
   ARTUS_FRAMEWORK_WEB_USER_NAMESPACE,
+  DistributeCacheEventSubscriberEventNames,
   PersistentDBInstance,
   ResponseDataStatus,
   UserSessionRecords
@@ -18,7 +19,10 @@ import {
   USER_DISTRIBUTE_CACHE_DEFAULT_TTL,
   USER_SESSION_COOKIE_MAX_AGE,
   USER_SESSION_COOKIE_MAX_AGE_REMEMBERED,
-  USER_SESSION_COOKIE_MAX_AGE_REMOVED, WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH
+  USER_SESSION_COOKIE_MAX_AGE_REMOVED,
+  userSessionIdPattern,
+  userSessionIdReplacePattern,
+  WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH
 } from '../constants'
 import { Account } from '../models/mongo/generated/client'
 import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
@@ -46,7 +50,8 @@ import { formatResponseData } from '../utils/services'
 import { AppConfig } from '../../../types'
 import {
   ARTUS_PLUGIN_WEBSOCKET_CLIENT,
-  ARTUS_PLUGIN_WEBSOCKET_TRIGGER, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY,
+  ARTUS_PLUGIN_WEBSOCKET_TRIGGER,
+  WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY,
   WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY,
   WebsocketMiddlewareContext
 } from '../../../plugins/plugin-websocket/types'
@@ -54,14 +59,19 @@ import { judgeCtxIsFromHTTP } from '../utils/middlewares'
 import { WebsocketClient } from '../../../plugins/plugin-websocket/client'
 import { WebsocketTrigger } from '../../../plugins/plugin-websocket/trigger'
 import url from 'url'
+import { SubscribeDistributeCacheEvent, SubscribeDistributeCacheEventUnit } from './cache/distribute'
 
 dayjs.extend(dayjsUtc)
 
+@SubscribeDistributeCacheEventUnit()
 @Injectable({
   id: ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
   scope: ScopeEnum.SINGLETON
 })
 export class AccountService {
+  @Inject(ArtusInjectEnum.Application)
+  private readonly app: ArtusApplication
+
   async getConfig (ctx: HTTPMiddlewareContext) {
     const { input: { params: { app } } } = ctx
     const cacheService = app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
@@ -208,7 +218,7 @@ export class AccountService {
     const websocketClient = app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
     const websocketClientTrigger = app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
-    websocketClient.filterWsServerSockets({
+    const foundOtherSameReqPathSockets = websocketClient.filterWsServerSockets({
       filter: (s) => {
         const socketReqUrlObj = _.get(s, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY) as url.UrlWithStringQuery
         if (!socketReqUrlObj) {
@@ -219,8 +229,10 @@ export class AccountService {
         return socketReqUrlObj.path === WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH &&
           sessionRecords.includes(this.getWsSocketSessionKey(s))
       }
-    }).forEach(s => {
-      websocketClientTrigger.send(s, {
+    });
+
+    for (const socket of foundOtherSameReqPathSockets) {
+      await websocketClientTrigger.send(socket, {
         trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
         command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
         value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
@@ -242,7 +254,51 @@ export class AccountService {
       //   command: WebsocketUserSessionClientCommandType.SET_COOKIE,
       //   value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
       // } as WebsocketUserSessionClientCommandInfo)
+    }
+  }
+
+  async staleClientSession (sessionKeyValue: string) {
+    const websocketClient = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
+    const websocketClientTrigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
+
+    const wsServerSocket = websocketClient.findWsServerSocket({
+      find: (s) => {
+        const sessionId = _.get(s, WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY) as UserSession['_sessionId']
+        if (sessionId == null) {
+          return false
+        }
+
+        // Find the same account signed-in session's related sockets.
+        return sessionId === sessionKeyValue
+      }
     })
+
+    if (!wsServerSocket) {
+      return
+    }
+
+    return websocketClientTrigger.send(wsServerSocket, {
+      trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+      command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+      value: UserSessionSignOutCausedBy.SESSION_DISTRIBUTE_EXPIRED
+    } as WebsocketUserSessionClientCommandInfo)
+
+    // No need this.
+    // const cookieValue = cookie.parse(
+    //   cookie.serialize(
+    //     shared.constants.USER_SESSION_KEY,
+    //     '',
+    //     {
+    //       path: '/', // Must set this. Otherwise, it will be req.path as default.
+    //       maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
+    //     }
+    //   )
+    // )
+    // websocketClientTrigger.send(s, {
+    //   trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+    //   command: WebsocketUserSessionClientCommandType.SET_COOKIE,
+    //   value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
+    // } as WebsocketUserSessionClientCommandInfo)
   }
 
   async initSession (
@@ -559,6 +615,15 @@ export class AccountService {
 
   async createUponPersistentDB (ctx: HTTPMiddlewareContext, data: Account) {
     return this.getPrisma(ctx).account.create({ data })
+  }
+
+  @SubscribeDistributeCacheEvent(DistributeCacheEventSubscriberEventNames.KEY_EXPIRED)
+  async handleDistributeSessionKeyExpired (sessionKeyValue: string) {
+    if (!(sessionKeyValue && userSessionIdPattern.test(sessionKeyValue))) {
+      return
+    }
+
+    return this.staleClientSession(sessionKeyValue.replace(userSessionIdReplacePattern, ''))
   }
 
   async signIn (

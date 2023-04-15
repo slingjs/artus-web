@@ -93,9 +93,9 @@ export class WebsocketClient {
   findWsServerSocket (options: { find: Parameters<Array<ws.WebSocket>['filter']>[0] }) {
     const currentAllClients = Array.from(this.wsServer.clients.values())
 
-    const condition = _.get(options, 'filter')
+    const condition = _.get(options, 'find')
     if (typeof condition !== 'function') {
-      return currentAllClients
+      return undefined
     }
 
     return currentAllClients.find(condition)

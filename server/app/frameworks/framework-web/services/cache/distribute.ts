@@ -21,6 +21,10 @@ import {
   DISTRIBUTE_CACHE_SET_SUCCESS_VALUE,
   DISTRIBUTE_CACHE_SUCCESS_VALUE
 } from '../../constants'
+import {
+  SubscribeRedisEvent,
+  SubscribeRedisEventUnit
+} from '../../../../plugins/plugin-redis/decorator'
 
 @Injectable({
   id: ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE,
@@ -128,4 +132,12 @@ export class DistributeCache {
   async clear () {
     return await this.client.flushdb() === DISTRIBUTE_CACHE_CLEAR_SUCCESS_VALUE
   }
+}
+
+export function SubscribeDistributeCacheEvent (...args: Parameters<typeof SubscribeRedisEvent>) {
+  return SubscribeRedisEvent(...args)
+}
+
+export function SubscribeDistributeCacheEventUnit () {
+  return SubscribeRedisEventUnit()
 }

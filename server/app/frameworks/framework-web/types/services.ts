@@ -5,6 +5,7 @@ import {
   PrismaPluginDataSourceName
 } from '../../../plugins/plugin-prisma/types'
 import { Roles, UserSession } from '@sling/artus-web-shared/types'
+import { RedisEventSubscriberEventNames } from '../../../plugins/plugin-redis/types'
 
 export const ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE = 'ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE'
 export const ARTUS_FRAMEWORK_WEB_FILE_SERVICE = 'ARTUS_FRAMEWORK_WEB_FILE_SERVICE'
@@ -12,6 +13,8 @@ export const ARTUS_FRAMEWORK_WEB_PAGE_SERVICE = 'ARTUS_FRAMEWORK_WEB_PAGE_SERVIC
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE'
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE'
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY'
+
+export const DistributeCacheEventSubscriberEventNames = RedisEventSubscriberEventNames;
 
 export enum ResponseDataStatus {
   SUCCESS = 'SUCCESS',

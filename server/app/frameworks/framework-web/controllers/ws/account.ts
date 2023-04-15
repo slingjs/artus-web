@@ -7,6 +7,11 @@ import {
 import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
 import { WebsocketClient } from '../../../../plugins/plugin-websocket/client'
 import { initUser } from '../../middlewares/business/account'
+import {
+  WebsocketUserSessionClientCommandInfo,
+  WebsocketUserSessionClientCommandTrigger,
+  WebsocketUserSessionClientCommandType
+} from '@sling/artus-web-shared/types'
 
 @WebsocketController('/ws/account')
 @WebsocketUse([executionTimeMiddleware<WebsocketMiddleware>(), initUser<WebsocketMiddleware>()])
@@ -15,7 +20,11 @@ export default class AccountWsController {
   async handleConnection (...args: Parameters<WebsocketMiddleware>) {
     const [ctx, next] = args
 
-    await ctx.input.params.trigger.response(ctx, 'Connected!')
+    await ctx.input.params.trigger.response(ctx, {
+      command: WebsocketUserSessionClientCommandType.MESSAGE_NOTIFY,
+      value: 'Websocket session connected!',
+      trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM
+    } as WebsocketUserSessionClientCommandInfo)
 
     await next()
   }
