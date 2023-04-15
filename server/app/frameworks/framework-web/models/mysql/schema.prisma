@@ -9,15 +9,16 @@ generator client {
 }
 
 model Account {
-  id         Int       @id @default(autoincrement())
-  userId     String    @unique
-  email      String    @unique
-  name       String
-  roles      String
-  salt       String // UUID
-  password   String
-  createdAt  DateTime? @default(now())
-  updatedAt  DateTime? @default(now())
-  inactive   Boolean   @default(false)
-  inactiveAt DateTime?
+  id             Int       @id @default(autoincrement())
+  userId         String    @unique
+  email          String    @unique
+  name           String
+  roles          String
+  salt           String // UUID
+  password       String
+  createdAt      DateTime? @default(now())
+  updatedAt      DateTime? @default(now())
+  lastSignedInAt DateTime?
+  inactive       Boolean   @default(false)
+  inactiveAt     DateTime?
 }

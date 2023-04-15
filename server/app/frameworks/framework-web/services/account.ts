@@ -259,7 +259,8 @@ export class AccountService {
         signedIn: false,
         id: uuid,
         email: '',
-        _sessionId: _.get(options, '_sessionId') || shared.utils.calcUUID()
+        _sessionId: _.get(options, '_sessionId') || shared.utils.calcUUID(),
+        lastSignedInAt: ''
       }
     }
 
@@ -270,7 +271,10 @@ export class AccountService {
       signedIn: true,
       id: signedInAccount.userId,
       email: signedInAccount.email,
-      _sessionId: _.get(options, '_sessionId') || shared.utils.calcUUID()
+      _sessionId: _.get(options, '_sessionId') || shared.utils.calcUUID(),
+      lastSignedInAt: signedInAccount.lastSignedInAt
+        ? dayjs.utc(signedInAccount.lastSignedInAt).toISOString()
+        : ''
     }
   }
 
@@ -545,12 +549,16 @@ export class AccountService {
   async updateOnPersistentDB (
     ctx: HTTPMiddlewareContext,
     condition: Pick<Account, 'email'>,
-    data: Partial<Pick<Account, 'password' | 'name' | 'updatedAt' | 'inactive' | 'inactiveAt'>>
+    data: Partial<Pick<Account, 'password' | 'name' | 'updatedAt' | 'inactive' | 'inactiveAt' | 'lastSignedInAt'>>
   ) {
     return this.getPrisma(ctx).account.update({
       where: condition,
-      data: _.merge({ updatedAt: dayjs.utc().toDate() }, data)
+      data
     })
+  }
+
+  async createUponPersistentDB (ctx: HTTPMiddlewareContext, data: Account) {
+    return this.getPrisma(ctx).account.create({ data })
   }
 
   async signIn (
@@ -608,6 +616,9 @@ export class AccountService {
         status: ResponseDataStatus.FAIL
       })
     }
+
+    // Update.
+    await this.updateOnPersistentDB(ctx, { email: foundAccount.email }, { lastSignedInAt: dayjs.utc().toDate() })
 
     return this.formatResponseData(
       {
@@ -676,12 +687,12 @@ export class AccountService {
       password: finalPassword,
       salt,
       userId: shared.utils.calcUUID(),
-      roles: [Roles.ANONYMOUS]
+      roles: [Roles.ANONYMOUS],
+      createdAt: dayjs.utc().toDate(),
+      updatedAt: dayjs.utc().toDate()
     } as Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>
     // Create user.
-    await this.getPrisma(ctx).account.create({
-      data: accountData
-    })
+    await this.createUponPersistentDB(ctx, accountData)
 
     return this.formatResponseData(
       {
@@ -765,7 +776,8 @@ export class AccountService {
       ctx,
       { email: rectifiedCertification.email },
       {
-        password: finalPassword
+        password: finalPassword,
+        updatedAt: dayjs.utc().toDate()
       }
     )
 
