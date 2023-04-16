@@ -404,7 +404,11 @@ export class AccountService {
 
   async handleCertificatedSessionTampered (
     ctx: HTTPMiddlewareContext,
-    options?: Partial<{ enableMultipleSignedInSessions: boolean, enableRecordMultipleSignedInSessions: boolean }>
+    options?: Partial<{
+      enableMultipleSignedInSessions: boolean,
+      enableRecordMultipleSignedInSessions: boolean,
+      fallbackSessionRecordsPersistentDBCondition: Parameters<AccountService['findInPersistentDB']>
+    }>
   ) {
     const { input: { params: { req } } } = ctx
 
@@ -417,6 +421,45 @@ export class AccountService {
       return
     }
 
+    const getFormattedSessionRecords = async (
+      userSession: UserSession,
+      options?: Partial<{
+        fallbackSessionRecordsPersistentDBCondition: Parameters<AccountService['findInPersistentDB']>
+      }>
+    ) => {
+      let foundSessionRecordsString = await this.getDistributeSessionRecords(userSession.id)
+      let foundSessionRecords: UserSessionRecords | null = null
+      if (foundSessionRecordsString != null) {
+        try {
+          foundSessionRecords = JSON.parse(foundSessionRecordsString || '')
+        } catch (e) {}
+      }
+
+      if (!_.isEmpty(foundSessionRecords)) {
+        return foundSessionRecords
+      }
+
+      const fallbackSessionRecordsPersistentDBCondition = _.get(options, 'fallbackSessionRecordsPersistentDBCondition')
+      if (_.isEmpty(fallbackSessionRecordsPersistentDBCondition)) {
+        return null
+      }
+
+      const foundMatchedPersistentDBAccount = await this.findInPersistentDB(fallbackSessionRecordsPersistentDBCondition as any)
+      if (!foundMatchedPersistentDBAccount) {
+        return null
+      }
+
+      const accountUserId = foundMatchedPersistentDBAccount.userId
+      foundSessionRecordsString = await this.getDistributeSessionRecords(accountUserId)
+      if (foundSessionRecordsString != null) {
+        try {
+          return JSON.parse(foundSessionRecordsString || '') as UserSessionRecords
+        } catch (e) {}
+      }
+
+      return null
+    }
+
     const enableMultipleSignedInSessions = _.get(options, 'enableMultipleSignedInSessions')
     const enableRecordMultipleSignedInSessions = _.get(options, 'enableRecordMultipleSignedInSessions')
     if (!enableMultipleSignedInSessions) {
@@ -426,22 +469,15 @@ export class AccountService {
       } catch (e) {}
 
       if (foundSession) {
-        const foundSessionRecordsString = await this.getDistributeSessionRecords(foundSession.id)
-        if (foundSessionRecordsString != null) {
-          let foundSessionRecords: UserSessionRecords | null = null
-          try {
-            foundSessionRecords = JSON.parse(foundSessionRecordsString || '')
-          } catch (e) {}
-
-          // Stale all related sessions.
-          if (Array.isArray(foundSessionRecords)) {
-            await this.broadcastStaleClientSessions(foundSessionRecords)
-            await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(r)))
-          }
-
-          // Stale records.
-          await this.staleDistributeSessionRecords(foundSession.id)
+        const foundSessionRecords = await getFormattedSessionRecords(foundSession, options)
+        // Stale all related sessions.
+        if (Array.isArray(foundSessionRecords)) {
+          await this.broadcastStaleClientSessions(foundSessionRecords)
+          await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(r)))
         }
+
+        // Stale records.
+        await this.staleDistributeSessionRecords(foundSession.id)
       }
     } else {
       if (enableRecordMultipleSignedInSessions) {
@@ -450,21 +486,17 @@ export class AccountService {
           foundSession = JSON.parse(await this.getDistributeSession(sessionKeyValue) || '')
         } catch (e) {}
 
-        const foundSessionRecordsString = await this.getDistributeSessionRecords(foundSession.id)
-        let foundSessionRecords: UserSessionRecords | null = null
-        if (foundSessionRecordsString != null) {
-          try {
-            foundSessionRecords = JSON.parse(foundSessionRecordsString || '')
-          } catch (e) {}
-        }
+        if (foundSession) {
+          const foundSessionRecords = await getFormattedSessionRecords(foundSession, options)
 
-        if (Array.isArray(foundSessionRecords)) {
-          _.remove(foundSessionRecords!, r => r === sessionKeyValue)
-          await this.staleDistributeSession(sessionKeyValue)
+          if (Array.isArray(foundSessionRecords)) {
+            _.remove(foundSessionRecords!, r => r === sessionKeyValue)
+            await this.staleDistributeSession(sessionKeyValue)
 
-          foundSessionRecords!.length
-            ? await this.setDistributeSessionRecords(foundSession.id, foundSessionRecords)
-            : await this.staleDistributeSessionRecords(foundSession.id)
+            foundSessionRecords!.length
+              ? await this.setDistributeSessionRecords(foundSession.id, foundSessionRecords)
+              : await this.staleDistributeSessionRecords(foundSession.id)
+          }
         }
       }
     }

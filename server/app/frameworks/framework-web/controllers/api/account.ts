@@ -248,7 +248,8 @@ export default class AccountApiController {
       ctx,
       {
         enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
+        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
+        fallbackSessionRecordsPersistentDBCondition: _.pick(req.body, 'email') as any
       }
     )
 
