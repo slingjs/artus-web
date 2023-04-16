@@ -110,4 +110,8 @@ export class RedisClient {
   getRedis () {
     return this.redis
   }
+
+  getSubscriber () {
+    return this.subscriber
+  }
 }

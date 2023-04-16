@@ -26,6 +26,11 @@ export default class RedisLifecycle implements ApplicationLifecycle {
       this.app.logger.error(e)
       this.app.close(true)
     })
+
+    client.getSubscriber()?.once('error', e => {
+      this.app.logger.error(e)
+      this.app.close(true)
+    })
   }
 
   @LifecycleHook()
