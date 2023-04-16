@@ -43,6 +43,7 @@ import { useRouter } from 'vue-router'
 import { preEncryptPassword } from '@/utils/string'
 import _ from 'lodash'
 import { validateConfirmPasswordGenerator, validatePassword } from '@/utils/form'
+import { USER_SIGN_IN_PRESET_EMAIL_KEY } from '@/constants'
 
 /* Data START */
 const userStore = useUserStore()
@@ -114,8 +115,9 @@ function handleSubmit () {
     )
       .then(res => {
         message.success('Success!')
+        sessionStorage.setItem(USER_SIGN_IN_PRESET_EMAIL_KEY, formConfig.model.email)
         setTimeout(
-          () => router.replace({ name: 'accountLandingSignIn', query: { email: formConfig.model.email } }),
+          () => router.replace({ name: 'accountLandingSignIn' }),
           500
         )
       })
