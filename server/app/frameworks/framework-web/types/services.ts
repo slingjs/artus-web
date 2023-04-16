@@ -155,3 +155,12 @@ export interface AccountResponseData<AccountType = any> extends ResponseData {
 }
 
 export type UserSessionRecords = Array<UserSession['_sessionId']>
+
+export enum UserSessionTamperedFromMethodType {
+  CHANGE_PWD = 'change-pwd',
+  SIGN_OUT = 'sign-out'
+}
+
+export enum UserSessionCertificatedFromMethodType {
+  SIGN_IN = 'sign-in'
+}

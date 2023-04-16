@@ -9,7 +9,9 @@ import {
   DistributeCacheEventSubscriberEventNames,
   PersistentDBInstance,
   ResponseDataStatus,
-  UserSessionRecords
+  UserSessionCertificatedFromMethodType,
+  UserSessionRecords,
+  UserSessionTamperedFromMethodType
 } from '../types'
 import { HTTPMiddlewareContext } from '../../../plugins/plugin-http/types'
 import { CacheService } from './cache'
@@ -210,7 +212,10 @@ export class AccountService {
     })
   }
 
-  async broadcastStaleClientSessions (sessionRecords: UserSessionRecords) {
+  async broadcastStaleClientSessions (
+    sessionRecords: UserSessionRecords,
+    sessionClientCommandInfo: WebsocketUserSessionClientCommandInfo
+  ) {
     const websocketClient = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
     const websocketClientTrigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
@@ -228,11 +233,7 @@ export class AccountService {
     });
 
     for (const socket of foundOtherSameReqPathSockets) {
-      await websocketClientTrigger.send(socket, {
-        trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-        command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
-        value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
-      } as WebsocketUserSessionClientCommandInfo)
+      await websocketClientTrigger.send(socket, sessionClientCommandInfo)
 
       await socket.terminate()
 
@@ -247,15 +248,14 @@ export class AccountService {
       //     }
       //   )
       // )
-      // websocketClientTrigger.send(s, {
-      //   trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-      //   command: WebsocketUserSessionClientCommandType.SET_COOKIE,
-      //   value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
-      // } as WebsocketUserSessionClientCommandInfo)
+      // websocketClientTrigger.send(s, sessionClientCommandInfo)
     }
   }
 
-  async staleClientSession (sessionKeyValue: string) {
+  async staleClientSession (
+    sessionKeyValue: string,
+    sessionClientCommandInfo: WebsocketUserSessionClientCommandInfo
+  ) {
     const websocketClient = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
     const websocketClientTrigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
@@ -275,11 +275,7 @@ export class AccountService {
       return
     }
 
-    await websocketClientTrigger.send(wsServerSocket, {
-      trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-      command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
-      value: UserSessionSignOutCausedBy.SESSION_DISTRIBUTE_EXPIRED
-    } as WebsocketUserSessionClientCommandInfo)
+    await websocketClientTrigger.send(wsServerSocket, sessionClientCommandInfo)
 
     await wsServerSocket.terminate()
 
@@ -294,11 +290,7 @@ export class AccountService {
     //     }
     //   )
     // )
-    // websocketClientTrigger.send(s, {
-    //   trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-    //   command: WebsocketUserSessionClientCommandType.SET_COOKIE,
-    //   value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
-    // } as WebsocketUserSessionClientCommandInfo)
+    // websocketClientTrigger.send(s, sessionClientCommandInfo)
   }
 
   async initSession (
@@ -339,7 +331,8 @@ export class AccountService {
     options?: Partial<{
       keepSignedIn: boolean,
       enableMultipleSignedInSessions: boolean,
-      enableRecordMultipleSignedInSessions: boolean
+      enableRecordMultipleSignedInSessions: boolean,
+      methodType: UserSessionCertificatedFromMethodType
     }>
   ) {
     const { input: { params: { req } } } = ctx
@@ -364,7 +357,14 @@ export class AccountService {
 
       // Stale all related sessions.
       if (Array.isArray(foundSessionRecords)) {
-        await this.broadcastStaleClientSessions(foundSessionRecords)
+        await this.broadcastStaleClientSessions(
+          foundSessionRecords,
+          {
+            trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+            command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+            value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
+          } as WebsocketUserSessionClientCommandInfo
+        )
         await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(r)))
 
         // Rest entirely..
@@ -407,7 +407,8 @@ export class AccountService {
     options?: Partial<{
       enableMultipleSignedInSessions: boolean,
       enableRecordMultipleSignedInSessions: boolean,
-      fallbackSessionRecordsPersistentDBCondition: Parameters<AccountService['findInPersistentDB']>
+      fallbackSessionRecordsPersistentDBCondition: Parameters<AccountService['findInPersistentDB']>,
+      methodType: UserSessionTamperedFromMethodType
     }>
   ) {
     const { input: { params: { req } } } = ctx
@@ -472,7 +473,21 @@ export class AccountService {
         const foundSessionRecords = await getFormattedSessionRecords(foundSession, options)
         // Stale all related sessions.
         if (Array.isArray(foundSessionRecords)) {
-          await this.broadcastStaleClientSessions(foundSessionRecords)
+          const sessionClientCommandInfo = _.get(options, 'methodType') === UserSessionTamperedFromMethodType.CHANGE_PWD
+            ? {
+              trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+              command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+              value: UserSessionSignOutCausedBy.SESSION_CREDENTIAL_MODIFIED
+            }
+            : {
+              trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+              command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+              value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
+            }
+          await this.broadcastStaleClientSessions(
+            foundSessionRecords,
+            sessionClientCommandInfo as WebsocketUserSessionClientCommandInfo
+          )
           await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(r)))
         }
 
@@ -635,7 +650,14 @@ export class AccountService {
       return
     }
 
-    return this.staleClientSession(sessionKeyValue.replace(userSessionIdReplacePattern, ''))
+    return this.staleClientSession(
+      sessionKeyValue.replace(userSessionIdReplacePattern, ''),
+      {
+        trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+        command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+        value: UserSessionSignOutCausedBy.SESSION_DISTRIBUTE_EXPIRED
+      } as WebsocketUserSessionClientCommandInfo
+    )
   }
 
   async signIn (

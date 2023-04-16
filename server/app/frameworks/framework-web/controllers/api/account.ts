@@ -1,7 +1,13 @@
 import { ArtusApplication, ArtusInjectEnum, Inject } from '@artus/core'
 import { HTTPController, HTTPRoute, Post, Use } from '../../../../plugins/plugin-http/decorator'
 import { AccountService } from '../../services/account'
-import { AccountResponseDataCode, ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, ResponseDataStatus } from '../../types'
+import {
+  AccountResponseDataCode,
+  ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE,
+  ResponseDataStatus,
+  UserSessionCertificatedFromMethodType,
+  UserSessionTamperedFromMethodType
+} from '../../types'
 import { initUser } from '../../middlewares/business/account'
 import { HTTPMethod, HTTPMiddleware } from '../../../../plugins/plugin-http/types'
 import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
@@ -102,7 +108,8 @@ export default class AccountApiController {
       accountData,
       {
         enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
+        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
+        methodType: UserSessionCertificatedFromMethodType.SIGN_IN
       }
     )
 
@@ -190,7 +197,8 @@ export default class AccountApiController {
       ctx,
       {
         enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
+        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
+        methodType: UserSessionTamperedFromMethodType.SIGN_OUT
       }
     )
 
@@ -249,7 +257,8 @@ export default class AccountApiController {
       {
         enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
         enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
-        fallbackSessionRecordsPersistentDBCondition: _.pick(req.body, 'email') as any
+        fallbackSessionRecordsPersistentDBCondition: _.pick(req.body, 'email') as any,
+        methodType: UserSessionTamperedFromMethodType.CHANGE_PWD
       }
     )
 
