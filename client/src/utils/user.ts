@@ -18,10 +18,13 @@ export function getUserSessionSignOutCausedByMessage (options?: Partial<{ autoRe
       return ''
     }
     case UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS: {
-      return 'Your signed-in session has been evicted!'
+      return 'Your signed-in session has been evicted due to another new sign-in request permitted!'
     }
     case UserSessionSignOutCausedBy.SESSION_DISTRIBUTE_EXPIRED: {
-      return 'Your signed-in session has been expired.'
+      return 'Your signed-in session expired.'
+    }
+    case UserSessionSignOutCausedBy.SESSION_CREDENTIAL_MODIFIED: {
+      return 'Your signed-in session has been evicted due to your account credential modified.'
     }
   }
 
