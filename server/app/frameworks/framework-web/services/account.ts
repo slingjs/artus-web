@@ -560,13 +560,13 @@ export class AccountService {
   }
 
   calcDistributeCacheSessionKey (sessionKeyValue: string) {
-    return 'USER.' + sessionKeyValue
+    return 'USER:' + sessionKeyValue
   }
 
   calcDistributeCacheSessionRecordsKey (
     userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
   ) {
-    return 'USER-SESSIONS.' + userId
+    return 'USER-SESSIONS:' + userId
   }
 
   async getDistributeSession (sessionKeyValue: string) {
