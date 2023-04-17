@@ -7,7 +7,7 @@ export const MEMORY_CACHE_DEFAULT_TTL = 5 * 60 * 1000 // ms.
 
 export const USER_DISTRIBUTE_CACHE_DEFAULT_TTL = 30 * 60 * 1000 // ms.
 
-export const ACCESSIBLE_ACCOUNT_PROPERTIES = ['email', 'name', 'roles', 'userId'] as const
+export const ACCESSIBLE_ACCOUNT_PROPERTIES = ['email', 'name', 'roles', 'userId', 'lastSignedInAt'] as const
 export const USER_SESSION_COOKIE_MAX_AGE = 60 * 30 // s.
 export const USER_SESSION_COOKIE_MAX_AGE_REMEMBERED = 60 * 60 * 24 // s.
 export const USER_SESSION_COOKIE_MAX_AGE_REMOVED = -1 // s.
