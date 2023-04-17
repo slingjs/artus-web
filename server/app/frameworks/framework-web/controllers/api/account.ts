@@ -64,7 +64,7 @@ export default class AccountApiController {
     const [ctx, _next] = args
 
     const { input: { params: { req } }, output: { data } } = ctx
-    const ctxSession = await this.accountService.getCtxSession(ctx)
+    let ctxSession = await this.accountService.getCtxSession(ctx)
     if (ctxSession.signedIn) {
       data.status = status.BAD_REQUEST
       data.body = this.accountService.formatResponseData({
@@ -113,13 +113,17 @@ export default class AccountApiController {
       }
     )
 
+    ctxSession = await this.accountService.getCtxSession(ctx)
     data.status = status.OK
     data.body = this.accountService.formatResponseData(
       {
         code: AccountResponseDataCode.SUCCESS_SIGN_IN_SUCCESS,
         status: ResponseDataStatus.SUCCESS
       },
-      accountData
+      ctxSession,
+      {
+        useCtxAccount: true
+      }
     )
 
     return
