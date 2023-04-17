@@ -264,7 +264,7 @@ export class WebsocketClient {
         return
       }
 
-      app.logger.info('New websocket connection arrived, request url: ', reqUrl)
+      app.logger.info('New websocket connection arrived, request url:', reqUrl)
 
       const enabledSocketEventNames = (Array.from(matchedEventRuleItem.keys()) as typeof this.supportedSocketEventNames)
         .filter(eventName => this.supportedSocketEventNames.includes(eventName))
