@@ -142,7 +142,8 @@ export class WebsocketClient {
         ) as WebsocketControllerMetadata
 
         return _.get(controllerMetadata, 'options.order') ?? 0
-      }
+      },
+      'asc'
     )
 
     for (const controllerClazz of wsControllerClazzList) {
@@ -217,7 +218,8 @@ export class WebsocketClient {
             eventPathRuleItemWithEventName.metadata,
             function(metadata) {
               return _.get(metadata, 'options.order') ?? 0
-            }
+            },
+            'asc'
           )
         }
       }

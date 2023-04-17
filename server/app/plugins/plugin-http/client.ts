@@ -48,7 +48,7 @@ export class PluginHTTPClient {
 
         return _.get(controllerMetadata, 'options.order') ?? 0
       },
-      'desc'
+      'asc'
     )
 
     for (const controllerClazz of controllerClazzList) {
