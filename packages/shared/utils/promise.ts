@@ -20,3 +20,25 @@ export function generateOperablePromise<T = any> (invoker?: Function) {
     reject: reject!
   }
 }
+
+/**
+ * Promise timeout.
+ * @param promise {Promise<*>}
+ * @param params {{ timeout: number, [errorMsg]: string }}
+ * @return Promise<*>
+ */
+export function promiseTimeout <T>(promise: Promise<T>, params: { timeout: number, errorMsg?: string }) {
+  const timeoutP = new Promise(function(resolve, reject) {
+    setTimeout(
+      function() {
+        reject(new Error(params.errorMsg || 'Promise timeout.'))
+      },
+      params.timeout
+    )
+  })
+
+  return Promise.race([promise, timeoutP])
+    .then(function(r) {
+      return promise
+    })
+}
