@@ -1,10 +1,20 @@
 {
-    "cSpell.words": [
-        "ARTUS",
-        "Clazz",
-        "codepaths",
-        "tsbuildinfo",
-        "artusjs",
-        "wangziling"
-    ]
+  "cSpell.words": [
+    "ARTUS",
+    "Clazz",
+    "codepaths",
+    "tsbuildinfo",
+    "artusjs",
+    "wangziling",
+    "vicons",
+    "pinia",
+    "rushstack"
+  ],
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
