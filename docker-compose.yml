@@ -1,0 +1,52 @@
+version: '3'
+
+networks:
+  sling-net:
+    driver: bridge
+
+services:
+  sling-web-mongo:
+    image: mongo:latest
+    container_name: sling-web-mongo
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "27017:27017"
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip", "localhost,sling-web-mongo", "--replSet", "rs0" ]
+    healthcheck:
+      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet) -eq 1
+      interval: 10s
+    networks:
+      - sling-net
+  sling-web-redis:
+    image: redis:latest
+    container_name: sling-web-redis
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "6379:6379"
+    command:
+      - /bin/bash
+      - -c
+      - redis-server --appendonly yes --requirepass "123456"
+    networks:
+      - sling-net
+  app:
+    build:
+      context: .
+    container_name: app
+    ports:
+      - "9527:9527"
+    restart: always
+    environment:
+      - TZ=Asia/Shanghai
+    depends_on:
+      - sling-web-mongo
+      - sling-web-redis
+    networks:
+      - sling-net
+    volumes:
+      - .:/app
+      - /app/node_modules

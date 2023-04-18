@@ -11,7 +11,8 @@
     "prepublish": "pnpm run build:release",
     "release:self": "pnpm publish --no-git-checks --access public",
     "release:workspaces": "pnpm publish -r --filter \"@sling/artus-web-*\" --no-git-checks --access public",
-    "release": "pnpm run release:self && pnpm run release:workspaces"
+    "release": "pnpm run release:self && pnpm run release:workspaces",
+    "compose:docker": "set DOCKER_BUILDKIT=0 && docker-compose down -v && docker-compose up -d --build"
   },
   "keywords": [
     "nodejs",
