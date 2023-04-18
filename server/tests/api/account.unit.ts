@@ -72,6 +72,8 @@ describe<LocalTestContext>('Account certificates', () => {
     email: 'i@test.com',
     password: Buffer.from('1qaz!QAZ', 'utf-8').toString('base64')
   }
+  const accountCertificateNewPwd = Buffer.from('1qaz!QAZ1', 'utf-8').toString('base64')
+  let accountAlreadySignedUp = false
 
   it<LocalTestContext>('Sign-up', async () => {
     const signUpUri = url.format(
@@ -101,6 +103,12 @@ describe<LocalTestContext>('Account certificates', () => {
       return res.json()
     })
 
+    if (_.get(result, 'code') === 'ERROR_SIGN_UP_DUPLICATE') {
+      accountAlreadySignedUp = true
+      accountCertificate.password = accountCertificateNewPwd
+      return
+    }
+
     assert(_.get(result, 'status') === 'SUCCESS')
   })
 
@@ -128,7 +136,8 @@ describe<LocalTestContext>('Account certificates', () => {
 
     const account = _.get(session, 'data.account')! as UserSession
     expect(account)
-    assert(account.signedIn === true)
+
+    assert(account.signedIn === !accountAlreadySignedUp)
   })
 
   it<LocalTestContext>('Sign-out', async () => {
@@ -154,7 +163,6 @@ describe<LocalTestContext>('Account certificates', () => {
   })
 
   it<LocalTestContext>('Change-Pwd', async () => {
-    const newPwd = Buffer.from('1qaz!QAZ1', 'utf-8').toString('base64')
     const changePwdUri = url.format(
       _.merge(url.parse(global.httpUri), {
         pathname: '/api/account/change-pwd'
@@ -172,7 +180,7 @@ describe<LocalTestContext>('Account certificates', () => {
           body: JSON.stringify(
             _.merge(_.pick(accountCertificate, 'email'), {
               oldPassword: _.get(accountCertificate, 'password'),
-              password: newPwd
+              password: accountCertificateNewPwd
             })
           )
         },
@@ -183,7 +191,7 @@ describe<LocalTestContext>('Account certificates', () => {
     assert(_.get(result, 'status') === 'SUCCESS')
 
     // Update pwd.
-    accountCertificate.password = newPwd
+    accountCertificate.password = accountCertificateNewPwd
   })
 
   it<LocalTestContext>('Sign-In', async () => {

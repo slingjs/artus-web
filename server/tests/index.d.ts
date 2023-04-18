@@ -3,5 +3,6 @@ export interface LocalTestContext {
   request?: {
     headers: object
   }
-  account: object
+  account: object,
+  accountAlreadySignedUp: boolean
 }
