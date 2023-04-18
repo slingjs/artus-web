@@ -12,7 +12,7 @@ WORKDIR /app/
 
 COPY ./**/package.json ./pnpm-workspace.yaml /app/
 
-RUN npm config set registry=https://registry.npmmirror.com/ --global
+RUN npm config set registry=https://mirrors.cloud.tencent.com/npm/ --global
 
 COPY . /app/
 
@@ -25,4 +25,4 @@ RUN pnpm run build
 
 EXPOSE 9527
 
-CMD ["/bin/sh", "-c", "pm2-runtime", "start", "pnpm -- run start"]
+CMD ["/bin/sh", "-c", "pm2", "start", "pnpm", "--", "run", "start"]

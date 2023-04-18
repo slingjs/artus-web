@@ -15,7 +15,7 @@ services:
       - "27017:27017"
     entrypoint: [ "/usr/bin/mongod", "--bind_ip", "localhost,sling-web-mongo", "--replSet", "rs0" ]
     healthcheck:
-      test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet) -eq 1
+      test: test $$(echo "rs.initiate().ok || rs.status().ok") -eq 1
       interval: 10s
     networks:
       - sling-net
