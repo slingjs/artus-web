@@ -8,10 +8,7 @@
     "target": "ESNext",
     "moduleResolution": "Node"
   },
-  "include": [
-    "./**/*.ts",
-    "./**/*.json"
-  ],
+  "include": ["./**/*.ts", "./**/*.json"],
   "exclude": [
     "package.json",
     "tsconfig.json",

@@ -13,11 +13,13 @@ export type PrismaPluginClientConfigDataSourceItem = {
   enable: boolean // Use or not?
 }
 
-export type PrismaPluginClientDataSourceItemInstance = InstanceType<ReturnType<typeof getPrismaClient>>
+export type PrismaPluginClientDataSourceItemInstance = InstanceType<
+  ReturnType<typeof getPrismaClient>
+>
 
 export type PrismaPluginDataSources = {
   [key: string]: {
-    prisma: PrismaPluginClientDataSourceItemInstance,
+    prisma: PrismaPluginClientDataSourceItemInstance
     config: PrismaPluginClientConfigDataSourceItem
   }
 }

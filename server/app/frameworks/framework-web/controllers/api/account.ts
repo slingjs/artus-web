@@ -30,10 +30,12 @@ export default class AccountApiController {
   app: ArtusApplication
 
   @Post('/session')
-  async session (...args: Parameters<HTTPMiddleware>) {
+  async session(...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args
 
-    const { output: { data } } = ctx
+    const {
+      output: { data }
+    } = ctx
     const ctxSession = await this.accountService.getCtxSession(ctx)
 
     if (!ctxSession) {
@@ -60,10 +62,15 @@ export default class AccountApiController {
   }
 
   @Post('/sign-in', { useBodyParser: true })
-  async signIn (...args: Parameters<HTTPMiddleware>) {
+  async signIn(...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args
 
-    const { input: { params: { req } }, output: { data } } = ctx
+    const {
+      input: {
+        params: { req }
+      },
+      output: { data }
+    } = ctx
     let ctxSession = await this.accountService.getCtxSession(ctx)
     if (ctxSession.signedIn) {
       data.status = status.BAD_REQUEST
@@ -83,8 +90,9 @@ export default class AccountApiController {
      *
      * fetch('/api/account/sign-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ' }) })
      */
-    const result = await this.accountService.signIn(req.body, { passwordPreEncrypt: true })
-      .catch(e => {
+    const result = await this.accountService
+      .signIn(req.body, { passwordPreEncrypt: true })
+      .catch((e) => {
         this.app.logger.error('[Error] Failed to sign in.', e)
 
         return this.accountService.formatResponseData({
@@ -103,15 +111,14 @@ export default class AccountApiController {
 
     const relatedConfig = await this.accountService.getConfig()
     // @ts-ignore
-    await this.accountService.handleSessionCertificated(
-      ctx,
-      accountData,
-      {
-        enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
-        methodType: UserSessionCertificatedFromMethodType.SIGN_IN
-      }
-    )
+    await this.accountService.handleSessionCertificated(ctx, accountData, {
+      enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
+      enableRecordMultipleSignedInSessions: !!_.get(
+        relatedConfig,
+        'enableRecordMultipleSignedInSessions'
+      ),
+      methodType: UserSessionCertificatedFromMethodType.SIGN_IN
+    })
 
     ctxSession = await this.accountService.getCtxSession(ctx)
     data.status = status.OK
@@ -130,10 +137,15 @@ export default class AccountApiController {
   }
 
   @Post('/sign-up', { useBodyParser: true })
-  async signUp (...args: Parameters<HTTPMiddleware>) {
+  async signUp(...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args
 
-    const { input: { params: { req } }, output: { data } } = ctx
+    const {
+      input: {
+        params: { req }
+      },
+      output: { data }
+    } = ctx
     const ctxSession = await this.accountService.getCtxSession(ctx)
     if (ctxSession.signedIn) {
       data.status = status.BAD_REQUEST
@@ -153,8 +165,9 @@ export default class AccountApiController {
      *
      * fetch('/api/account/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', name: 'YouAreMySunShine' }) })
      */
-    const result = await this.accountService.signUp(req.body, { passwordPreEncrypt: true })
-      .catch(e => {
+    const result = await this.accountService
+      .signUp(req.body, { passwordPreEncrypt: true })
+      .catch((e) => {
         this.app.logger.error('[Error] Failed to sign up.', e)
 
         return this.accountService.formatResponseData({
@@ -172,14 +185,13 @@ export default class AccountApiController {
 
     const relatedConfig = await this.accountService.getConfig()
     // @ts-ignore
-    await this.accountService.handleSessionCertificated(
-      ctx,
-      accountData,
-      {
-        enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
-      }
-    )
+    await this.accountService.handleSessionCertificated(ctx, accountData, {
+      enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
+      enableRecordMultipleSignedInSessions: !!_.get(
+        relatedConfig,
+        'enableRecordMultipleSignedInSessions'
+      )
+    })
 
     data.status = status.OK
     data.body = this.accountService.formatResponseData({
@@ -192,30 +204,34 @@ export default class AccountApiController {
     path: '/sign-out',
     method: [HTTPMethod.POST, HTTPMethod.GET]
   })
-  async signOut (...args: Parameters<HTTPMiddleware>) {
+  async signOut(...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args
-    const { input: { params: { searchParams, res } }, output: { data } } = ctx
+    const {
+      input: {
+        params: { searchParams, res }
+      },
+      output: { data }
+    } = ctx
 
     const relatedConfig = await this.accountService.getConfig()
-    await this.accountService.signOut(
-      ctx,
-      {
-        enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
-        methodType: UserSessionTamperedFromMethodType.SIGN_OUT
-      }
-    )
+    await this.accountService.signOut(ctx, {
+      enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
+      enableRecordMultipleSignedInSessions: !!_.get(
+        relatedConfig,
+        'enableRecordMultipleSignedInSessions'
+      ),
+      methodType: UserSessionTamperedFromMethodType.SIGN_OUT
+    })
 
     // If callback.
-    const callback = filterXSS(_.get(searchParams, shared.constants.accountSignOutCallbackSearchParamKey) || '');
+    const callback = filterXSS(
+      _.get(searchParams, shared.constants.accountSignOutCallbackSearchParamKey) || ''
+    )
     if (callback) {
       // Redirect.
-      data.status = status.FOUND;
-      res.setHeader(
-        'Location',
-        callback
-      );
-      return;
+      data.status = status.FOUND
+      res.setHeader('Location', callback)
+      return
     }
 
     data.status = status.OK
@@ -225,9 +241,14 @@ export default class AccountApiController {
   // Need signed in.
   @Post('/change-pwd', { useBodyParser: true })
   // @Use([userAuthMiddleware()])
-  async changePwd (...args: Parameters<HTTPMiddleware>) {
+  async changePwd(...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args
-    const { input: { params: { req } }, output: { data } } = ctx
+    const {
+      input: {
+        params: { req }
+      },
+      output: { data }
+    } = ctx
 
     /**
      * Change pwd invoker.
@@ -238,8 +259,9 @@ export default class AccountApiController {
      *
      * fetch('/api/account/change-pwd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', oldPassword: '1qaz!QAZ' }) })
      */
-    const result = await this.accountService.changePwd(req.body, { passwordPreEncrypt: true })
-      .catch(e => {
+    const result = await this.accountService
+      .changePwd(req.body, { passwordPreEncrypt: true })
+      .catch((e) => {
         this.app.logger.error('[Error] Failed to change pwd.', e)
 
         return this.accountService.formatResponseData({
@@ -256,15 +278,15 @@ export default class AccountApiController {
     }
 
     const relatedConfig = await this.accountService.getConfig()
-    await this.accountService.handleCertificatedSessionTampered(
-      ctx,
-      {
-        enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-        enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
-        fallbackSessionRecordsPersistentDBCondition: _.pick(req.body, 'email') as any,
-        methodType: UserSessionTamperedFromMethodType.CHANGE_PWD
-      }
-    )
+    await this.accountService.handleCertificatedSessionTampered(ctx, {
+      enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
+      enableRecordMultipleSignedInSessions: !!_.get(
+        relatedConfig,
+        'enableRecordMultipleSignedInSessions'
+      ),
+      fallbackSessionRecordsPersistentDBCondition: _.pick(req.body, 'email') as any,
+      methodType: UserSessionTamperedFromMethodType.CHANGE_PWD
+    })
 
     data.status = status.OK
     data.body = this.accountService.formatResponseData({

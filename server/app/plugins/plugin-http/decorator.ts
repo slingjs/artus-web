@@ -14,13 +14,16 @@ import {
   HTTPControllerDecoratorOptions
 } from './types'
 import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
-import { HTTPControllerDecoratorDefaultOptions, HTTPRouteDecoratorDefaultOptions } from './constants'
+import {
+  HTTPControllerDecoratorDefaultOptions,
+  HTTPRouteDecoratorDefaultOptions
+} from './constants'
 
-export function HTTPController (
+export function HTTPController(
   prefix: string = '',
   options: Partial<HTTPControllerDecoratorOptions> = HTTPControllerDecoratorDefaultOptions
 ): ClassDecorator {
-  return function(target) {
+  return function (target) {
     const controllerMetaData = {
       prefix,
       options
@@ -32,123 +35,130 @@ export function HTTPController (
   }
 }
 
-export function Get (
+export function Get(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function(
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
+      []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.GET, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function Post (
+export function Post(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function(
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
+      []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.POST, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function Delete (
+export function Delete(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function(
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
+      []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.DELETE, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function Put (
+export function Put(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function(
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
+      []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.PUT, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function Patch (
+export function Patch(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function(
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
+      []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.PATCH, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function Head (
+export function Head(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function(
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
+      []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.HEAD, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function Options (
+export function Options(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function(
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
   ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
+      []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.OPTIONS, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function All (
+export function All(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function(
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
@@ -160,8 +170,8 @@ export function All (
   }
 }
 
-export function HTTPRoute (options: HTTPMethodRouteDecoratorOptions) {
-  return function(
+export function HTTPRoute(options: HTTPMethodRouteDecoratorOptions) {
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<HTTPMiddleware>
@@ -172,18 +182,16 @@ export function HTTPRoute (options: HTTPMethodRouteDecoratorOptions) {
   }
 }
 
-export function Use (middlewares: ArrayOrPrimitive<HTTPMiddleware>) {
-  return function(
+export function Use(middlewares: ArrayOrPrimitive<HTTPMiddleware>) {
+  return function (
     target: Object,
     _key?: string | symbol,
     descriptor?: TypedPropertyDescriptor<HTTPMiddleware>
   ) {
     // Class Decorator.
     if (arguments.length === 1) {
-      const clazzRouteMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata = Reflect.getMetadata(
-        HTTP_MIDDLEWARE_METADATA,
-        target
-      ) ?? []
+      const clazzRouteMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata =
+        Reflect.getMetadata(HTTP_MIDDLEWARE_METADATA, target) ?? []
 
       clazzRouteMiddlewaresMetadata.push(middlewares)
       Reflect.defineMetadata(HTTP_MIDDLEWARE_METADATA, clazzRouteMiddlewaresMetadata, target)
@@ -192,12 +200,14 @@ export function Use (middlewares: ArrayOrPrimitive<HTTPMiddleware>) {
     }
 
     // Method Decorator.
-    const methodRouteMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata = Reflect.getMetadata(
-      HTTP_MIDDLEWARE_METADATA,
-      descriptor!.value!
-    ) ?? []
+    const methodRouteMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata =
+      Reflect.getMetadata(HTTP_MIDDLEWARE_METADATA, descriptor!.value!) ?? []
 
     methodRouteMiddlewaresMetadata.push(middlewares)
-    Reflect.defineMetadata(HTTP_MIDDLEWARE_METADATA, methodRouteMiddlewaresMetadata, descriptor!.value!)
+    Reflect.defineMetadata(
+      HTTP_MIDDLEWARE_METADATA,
+      methodRouteMiddlewaresMetadata,
+      descriptor!.value!
+    )
   }
 }

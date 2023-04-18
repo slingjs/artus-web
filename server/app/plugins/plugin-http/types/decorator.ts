@@ -33,7 +33,7 @@ export type HTTPRouteDecoratorOptions = {
 
 export type HTTPRouteMetadata = Array<{
   path: string
-  method: ArrayOrPrimitive<HTTPMethod[]>,
+  method: ArrayOrPrimitive<HTTPMethod[]>
   options?: Partial<HTTPRouteDecoratorOptions>
 }>
 

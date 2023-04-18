@@ -4,7 +4,7 @@ import dotEnv from 'dotenv'
 
 dotEnv.config()
 
-export async function start (options: any = {}) {
+export async function start(options: any = {}) {
   const scanner = new Scanner({
     appName: 'application',
     needWriteFile: false,

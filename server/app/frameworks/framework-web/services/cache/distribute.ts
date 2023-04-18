@@ -40,17 +40,17 @@ export class DistributeCache {
     refreshWhenExists: false
   }
 
-  private get client () {
+  private get client() {
     return this.redisClient.getRedis()
   }
 
-  mergeDefaultOptions (options: Partial<DistributeCacheDefaultOptions>) {
+  mergeDefaultOptions(options: Partial<DistributeCacheDefaultOptions>) {
     _.merge(this.defaultOptions, options)
   }
 
-  async get (key: DistributeCacheKey, options?: Partial<DistributeCacheGetOptions>) {
-    const needRefresh = _.get(options, 'needRefresh') ||
-      _.get(this.defaultOptions, 'refreshWhenGet')
+  async get(key: DistributeCacheKey, options?: Partial<DistributeCacheGetOptions>) {
+    const needRefresh =
+      _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenGet')
     if (needRefresh) {
       let ttl = _.get(options, 'ttl')
       if (ttl == null) {
@@ -63,7 +63,7 @@ export class DistributeCache {
     return this.client.get(key)
   }
 
-  async set (
+  async set(
     key: DistributeCacheKey,
     value: DistributeCacheValue,
     options?: Partial<DistributeCacheSetOptions>
@@ -73,71 +73,87 @@ export class DistributeCache {
       ttl = _.get(this.defaultOptions, 'ttl')
     }
 
-    return await this.client.set(key, value, 'PX', ttl) === DISTRIBUTE_CACHE_SET_SUCCESS_VALUE
+    return (await this.client.set(key, value, 'PX', ttl)) === DISTRIBUTE_CACHE_SET_SUCCESS_VALUE
   }
 
-  async exists (key: DistributeCacheKey, options?: Partial<DistributeCacheExistsOptions>) {
-    const needRefresh = _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenExists')
+  async exists(key: DistributeCacheKey, options?: Partial<DistributeCacheExistsOptions>) {
+    const needRefresh =
+      _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenExists')
     if (needRefresh) {
       let ttl = _.get(options, 'ttl')
       if (ttl == null) {
         ttl = _.get(this.defaultOptions, 'ttl')
       }
 
-      return await Promise.allSettled([this.client.exists(key), this.client.pexpire(key, ttl!)])
-        .then(res => {
-          const existsRes = res[0]
-          if (existsRes.status === 'rejected') {
-            return false
-          }
+      return await Promise.allSettled([
+        this.client.exists(key),
+        this.client.pexpire(key, ttl!)
+      ]).then((res) => {
+        const existsRes = res[0]
+        if (existsRes.status === 'rejected') {
+          return false
+        }
 
-          return existsRes.value === DISTRIBUTE_CACHE_SUCCESS_VALUE
-        })
+        return existsRes.value === DISTRIBUTE_CACHE_SUCCESS_VALUE
+      })
     }
 
-    return await this.client.exists(key) === DISTRIBUTE_CACHE_SUCCESS_VALUE
+    return (await this.client.exists(key)) === DISTRIBUTE_CACHE_SUCCESS_VALUE
   }
 
-  async remove (key: ArrayOrPrimitive<DistributeCacheKey>, _options?: Partial<DistributeCacheRemoveOptions>) {
-    return await this.client.del(key as Array<DistributeCacheKey>) === DISTRIBUTE_CACHE_SUCCESS_VALUE
+  async remove(
+    key: ArrayOrPrimitive<DistributeCacheKey>,
+    _options?: Partial<DistributeCacheRemoveOptions>
+  ) {
+    return (
+      (await this.client.del(key as Array<DistributeCacheKey>)) === DISTRIBUTE_CACHE_SUCCESS_VALUE
+    )
   }
 
-  async stale (key: ArrayOrPrimitive<DistributeCacheKey>, _options?: Partial<DistributeCacheStaleOptions>) {
+  async stale(
+    key: ArrayOrPrimitive<DistributeCacheKey>,
+    _options?: Partial<DistributeCacheStaleOptions>
+  ) {
     if (Array.isArray(key)) {
-      return Promise.allSettled(key.map(k => this.client.pexpire(k, -1)))
-        .then(res => {
-          return res.every(r => r.status === 'fulfilled' && r.value === DISTRIBUTE_CACHE_SUCCESS_VALUE)
-        })
+      return Promise.allSettled(key.map((k) => this.client.pexpire(k, -1))).then((res) => {
+        return res.every(
+          (r) => r.status === 'fulfilled' && r.value === DISTRIBUTE_CACHE_SUCCESS_VALUE
+        )
+      })
     }
 
-    return await this.client.pexpire(key, -1) === DISTRIBUTE_CACHE_SUCCESS_VALUE
+    return (await this.client.pexpire(key, -1)) === DISTRIBUTE_CACHE_SUCCESS_VALUE
   }
 
-  async expire (key: ArrayOrPrimitive<DistributeCacheKey>, options?: Partial<DistributeCacheExpireOptions>) {
+  async expire(
+    key: ArrayOrPrimitive<DistributeCacheKey>,
+    options?: Partial<DistributeCacheExpireOptions>
+  ) {
     let ttl = _.get(options, 'ttl')
     if (ttl == null) {
       ttl = _.get(this.defaultOptions, 'ttl')
     }
 
     if (Array.isArray(key)) {
-      return Promise.allSettled(key.map(k => this.client.pexpire(k, ttl!)))
-        .then(res => {
-          return res.every(r => r.status === 'fulfilled' && r.value === DISTRIBUTE_CACHE_SUCCESS_VALUE)
-        })
+      return Promise.allSettled(key.map((k) => this.client.pexpire(k, ttl!))).then((res) => {
+        return res.every(
+          (r) => r.status === 'fulfilled' && r.value === DISTRIBUTE_CACHE_SUCCESS_VALUE
+        )
+      })
     }
 
-    return await this.client.expire(key, ttl!) === DISTRIBUTE_CACHE_SUCCESS_VALUE
+    return (await this.client.expire(key, ttl!)) === DISTRIBUTE_CACHE_SUCCESS_VALUE
   }
 
-  async clear () {
-    return await this.client.flushdb() === DISTRIBUTE_CACHE_CLEAR_SUCCESS_VALUE
+  async clear() {
+    return (await this.client.flushdb()) === DISTRIBUTE_CACHE_CLEAR_SUCCESS_VALUE
   }
 }
 
-export function SubscribeDistributeCacheEvent (...args: Parameters<typeof SubscribeRedisEvent>) {
+export function SubscribeDistributeCacheEvent(...args: Parameters<typeof SubscribeRedisEvent>) {
   return SubscribeRedisEvent(...args)
 }
 
-export function SubscribeDistributeCacheEventUnit () {
+export function SubscribeDistributeCacheEventUnit() {
   return SubscribeRedisEventUnit()
 }

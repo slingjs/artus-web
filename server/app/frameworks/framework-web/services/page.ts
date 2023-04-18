@@ -12,8 +12,12 @@ export class PageService {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 
-  render (ctx: HTTPMiddlewareContext, _appPath: string) {
-    const { input: { params: { req } } } = ctx
+  render(ctx: HTTPMiddlewareContext, _appPath: string) {
+    const {
+      input: {
+        params: { req }
+      }
+    } = ctx
 
     return send(req, 'index.html', { root: (this.app.config as AppConfig).framework.web.distDir })
   }

@@ -30,17 +30,17 @@ export class MemoryCache {
     refreshWhenExists: false
   }
 
-  private get client () {
+  private get client() {
     return this.cacheClient.getCache()
   }
 
-  mergeDefaultOptions (options: Partial<MemoryCacheDefaultOptions>) {
+  mergeDefaultOptions(options: Partial<MemoryCacheDefaultOptions>) {
     _.merge(this.defaultOptions, options)
   }
 
-  async get (key: MemoryCacheKey, options?: Partial<MemoryCacheGetOptions>) {
-    const needRefresh = _.get(options, 'needRefresh') ||
-      _.get(this.defaultOptions, 'refreshWhenGet')
+  async get(key: MemoryCacheKey, options?: Partial<MemoryCacheGetOptions>) {
+    const needRefresh =
+      _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenGet')
 
     if (needRefresh) {
       let ttl = _.get(options, 'ttl')
@@ -54,7 +54,11 @@ export class MemoryCache {
     return this.client.get(key)
   }
 
-  async set (key: MemoryCacheKey, value: MemoryCacheValue, options?: Partial<MemoryCacheSetOptions>) {
+  async set(
+    key: MemoryCacheKey,
+    value: MemoryCacheValue,
+    options?: Partial<MemoryCacheSetOptions>
+  ) {
     let ttl = _.get(options, 'ttl')
     if (ttl == null) {
       ttl = _.get(this.defaultOptions, 'ttl')
@@ -69,23 +73,22 @@ export class MemoryCache {
     return true
   }
 
-  async exists (key: MemoryCacheKey, options?: Partial<MemoryCacheExistsOptions>) {
-    const needRefresh = _.get(options, 'needRefresh') ||
-      _.get(this.defaultOptions, 'refreshWhenExists')
+  async exists(key: MemoryCacheKey, options?: Partial<MemoryCacheExistsOptions>) {
+    const needRefresh =
+      _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenExists')
 
     this.client.has(key, { updateAgeOnHas: needRefresh })
   }
 
-  async remove (key: MemoryCacheKey, _options?: Partial<MemoryCacheRemoveOptions>) {
-    return this.client.delete(key)
-
-  }
-
-  async stale (key: MemoryCacheKey, _options?: Partial<MemoryCacheStaleOptions>) {
+  async remove(key: MemoryCacheKey, _options?: Partial<MemoryCacheRemoveOptions>) {
     return this.client.delete(key)
   }
 
-  async expire (key: MemoryCacheKey, options?: Partial<MemoryCacheExpireOptions>) {
+  async stale(key: MemoryCacheKey, _options?: Partial<MemoryCacheStaleOptions>) {
+    return this.client.delete(key)
+  }
+
+  async expire(key: MemoryCacheKey, options?: Partial<MemoryCacheExpireOptions>) {
     let ttl = _.get(options, 'ttl')
     if (ttl == null) {
       ttl = _.get(this.defaultOptions, 'ttl')
@@ -94,7 +97,7 @@ export class MemoryCache {
     return this.client.has(key, { updateAgeOnHas: true, status: { remainingTTL: ttl! } })
   }
 
-  async clear () {
+  async clear() {
     return this.client.clear()
   }
 }

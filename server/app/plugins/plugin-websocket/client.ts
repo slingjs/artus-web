@@ -36,15 +36,16 @@ export class WebsocketClient {
   private server: http.Server
   private wsServer: ws.WebSocketServer
 
-  get supportedSocketEventNames () {
-    return Object.values(WebSocketEventNames)
-      .filter(eventName => eventName !== WebSocketEventNames.CONNECTION)
+  get supportedSocketEventNames() {
+    return Object.values(WebSocketEventNames).filter(
+      (eventName) => eventName !== WebSocketEventNames.CONNECTION
+    )
   }
 
-  async init (config: WebsocketConfig, options?: Partial<{ existedServer: http.Server }>) {
+  async init(config: WebsocketConfig, options?: Partial<{ existedServer: http.Server }>) {
     const serverListen = () => {
       const { host, port } = config
-      return new Promise(function(resolve) {
+      return new Promise(function (resolve) {
         server.listen(port, host, () => resolve(server))
       })
     }
@@ -63,7 +64,11 @@ export class WebsocketClient {
     const address = server.address() as AddressInfo
     // @ts-ignore
     this.app.logger.info(
-      `Websocket server listening on: ${ url.format({ hostname: address.address, port: address.port, protocol: 'ws' }) }`
+      `Websocket server listening on: ${url.format({
+        hostname: address.address,
+        port: address.port,
+        protocol: 'ws'
+      })}`
     )
 
     this.wsServer = new ws.WebSocketServer({ server })
@@ -71,15 +76,17 @@ export class WebsocketClient {
     this.registerEvents({ requestPathCaseSensitive: !!_.get(config, 'requestPathCaseSensitive') })
   }
 
-  getServer () {
+  getServer() {
     return this.server
   }
 
-  getWsServer () {
+  getWsServer() {
     return this.wsServer
   }
 
-  filterWsServerSockets (options?: Partial<{ filter: Parameters<Array<ws.WebSocket>['filter']>[0] }>) {
+  filterWsServerSockets(
+    options?: Partial<{ filter: Parameters<Array<ws.WebSocket>['filter']>[0] }>
+  ) {
     const currentAllClients = Array.from(this.wsServer.clients.values())
 
     const condition = _.get(options, 'filter')
@@ -90,7 +97,7 @@ export class WebsocketClient {
     return currentAllClients.filter(condition)
   }
 
-  findWsServerSocket (options: { find: Parameters<Array<ws.WebSocket>['filter']>[0] }) {
+  findWsServerSocket(options: { find: Parameters<Array<ws.WebSocket>['filter']>[0] }) {
     const currentAllClients = Array.from(this.wsServer.clients.values())
 
     const condition = _.get(options, 'find')
@@ -101,9 +108,12 @@ export class WebsocketClient {
     return currentAllClients.find(condition)
   }
 
-  getWsServerSameReqPathSockets (targetSocket: ws.WebSocket, options?: Partial<{ reqPathCaseInsensitive: boolean }>) {
+  getWsServerSameReqPathSockets(
+    targetSocket: ws.WebSocket,
+    options?: Partial<{ reqPathCaseInsensitive: boolean }>
+  ) {
     return this.filterWsServerSockets({
-      filter (socket) {
+      filter(socket) {
         if (socket === targetSocket) {
           return false
         }
@@ -116,7 +126,10 @@ export class WebsocketClient {
           return false
         }
 
-        const socketReqUrlObj = _.get(socket, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY) as url.UrlWithStringQuery
+        const socketReqUrlObj = _.get(
+          socket,
+          WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY
+        ) as url.UrlWithStringQuery
         if (!socketReqUrlObj) {
           return false
         }
@@ -130,12 +143,12 @@ export class WebsocketClient {
     })
   }
 
-  initializeEventRules (options?: Partial<{ requestPathCaseSensitive: boolean }>) {
+  initializeEventRules(options?: Partial<{ requestPathCaseSensitive: boolean }>) {
     const eventRules: WebsocketEventRules = new Map()
 
     const wsControllerClazzList = _.orderBy(
       this.app.container.getInjectableByTag(WEBSOCKET_CONTROLLER_TAG) as Array<FunctionConstructor>,
-      function(controllerClazz) {
+      function (controllerClazz) {
         const controllerMetadata = Reflect.getMetadata(
           WEBSOCKET_CONTROLLER_METADATA,
           controllerClazz
@@ -152,10 +165,8 @@ export class WebsocketClient {
         controllerClazz
       ) as WebsocketControllerMetadata
       const controller = this.app.container.get(controllerClazz) as FunctionConstructor
-      const controllerMiddlewaresMetadata: WebsocketEventMiddlewaresMetadata = Reflect.getMetadata(
-        WEBSOCKET_MIDDLEWARE_METADATA,
-        controllerClazz
-      ) ?? []
+      const controllerMiddlewaresMetadata: WebsocketEventMiddlewaresMetadata =
+        Reflect.getMetadata(WEBSOCKET_MIDDLEWARE_METADATA, controllerClazz) ?? []
 
       // Retrieve the registered metadata from controller's proto functions.
       const handlerDescriptionList = Object.getOwnPropertyDescriptors(controllerClazz.prototype)
@@ -171,15 +182,14 @@ export class WebsocketClient {
         }
 
         // Event middlewares.
-        const eventMiddlewaresMetadata: WebsocketEventMiddlewaresMetadata = Reflect.getMetadata(
-          WEBSOCKET_MIDDLEWARE_METADATA,
-          handlerDescriptor.value
-        ) ?? []
+        const eventMiddlewaresMetadata: WebsocketEventMiddlewaresMetadata =
+          Reflect.getMetadata(WEBSOCKET_MIDDLEWARE_METADATA, handlerDescriptor.value) ?? []
 
         // Get the registered data with the target path.
-        let eventPath = (
-          (controllerMetadata.prefix ?? '/') + (_.get(eventMetadata, 'options.path') ?? '')
-        ).replace(trimEventPathRegExp, '') || '/'
+        let eventPath =
+          (
+            (controllerMetadata.prefix ?? '/') + (_.get(eventMetadata, 'options.path') ?? '')
+          ).replace(trimEventPathRegExp, '') || '/'
         if (!_.get(options, 'requestPathCaseSensitive')) {
           eventPath = eventPath.toLowerCase()
         }
@@ -216,7 +226,7 @@ export class WebsocketClient {
         if (eventPathRuleItemWithEventName.metadata.length > 1) {
           eventPathRuleItemWithEventName.metadata = _.orderBy(
             eventPathRuleItemWithEventName.metadata,
-            function(metadata) {
+            function (metadata) {
               return _.get(metadata, 'options.order') ?? 0
             },
             'asc'
@@ -228,13 +238,13 @@ export class WebsocketClient {
     return eventRules
   }
 
-  registerEvents (options?: Partial<{ requestPathCaseSensitive: boolean }>) {
+  registerEvents(options?: Partial<{ requestPathCaseSensitive: boolean }>) {
     const eventRules = this.initializeEventRules(options)
     const app = this.app
     const trigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
 
     this.wsServer.on(WebSocketEventNames.CONNECTION, async (socket, req) => {
-      const handleOnException = function(message: string = 'Something went wrong.') {
+      const handleOnException = function (message: string = 'Something went wrong.') {
         socket.send(message)
         socket.send('Socket shutting down...')
         socket.terminate()
@@ -253,26 +263,27 @@ export class WebsocketClient {
       }
 
       // Store some vital metrics.
-      _.set(socket, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY, reqUrlObj);
+      _.set(socket, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY, reqUrlObj)
 
       const eventRuleTargetPath = _.get(options, 'requestPathCaseSensitive')
         ? reqUrlObj.path
-        : (reqUrlObj.path).toLowerCase()
+        : reqUrlObj.path.toLowerCase()
       const matchedEventRuleItem = eventRules.get(eventRuleTargetPath)
       if (!(matchedEventRuleItem && matchedEventRuleItem.size)) {
-        handleOnException(`No registered handler for such path: ${ reqUrlObj.path }`)
+        handleOnException(`No registered handler for such path: ${reqUrlObj.path}`)
         return
       }
 
       app.logger.info('New websocket connection arrived, request url:', reqUrl)
 
-      const enabledSocketEventNames = (Array.from(matchedEventRuleItem.keys()) as typeof this.supportedSocketEventNames)
-        .filter(eventName => this.supportedSocketEventNames.includes(eventName))
+      const enabledSocketEventNames = (
+        Array.from(matchedEventRuleItem.keys()) as typeof this.supportedSocketEventNames
+      ).filter((eventName) => this.supportedSocketEventNames.includes(eventName))
 
       const dispatchEventGenerator = (eventName: WebsocketEventMetadata['eventName']) => {
         const matchedEventRuleItemData = matchedEventRuleItem.get(eventName)
-        if (!(matchedEventRuleItemData)) {
-          return function noop () {}
+        if (!matchedEventRuleItemData) {
+          return function noop() {}
         }
 
         const dispatchEvent = async (...eventArgs: any[]) => {
@@ -310,8 +321,9 @@ export class WebsocketClient {
 
           trigger.setHandlePipeline(pipeline)
 
-          await trigger.startPipeline(ctx)
-            .catch(e => {
+          await trigger
+            .startPipeline(ctx)
+            .catch((e) => {
               app.logger.error(e)
             })
             .finally(() => {
@@ -326,7 +338,7 @@ export class WebsocketClient {
       dispatchEventGenerator(WebSocketEventNames.CONNECTION)()
 
       // Observe socket events.
-      enabledSocketEventNames.forEach(eventName => {
+      enabledSocketEventNames.forEach((eventName) => {
         socket.on(eventName, dispatchEventGenerator(eventName))
       })
     })

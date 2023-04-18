@@ -36,15 +36,18 @@ export class PluginHTTPClient {
   private router: ReturnType<typeof Router<Router.HTTPVersion.V1>>
 
   // Handle on retrieving registered route metadata.
-  public async init (config: HTTPConfig) {
+  public async init(config: HTTPConfig) {
     this.router = Router({
       caseSensitive: !!_.get(config, 'requestPathCaseSensitive')
     })
 
     const controllerClazzList = _.orderBy(
       this.app.container.getInjectableByTag(HTTP_CONTROLLER_TAG),
-      function(controllerClazz) {
-        const controllerMetadata = Reflect.getMetadata(HTTP_CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
+      function (controllerClazz) {
+        const controllerMetadata = Reflect.getMetadata(
+          HTTP_CONTROLLER_METADATA,
+          controllerClazz
+        ) as HTTPControllerMetadata
 
         return _.get(controllerMetadata, 'options.order') ?? 0
       },
@@ -53,35 +56,35 @@ export class PluginHTTPClient {
 
     for (const controllerClazz of controllerClazzList) {
       // Retrieve the registered metadata from the controller's generator..
-      const controllerMetadata = Reflect.getMetadata(HTTP_CONTROLLER_METADATA, controllerClazz) as HTTPControllerMetadata
+      const controllerMetadata = Reflect.getMetadata(
+        HTTP_CONTROLLER_METADATA,
+        controllerClazz
+      ) as HTTPControllerMetadata
       const controller = this.app.container.get(controllerClazz) as FunctionConstructor
       // Controller Middlewares.
-      const controllerMiddlewaresMetadata = (
-        Reflect.getMetadata(
-          HTTP_MIDDLEWARE_METADATA,
-          controllerClazz
-        ) ?? []
-      ) as HTTPRouteMiddlewaresMetadata
+      const controllerMiddlewaresMetadata = (Reflect.getMetadata(
+        HTTP_MIDDLEWARE_METADATA,
+        controllerClazz
+      ) ?? []) as HTTPRouteMiddlewaresMetadata
 
       // Retrieve the registered metadata from controller's proto functions.
       const handlerDescriptorList = Object.getOwnPropertyDescriptors(controllerClazz.prototype)
       for (const key of Object.keys(handlerDescriptorList)) {
         const handlerDescriptor = handlerDescriptorList[key]
 
-        const routeMetadataList = (
-          Reflect.getMetadata(HTTP_ROUTER_METADATA, handlerDescriptor.value) ?? []
-        ) as HTTPRouteMetadata
+        const routeMetadataList = (Reflect.getMetadata(
+          HTTP_ROUTER_METADATA,
+          handlerDescriptor.value
+        ) ?? []) as HTTPRouteMetadata
         if (!routeMetadataList.length) {
           continue
         }
 
         // Route Middlewares.
-        const routeMiddlewaresMetadata = (
-          Reflect.getMetadata(
-            HTTP_MIDDLEWARE_METADATA,
-            handlerDescriptor.value
-          ) ?? []
-        ) as HTTPRouteMiddlewaresMetadata
+        const routeMiddlewaresMetadata = (Reflect.getMetadata(
+          HTTP_MIDDLEWARE_METADATA,
+          handlerDescriptor.value
+        ) ?? []) as HTTPRouteMiddlewaresMetadata
 
         // Inject metadata in route. Handle on route's request.
         this.registerRoute(
@@ -98,11 +101,13 @@ export class PluginHTTPClient {
       this.router.lookup(req, res)
     })
 
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       const { host, port } = config
       this.server.listen(port, host, () => {
         // @ts-ignore
-        this.app.logger.info(`HTTP server listening on: ${ url.format({ hostname: host, port, protocol: 'http' }) }`)
+        this.app.logger.info(
+          `HTTP server listening on: ${url.format({ hostname: host, port, protocol: 'http' })}`
+        )
         resolve(this.server)
       })
     })
@@ -110,11 +115,11 @@ export class PluginHTTPClient {
     return this.server
   }
 
-  public getServer () {
+  public getServer() {
     return this.server
   }
 
-  private registerRoute (
+  private registerRoute(
     controllerMetadata: HTTPControllerMetadata,
     routeMetadataList: HTTPRouteMetadata,
     routeMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata,
@@ -124,13 +129,15 @@ export class PluginHTTPClient {
     const app = this.app
 
     for (const routeMetadata of routeMetadataList) {
-      const routePath = (
-        (controllerMetadata.prefix ?? '/') + routeMetadata.path
-      ).replace(trimEventPathRegExp, '') || '/'
+      const routePath =
+        ((controllerMetadata.prefix ?? '/') + routeMetadata.path).replace(
+          trimEventPathRegExp,
+          ''
+        ) || '/'
       this.router.on(
         routeMetadata.method,
         routePath,
-        async function(req, res, params, store, searchParams) {
+        async function (req, res, params, store, searchParams) {
           const input = new Input() as HTTPMiddlewareContext['input']
           input.params = {
             req,
@@ -144,18 +151,18 @@ export class PluginHTTPClient {
           const output = new Output() as HTTPMiddlewareContext['output']
           output.data = {
             __status__: undefined,
-            get status () {
+            get status() {
               return this.__status__
             },
-            set status (val: any) {
+            set status(val: any) {
               this.__modified__ = true
               this.__status__ = val
             },
             __body__: undefined,
-            get body () {
+            get body() {
               return this.__body__
             },
-            set body (val: any) {
+            set body(val: any) {
               this.__modified__ = true
               this.__body__ = val
             },
@@ -168,20 +175,22 @@ export class PluginHTTPClient {
 
           // For body-parser.
           if (_.get(routeMetadata.options || {}, 'useBodyParser')) {
-            const bodyParserOptions = _.get(routeMetadata.options || {}, 'bodyParserOptions') ??
+            const bodyParserOptions =
+              _.get(routeMetadata.options || {}, 'bodyParserOptions') ??
               HTTP_DEFAULT_BODY_PARSER_OPTIONS
 
-            const bodyParserType = _.get(routeMetadata.options || {}, 'bodyParserType') ||
-              HTTP_DEFAULT_BODY_PARSER_TYPE
+            const bodyParserType =
+              _.get(routeMetadata.options || {}, 'bodyParserType') || HTTP_DEFAULT_BODY_PARSER_TYPE
 
-            await pipeline.use(async function httpBodyParser (_ctx, next) {
+            await pipeline.use(async function httpBodyParser(_ctx, next) {
               const { p, resolve, reject } = shared.utils.generateOperablePromise()
-              const usedBodyParserUtil = bodyParserType && _.has(bodyParser, bodyParserType)
-                ? _.get(bodyParser, bodyParserType)
-                : bodyParser
+              const usedBodyParserUtil =
+                bodyParserType && _.has(bodyParser, bodyParserType)
+                  ? _.get(bodyParser, bodyParserType)
+                  : bodyParser
 
               try {
-                usedBodyParserUtil(bodyParserOptions)(req, res, function bodyParserNext () {
+                usedBodyParserUtil(bodyParserOptions)(req, res, function bodyParserNext() {
                   resolve(next())
                 })
               } catch (e) {
@@ -200,8 +209,9 @@ export class PluginHTTPClient {
 
           trigger.setHandlePipeline(pipeline)
 
-          await trigger.startPipeline(ctx)
-            .catch(e => {
+          await trigger
+            .startPipeline(ctx)
+            .catch((e) => {
               app.logger.error(e)
             })
             .finally(() => {

@@ -18,7 +18,5 @@ export default class FrameworkWebLifecycle implements ApplicationLifecycle {
   webClient: FrameworkWebClient
 
   @LifecycleHook()
-  public async didReady () {
-
-  }
+  public async didReady() {}
 }

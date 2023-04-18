@@ -2,6 +2,6 @@
 
 import { start } from '../app/bootstrap'
 
-start().catch(e => {
+start().catch((e) => {
   console.error('[Fatal] Failed to start app.', e)
 })

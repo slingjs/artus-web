@@ -8,7 +8,11 @@ export const accountSignUpPayloadSchema: JSONSchemaType<AccountSignUpPayload> = 
     password: { type: 'string', pattern: shared.constants.accountPasswordPatternString },
     email: { type: 'string', format: 'email' },
     name: { type: 'string', pattern: shared.constants.accountNamePatternString },
-    roles: { type: 'array', items: { type: 'string', enum: Object.values(shared.types.Roles) }, nullable: true }
+    roles: {
+      type: 'array',
+      items: { type: 'string', enum: Object.values(shared.types.Roles) },
+      nullable: true
+    }
   },
   required: ['name', 'password', 'email'],
   additionalProperties: false

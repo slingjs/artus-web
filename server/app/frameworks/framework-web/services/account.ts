@@ -27,7 +27,10 @@ import {
   WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH
 } from '../constants'
 import { Account } from '../models/mongo/generated/client'
-import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
+import {
+  ARTUS_PLUGIN_PRISMA_CLIENT,
+  PrismaPluginDataSourceName
+} from '../../../plugins/plugin-prisma/types'
 import { PluginPrismaClient } from '../../../plugins/plugin-prisma/client'
 import _ from 'lodash'
 import { encryptPassword, rectifyPassword } from '../utils/business/account'
@@ -61,7 +64,10 @@ import { judgeCtxIsFromHTTP } from '../utils/middlewares'
 import { WebsocketClient } from '../../../plugins/plugin-websocket/client'
 import { WebsocketTrigger } from '../../../plugins/plugin-websocket/trigger'
 import url from 'url'
-import { SubscribeDistributeCacheEvent, SubscribeDistributeCacheEventUnit } from './cache/distribute'
+import {
+  SubscribeDistributeCacheEvent,
+  SubscribeDistributeCacheEventUnit
+} from './cache/distribute'
 
 dayjs.extend(dayjsUtc)
 
@@ -74,7 +80,7 @@ export class AccountService {
   @Inject(ArtusInjectEnum.Application)
   private readonly app: ArtusApplication
 
-  async getConfig () {
+  async getConfig() {
     const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
     const cacheKey = 'framework.web.api.account.config'
     let result = await cacheService.memory.get(cacheKey)
@@ -85,7 +91,7 @@ export class AccountService {
     return result
   }
 
-  private getPrisma () {
+  private getPrisma() {
     const prismaClient = this.app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
 
     return prismaClient.getPrisma<PersistentDBInstance<PrismaPluginDataSourceName.MONGO>>(
@@ -93,9 +99,11 @@ export class AccountService {
     )
   }
 
-  formatResponseData (
+  formatResponseData(
     data: Partial<AccountResponseData>,
-    account: PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>> | UserSession = null,
+    account:
+      | PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>
+      | UserSession = null,
     options?: Partial<{ useCtxAccount: boolean }>
   ) {
     if (account) {
@@ -105,9 +113,11 @@ export class AccountService {
             account: _.get(options, 'useCtxAccount')
               ? _.omit(account as UserSession, PAGE_PROHIBIT_ACCOUNT_PROPERTIES)
               : _.pick(
-                account as PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>,
-                ACCESSIBLE_ACCOUNT_PROPERTIES
-              )
+                  account as PromiseFulfilledResult<
+                    ReturnType<AccountService['findInPersistentDB']>
+                  >,
+                  ACCESSIBLE_ACCOUNT_PROPERTIES
+                )
           }
         })
       )
@@ -122,7 +132,7 @@ export class AccountService {
     )
   }
 
-  async setClientSession (
+  async setClientSession(
     ctx: HTTPMiddlewareContext | WebsocketMiddlewareContext,
     session: UserSession | null,
     options?: Partial<{
@@ -131,18 +141,18 @@ export class AccountService {
   ) {
     // HTTP.
     if (judgeCtxIsFromHTTP(ctx)) {
-      const { input: { params: { res } } } = ctx
+      const {
+        input: {
+          params: { res }
+        }
+      } = ctx
       if (!session) {
         res.setHeader(
           'set-cookie',
-          cookie.serialize(
-            shared.constants.USER_SESSION_KEY,
-            '',
-            {
-              path: '/', // Must set this. Otherwise, it will be req.path as default.
-              maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
-            }
-          )
+          cookie.serialize(shared.constants.USER_SESSION_KEY, '', {
+            path: '/', // Must set this. Otherwise, it will be req.path as default.
+            maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
+          })
         )
 
         return
@@ -155,39 +165,32 @@ export class AccountService {
         : USER_SESSION_COOKIE_MAX_AGE
       res.setHeader(
         'set-cookie',
-        cookie.serialize(
-          shared.constants.USER_SESSION_KEY,
-          session._sessionId,
-          {
-            path: '/', // Must set this. Otherwise, it will be req.path as default.
-            maxAge
-          }
-        )
+        cookie.serialize(shared.constants.USER_SESSION_KEY, session._sessionId, {
+          path: '/', // Must set this. Otherwise, it will be req.path as default.
+          maxAge
+        })
       )
       return
     }
 
     // Websocket.
-    const { input: { params: { trigger, socket } } } = ctx
+    const {
+      input: {
+        params: { trigger, socket }
+      }
+    } = ctx
     if (!session) {
       const cookieValue = cookie.parse(
-        cookie.serialize(
-          shared.constants.USER_SESSION_KEY,
-          '',
-          {
-            path: '/', // Must set this. Otherwise, it will be req.path as default.
-            maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
-          }
-        )
+        cookie.serialize(shared.constants.USER_SESSION_KEY, '', {
+          path: '/', // Must set this. Otherwise, it will be req.path as default.
+          maxAge: USER_SESSION_COOKIE_MAX_AGE_REMOVED
+        })
       )
-      await trigger.send(
-        socket,
-        {
-          trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-          command: WebsocketUserSessionClientCommandType.SET_COOKIE,
-          value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
-        } as WebsocketUserSessionClientCommandInfo
-      )
+      await trigger.send(socket, {
+        trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+        command: WebsocketUserSessionClientCommandType.SET_COOKIE,
+        value: _.get(cookieValue, shared.constants.USER_SESSION_KEY)
+      } as WebsocketUserSessionClientCommandInfo)
 
       return
     }
@@ -197,14 +200,10 @@ export class AccountService {
         ? USER_SESSION_COOKIE_MAX_AGE_REMEMBERED
         : USER_SESSION_COOKIE_MAX_AGE
       : USER_SESSION_COOKIE_MAX_AGE
-    const cookieValue = cookie.serialize(
-      shared.constants.USER_SESSION_KEY,
-      session._sessionId,
-      {
-        path: '/', // Must set this. Otherwise, it will be req.path as default.
-        maxAge
-      }
-    )
+    const cookieValue = cookie.serialize(shared.constants.USER_SESSION_KEY, session._sessionId, {
+      path: '/', // Must set this. Otherwise, it will be req.path as default.
+      maxAge
+    })
     await trigger.send(socket, {
       trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
       command: WebsocketUserSessionClientCommandType.SET_COOKIE,
@@ -212,25 +211,32 @@ export class AccountService {
     })
   }
 
-  async broadcastStaleClientSessions (
+  async broadcastStaleClientSessions(
     sessionRecords: UserSessionRecords,
     sessionClientCommandInfo: WebsocketUserSessionClientCommandInfo
   ) {
     const websocketClient = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
-    const websocketClientTrigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
+    const websocketClientTrigger = this.app.container.get(
+      ARTUS_PLUGIN_WEBSOCKET_TRIGGER
+    ) as WebsocketTrigger
 
     const foundOtherSameReqPathSockets = websocketClient.filterWsServerSockets({
       filter: (s) => {
-        const socketReqUrlObj = _.get(s, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY) as url.UrlWithStringQuery
+        const socketReqUrlObj = _.get(
+          s,
+          WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY
+        ) as url.UrlWithStringQuery
         if (!socketReqUrlObj) {
           return false
         }
 
         // Find the same account signed-in session's related sockets.
-        return socketReqUrlObj.path === WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH &&
+        return (
+          socketReqUrlObj.path === WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH &&
           sessionRecords.includes(this.getWsSocketSessionKey(s))
+        )
       }
-    });
+    })
 
     for (const socket of foundOtherSameReqPathSockets) {
       await websocketClientTrigger.send(socket, sessionClientCommandInfo)
@@ -252,16 +258,21 @@ export class AccountService {
     }
   }
 
-  async staleClientSession (
+  async staleClientSession(
     sessionKeyValue: string,
     sessionClientCommandInfo: WebsocketUserSessionClientCommandInfo
   ) {
     const websocketClient = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
-    const websocketClientTrigger = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_TRIGGER) as WebsocketTrigger
+    const websocketClientTrigger = this.app.container.get(
+      ARTUS_PLUGIN_WEBSOCKET_TRIGGER
+    ) as WebsocketTrigger
 
     const wsServerSocket = websocketClient.findWsServerSocket({
       find: (s) => {
-        const sessionId = _.get(s, WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY) as UserSession['_sessionId']
+        const sessionId = _.get(
+          s,
+          WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY
+        ) as UserSession['_sessionId']
         if (sessionId == null) {
           return false
         }
@@ -293,7 +304,7 @@ export class AccountService {
     // websocketClientTrigger.send(s, sessionClientCommandInfo)
   }
 
-  async initSession (
+  async initSession(
     signedInAccount?: Account,
     options?: Partial<{ _sessionId: string }>
   ): Promise<UserSession> {
@@ -325,27 +336,38 @@ export class AccountService {
     }
   }
 
-  async handleSessionCertificated (
+  async handleSessionCertificated(
     ctx: HTTPMiddlewareContext,
     signedInAccount: Account,
     options?: Partial<{
-      keepSignedIn: boolean,
-      enableMultipleSignedInSessions: boolean,
-      enableRecordMultipleSignedInSessions: boolean,
+      keepSignedIn: boolean
+      enableMultipleSignedInSessions: boolean
+      enableRecordMultipleSignedInSessions: boolean
       methodType: UserSessionCertificatedFromMethodType
     }>
   ) {
-    const { input: { params: { req } } } = ctx
+    const {
+      input: {
+        params: { req }
+      }
+    } = ctx
 
     const ctxPreviousSession = await this.getCtxSession(ctx)
-    const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
+    const sessionCookieValue = _.get(
+      cookie.parse(req.headers.cookie || ''),
+      shared.constants.USER_SESSION_KEY
+    )
     const ctxPreviousSessionKeyValue = _.get(ctxPreviousSession, '_sessionId')
-    const sessionKeyValue = ctxPreviousSessionKeyValue || sessionCookieValue || shared.utils.calcUUID()
+    const sessionKeyValue =
+      ctxPreviousSessionKeyValue || sessionCookieValue || shared.utils.calcUUID()
     const session = await this.initSession(signedInAccount, { _sessionId: sessionKeyValue })
     await this.setCtxSession(ctx, session)
 
     const enableMultipleSignedInSessions = _.get(options, 'enableMultipleSignedInSessions')
-    const enableRecordMultipleSignedInSessions = _.get(options, 'enableRecordMultipleSignedInSessions')
+    const enableRecordMultipleSignedInSessions = _.get(
+      options,
+      'enableRecordMultipleSignedInSessions'
+    )
     if (!enableMultipleSignedInSessions) {
       const foundSessionRecordsString = await this.getDistributeSessionRecords(session.id)
       let foundSessionRecords: UserSessionRecords | null = null
@@ -357,15 +379,14 @@ export class AccountService {
 
       // Stale all related sessions.
       if (Array.isArray(foundSessionRecords)) {
-        await this.broadcastStaleClientSessions(
-          foundSessionRecords,
-          {
-            trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-            command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
-            value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
-          } as WebsocketUserSessionClientCommandInfo
+        await this.broadcastStaleClientSessions(foundSessionRecords, {
+          trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+          command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+          value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
+        } as WebsocketUserSessionClientCommandInfo)
+        await Promise.allSettled(
+          foundSessionRecords!.filter(Boolean).map((r) => this.staleDistributeSession(r))
         )
-        await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(r)))
 
         // Rest entirely..
         foundSessionRecords = []
@@ -402,19 +423,26 @@ export class AccountService {
     }
   }
 
-  async handleCertificatedSessionTampered (
+  async handleCertificatedSessionTampered(
     ctx: HTTPMiddlewareContext,
     options?: Partial<{
-      enableMultipleSignedInSessions: boolean,
-      enableRecordMultipleSignedInSessions: boolean,
-      fallbackSessionRecordsPersistentDBCondition: Parameters<AccountService['findInPersistentDB']>,
+      enableMultipleSignedInSessions: boolean
+      enableRecordMultipleSignedInSessions: boolean
+      fallbackSessionRecordsPersistentDBCondition: Parameters<AccountService['findInPersistentDB']>
       methodType: UserSessionTamperedFromMethodType
     }>
   ) {
-    const { input: { params: { req } } } = ctx
+    const {
+      input: {
+        params: { req }
+      }
+    } = ctx
 
     const ctxPreviousSession = await this.getCtxSession(ctx)
-    const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
+    const sessionCookieValue = _.get(
+      cookie.parse(req.headers.cookie || ''),
+      shared.constants.USER_SESSION_KEY
+    )
     const ctxPreviousSessionKeyValue = _.get(ctxPreviousSession, '_sessionId')
     const sessionKeyValue = ctxPreviousSessionKeyValue || sessionCookieValue
 
@@ -425,7 +453,9 @@ export class AccountService {
     const getFormattedSessionRecords = async (
       userSession: UserSession,
       options?: Partial<{
-        fallbackSessionRecordsPersistentDBCondition: Parameters<AccountService['findInPersistentDB']>
+        fallbackSessionRecordsPersistentDBCondition: Parameters<
+          AccountService['findInPersistentDB']
+        >
       }>
     ) => {
       let foundSessionRecordsString = await this.getDistributeSessionRecords(userSession.id)
@@ -440,12 +470,17 @@ export class AccountService {
         return foundSessionRecords
       }
 
-      const fallbackSessionRecordsPersistentDBCondition = _.get(options, 'fallbackSessionRecordsPersistentDBCondition')
+      const fallbackSessionRecordsPersistentDBCondition = _.get(
+        options,
+        'fallbackSessionRecordsPersistentDBCondition'
+      )
       if (_.isEmpty(fallbackSessionRecordsPersistentDBCondition)) {
         return null
       }
 
-      const foundMatchedPersistentDBAccount = await this.findInPersistentDB(fallbackSessionRecordsPersistentDBCondition as any)
+      const foundMatchedPersistentDBAccount = await this.findInPersistentDB(
+        fallbackSessionRecordsPersistentDBCondition as any
+      )
       if (!foundMatchedPersistentDBAccount) {
         return null
       }
@@ -462,33 +497,39 @@ export class AccountService {
     }
 
     const enableMultipleSignedInSessions = _.get(options, 'enableMultipleSignedInSessions')
-    const enableRecordMultipleSignedInSessions = _.get(options, 'enableRecordMultipleSignedInSessions')
+    const enableRecordMultipleSignedInSessions = _.get(
+      options,
+      'enableRecordMultipleSignedInSessions'
+    )
     if (!enableMultipleSignedInSessions) {
       let foundSession = ctxPreviousSession
       try {
-        foundSession = JSON.parse(await this.getDistributeSession(sessionKeyValue) || '')
+        foundSession = JSON.parse((await this.getDistributeSession(sessionKeyValue)) || '')
       } catch (e) {}
 
       if (foundSession) {
         const foundSessionRecords = await getFormattedSessionRecords(foundSession, options)
         // Stale all related sessions.
         if (Array.isArray(foundSessionRecords)) {
-          const sessionClientCommandInfo = _.get(options, 'methodType') === UserSessionTamperedFromMethodType.CHANGE_PWD
-            ? {
-              trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-              command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
-              value: UserSessionSignOutCausedBy.SESSION_CREDENTIAL_MODIFIED
-            }
-            : {
-              trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-              command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
-              value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
-            }
+          const sessionClientCommandInfo =
+            _.get(options, 'methodType') === UserSessionTamperedFromMethodType.CHANGE_PWD
+              ? {
+                  trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+                  command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+                  value: UserSessionSignOutCausedBy.SESSION_CREDENTIAL_MODIFIED
+                }
+              : {
+                  trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+                  command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+                  value: UserSessionSignOutCausedBy.DISABLE_MULTIPLE_SIGNED_IN_SESSIONS
+                }
           await this.broadcastStaleClientSessions(
             foundSessionRecords,
             sessionClientCommandInfo as WebsocketUserSessionClientCommandInfo
           )
-          await Promise.allSettled(foundSessionRecords!.filter(Boolean).map(r => this.staleDistributeSession(r)))
+          await Promise.allSettled(
+            foundSessionRecords!.filter(Boolean).map((r) => this.staleDistributeSession(r))
+          )
         }
 
         // Stale records.
@@ -498,14 +539,14 @@ export class AccountService {
       if (enableRecordMultipleSignedInSessions) {
         let foundSession = ctxPreviousSession
         try {
-          foundSession = JSON.parse(await this.getDistributeSession(sessionKeyValue) || '')
+          foundSession = JSON.parse((await this.getDistributeSession(sessionKeyValue)) || '')
         } catch (e) {}
 
         if (foundSession) {
           const foundSessionRecords = await getFormattedSessionRecords(foundSession, options)
 
           if (Array.isArray(foundSessionRecords)) {
-            _.remove(foundSessionRecords!, r => r === sessionKeyValue)
+            _.remove(foundSessionRecords!, (r) => r === sessionKeyValue)
             await this.staleDistributeSession(sessionKeyValue)
 
             foundSessionRecords!.length
@@ -523,18 +564,16 @@ export class AccountService {
     await this.setClientSession(ctx, null)
   }
 
-  getWsSocketSessionKey (
-    socket: WebsocketMiddlewareContext['input']['params']['socket']
-  ) {
+  getWsSocketSessionKey(socket: WebsocketMiddlewareContext['input']['params']['socket']) {
     return _.get(socket, WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY) as UserSession['_sessionId']
   }
 
-  async getCtxSession (ctx: HTTPMiddlewareContext) {
+  async getCtxSession(ctx: HTTPMiddlewareContext) {
     const storage = ctx.namespace(ARTUS_FRAMEWORK_WEB_USER_NAMESPACE)
     return storage.get('session') as UserSession
   }
 
-  setWsSocketSessionKey (
+  setWsSocketSessionKey(
     socket: WebsocketMiddlewareContext['input']['params']['socket'],
     session: UserSession | null
   ) {
@@ -545,51 +584,57 @@ export class AccountService {
     _.set(socket, WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY, session._sessionId)
   }
 
-  async setCtxSession (ctx: HTTPMiddlewareContext, session: UserSession | null) {
+  async setCtxSession(ctx: HTTPMiddlewareContext, session: UserSession | null) {
     const storage = ctx.namespace(ARTUS_FRAMEWORK_WEB_USER_NAMESPACE)
     storage.set(session, 'session')
 
     return storage
   }
 
-  async staleCtxSession (ctx: HTTPMiddlewareContext) {
+  async staleCtxSession(ctx: HTTPMiddlewareContext) {
     const storage = ctx.namespace(ARTUS_FRAMEWORK_WEB_USER_NAMESPACE)
     storage.set(null, 'session')
 
     return storage
   }
 
-  calcDistributeCacheSessionKey (sessionKeyValue: string) {
+  calcDistributeCacheSessionKey(sessionKeyValue: string) {
     return 'USER:' + sessionKeyValue
   }
 
-  calcDistributeCacheSessionRecordsKey (
-    userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
+  calcDistributeCacheSessionRecordsKey(
+    userId: Exclude<
+      PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>,
+      null
+    >['userId']
   ) {
     return 'USER-SESSIONS:' + userId
   }
 
-  async getDistributeSession (sessionKeyValue: string) {
+  async getDistributeSession(sessionKeyValue: string) {
     const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
-    return cacheService.distribute.get(
-      this.calcDistributeCacheSessionKey(sessionKeyValue),
-      { needRefresh: true, ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
-    )
+    return cacheService.distribute.get(this.calcDistributeCacheSessionKey(sessionKeyValue), {
+      needRefresh: true,
+      ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL
+    })
   }
 
-  async getDistributeSessionRecords (
-    userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
+  async getDistributeSessionRecords(
+    userId: Exclude<
+      PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>,
+      null
+    >['userId']
   ) {
     const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
-    return cacheService.distribute.get(
-      this.calcDistributeCacheSessionRecordsKey(userId),
-      { needRefresh: true, ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
-    )
+    return cacheService.distribute.get(this.calcDistributeCacheSessionRecordsKey(userId), {
+      needRefresh: true,
+      ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL
+    })
   }
 
-  async setDistributeSession (sessionKeyValue: string, session: UserSession) {
+  async setDistributeSession(sessionKeyValue: string, session: UserSession) {
     const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
     return cacheService.distribute.set(
@@ -599,8 +644,11 @@ export class AccountService {
     )
   }
 
-  async setDistributeSessionRecords (
-    userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId'],
+  async setDistributeSessionRecords(
+    userId: Exclude<
+      PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>,
+      null
+    >['userId'],
     sessionRecords: UserSessionRecords
   ) {
     const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
@@ -612,27 +660,35 @@ export class AccountService {
     )
   }
 
-  async staleDistributeSession (sessionKeyValue: string) {
+  async staleDistributeSession(sessionKeyValue: string) {
     const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
     return cacheService.distribute.stale(this.calcDistributeCacheSessionKey(sessionKeyValue))
   }
 
-  async staleDistributeSessionRecords (
-    userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
+  async staleDistributeSessionRecords(
+    userId: Exclude<
+      PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>,
+      null
+    >['userId']
   ) {
     const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
 
     return cacheService.distribute.stale(this.calcDistributeCacheSessionRecordsKey(userId))
   }
 
-  async findInPersistentDB (condition: Pick<Account, 'email'>) {
+  async findInPersistentDB(condition: Pick<Account, 'email'>) {
     return this.getPrisma().account.findFirst({ where: condition })
   }
 
-  async updateOnPersistentDB (
+  async updateOnPersistentDB(
     condition: Pick<Account, 'email'>,
-    data: Partial<Pick<Account, 'password' | 'name' | 'updatedAt' | 'inactive' | 'inactiveAt' | 'lastSignedInAt'>>
+    data: Partial<
+      Pick<
+        Account,
+        'password' | 'name' | 'updatedAt' | 'inactive' | 'inactiveAt' | 'lastSignedInAt'
+      >
+    >
   ) {
     return this.getPrisma().account.update({
       where: condition,
@@ -640,29 +696,26 @@ export class AccountService {
     })
   }
 
-  async createUponPersistentDB (data: Account) {
+  async createUponPersistentDB(data: Account) {
     return this.getPrisma().account.create({ data })
   }
 
   @SubscribeDistributeCacheEvent(DistributeCacheEventSubscriberEventNames.KEY_EXPIRED)
-  async handleDistributeSessionKeyExpired (sessionKeyValue: string) {
+  async handleDistributeSessionKeyExpired(sessionKeyValue: string) {
     if (!(sessionKeyValue && userSessionIdPattern.test(sessionKeyValue))) {
       return
     }
 
-    return this.staleClientSession(
-      sessionKeyValue.replace(userSessionIdReplacePattern, ''),
-      {
-        trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
-        command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
-        value: UserSessionSignOutCausedBy.SESSION_DISTRIBUTE_EXPIRED
-      } as WebsocketUserSessionClientCommandInfo
-    )
+    return this.staleClientSession(sessionKeyValue.replace(userSessionIdReplacePattern, ''), {
+      trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM,
+      command: WebsocketUserSessionClientCommandType.SESSION_EVICT,
+      value: UserSessionSignOutCausedBy.SESSION_DISTRIBUTE_EXPIRED
+    } as WebsocketUserSessionClientCommandInfo)
   }
 
-  async signIn (
+  async signIn(
     certification: Pick<Account, 'email' | 'password'>,
-    options?: Partial<{ passwordPreEncrypt: boolean, enableMultipleSignedInSessions: boolean }>
+    options?: Partial<{ passwordPreEncrypt: boolean; enableMultipleSignedInSessions: boolean }>
   ) {
     const password = _.get(certification, 'password')
     if (!(password && typeof password === 'string')) {
@@ -672,17 +725,12 @@ export class AccountService {
       })
     }
 
-    const rectifiedPassword = rectifyPassword(
-      password,
-      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
-    )
-    const rectifiedCertification = _.merge(
-      {},
-      certification,
-      {
-        password: rectifiedPassword
-      }
-    )
+    const rectifiedPassword = rectifyPassword(password, {
+      preEncrypt: _.get(options, 'passwordPreEncrypt')
+    })
+    const rectifiedCertification = _.merge({}, certification, {
+      password: rectifiedPassword
+    })
     const validateResult = await validateAccountSignInPayload(rectifiedCertification)
     if (!validateResult) {
       // @ts-ignore
@@ -716,7 +764,10 @@ export class AccountService {
     }
 
     // Update.
-    await this.updateOnPersistentDB({ email: foundAccount.email }, { lastSignedInAt: dayjs.utc().toDate() })
+    await this.updateOnPersistentDB(
+      { email: foundAccount.email },
+      { lastSignedInAt: dayjs.utc().toDate() }
+    )
 
     return this.formatResponseData(
       {
@@ -727,9 +778,9 @@ export class AccountService {
     )
   }
 
-  async signUp (
+  async signUp(
     registration: Pick<Account, 'email' | 'name' | 'password'>,
-    options?: Partial<{ passwordPreEncrypt: boolean, enableMultipleSignedInSessions: boolean }>
+    options?: Partial<{ passwordPreEncrypt: boolean; enableMultipleSignedInSessions: boolean }>
   ) {
     const password = _.get(registration, 'password')
     if (!(password && typeof password === 'string')) {
@@ -739,17 +790,12 @@ export class AccountService {
       })
     }
 
-    const rectifiedPassword = rectifyPassword(
-      password,
-      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
-    )
-    const rectifiedRegistration = _.merge(
-      {},
-      registration,
-      {
-        password: rectifiedPassword
-      }
-    )
+    const rectifiedPassword = rectifyPassword(password, {
+      preEncrypt: _.get(options, 'passwordPreEncrypt')
+    })
+    const rectifiedRegistration = _.merge({}, registration, {
+      password: rectifiedPassword
+    })
     const validateResult = await validateAccountSignUpPayload(rectifiedRegistration)
     if (!validateResult) {
       // @ts-ignore
@@ -771,10 +817,7 @@ export class AccountService {
     const salt = shared.utils.calcUUID()
     // Password, base64 decode.
     const finalPassword = encryptPassword(
-      rectifyPassword(
-        registration.password,
-        { preEncrypt: _.get(options, 'passwordPreEncrypt') }
-      ),
+      rectifyPassword(registration.password, { preEncrypt: _.get(options, 'passwordPreEncrypt') }),
       salt
     )
 
@@ -800,11 +843,11 @@ export class AccountService {
     )
   }
 
-  async signOut (...args: Parameters<AccountService['handleCertificatedSessionTampered']>) {
+  async signOut(...args: Parameters<AccountService['handleCertificatedSessionTampered']>) {
     return this.handleCertificatedSessionTampered(...args)
   }
 
-  async changePwd (
+  async changePwd(
     certification: Pick<Account, 'email' | 'password'> & { oldPassword: string },
     options?: Partial<{ passwordPreEncrypt: boolean }>
   ) {
@@ -824,23 +867,17 @@ export class AccountService {
       })
     }
 
-    const rectifiedPassword = rectifyPassword(
-      password,
-      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
-    )
+    const rectifiedPassword = rectifyPassword(password, {
+      preEncrypt: _.get(options, 'passwordPreEncrypt')
+    })
     // Currently, we tolerate that new password is the same as the old one.
-    const rectifiedOldPassword = rectifyPassword(
-      oldPassword,
-      { preEncrypt: _.get(options, 'passwordPreEncrypt') }
-    )
-    const rectifiedCertification = _.merge(
-      {},
-      certification,
-      {
-        password: rectifiedPassword,
-        oldPassword: rectifiedOldPassword
-      }
-    )
+    const rectifiedOldPassword = rectifyPassword(oldPassword, {
+      preEncrypt: _.get(options, 'passwordPreEncrypt')
+    })
+    const rectifiedCertification = _.merge({}, certification, {
+      password: rectifiedPassword,
+      oldPassword: rectifiedOldPassword
+    })
     const validateResult = await validateAccountChangePwdPayload(rectifiedCertification)
     if (!validateResult) {
       // @ts-ignore

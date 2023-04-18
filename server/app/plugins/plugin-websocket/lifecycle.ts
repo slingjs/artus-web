@@ -18,9 +18,11 @@ export default class WebsocketLifecycle implements ApplicationLifecycle {
   app: ArtusApplication
 
   @LifecycleHook()
-  async didLoad () {
+  async didLoad() {
     const client = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
-    const relatedConfig = filterPluginConfig((this.app.config as AppConfig).plugin.websocket) as AppConfig['plugin']['websocket']
+    const relatedConfig = filterPluginConfig(
+      (this.app.config as AppConfig).plugin.websocket
+    ) as AppConfig['plugin']['websocket']
 
     let sharedServer: http.Server | undefined
     if (relatedConfig.useSharedHTTPServer) {
@@ -41,7 +43,7 @@ export default class WebsocketLifecycle implements ApplicationLifecycle {
   }
 
   @LifecycleHook()
-  async beforeClose () {
+  async beforeClose() {
     const client = this.app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
 
     client.getWsServer()?.close()

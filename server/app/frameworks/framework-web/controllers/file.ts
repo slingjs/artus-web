@@ -11,10 +11,17 @@ export class FileController {
   fileService: FileService
 
   @Get('/*')
-  async handler (...args: Parameters<HTTPMiddleware>) {
+  async handler(...args: Parameters<HTTPMiddleware>) {
     const [ctx, next] = args
 
-    const { input: { params: { params: { '*': filePath } } }, output: { data } } = ctx
+    const {
+      input: {
+        params: {
+          params: { '*': filePath }
+        }
+      },
+      output: { data }
+    } = ctx
     if (!filePath) {
       return await next()
     }

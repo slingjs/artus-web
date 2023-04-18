@@ -23,20 +23,29 @@ export class RedisClient {
 
   private subscriber: Redis | null = null
 
-  async init (config: RedisConfig) {
+  async init(config: RedisConfig) {
     this.redis = new Redis(config)
 
-    const eventMetadataRecords: Record<RedisEventSubscriberEventNames, RedisEventSubscriberMetadata> = {} as any
+    const eventMetadataRecords: Record<
+      RedisEventSubscriberEventNames,
+      RedisEventSubscriberMetadata
+    > = {} as any
 
     const redisOperablePromise = shared.utils.generateOperablePromise<Redis>()
     this.redis.once('ready', async () => {
-      const eventSubscriberControllerClazzs = this.app.container.getInjectableByTag(REDIS_EVENT_SUBSCRIBER_TAG) as FunctionConstructor[]
-      if (!(Array.isArray(eventSubscriberControllerClazzs) && eventSubscriberControllerClazzs.length)) {
+      const eventSubscriberControllerClazzs = this.app.container.getInjectableByTag(
+        REDIS_EVENT_SUBSCRIBER_TAG
+      ) as FunctionConstructor[]
+      if (
+        !(Array.isArray(eventSubscriberControllerClazzs) && eventSubscriberControllerClazzs.length)
+      ) {
         return redisOperablePromise.resolve(this.redis)
       }
 
       for (const eventSubscriberControllerClazz of eventSubscriberControllerClazzs) {
-        const eventSubscriberHandlerDescriptorList = Object.getOwnPropertyDescriptors(eventSubscriberControllerClazz.prototype)
+        const eventSubscriberHandlerDescriptorList = Object.getOwnPropertyDescriptors(
+          eventSubscriberControllerClazz.prototype
+        )
         const eventSubscriberController = this.app.container.get(eventSubscriberControllerClazz)
 
         for (const key of Object.keys(eventSubscriberHandlerDescriptorList)) {
@@ -53,7 +62,8 @@ export class RedisClient {
           for (const eventMetadata of redisEventSubscriberMetadata) {
             let eventMetadataRecord = eventMetadataRecords[eventMetadata.eventName]
             if (!eventMetadataRecord) {
-              eventMetadataRecords[eventMetadata.eventName] = eventMetadataRecord = [] as RedisEventSubscriberMetadata
+              eventMetadataRecords[eventMetadata.eventName] = eventMetadataRecord =
+                [] as RedisEventSubscriberMetadata
             }
 
             eventMetadataRecord.push({
@@ -81,12 +91,14 @@ export class RedisClient {
     this.subscriber.once('error', subscriberOperablePromise.reject)
 
     await subscriberOperablePromise.p
-    await this.handleSubscribeKeyExpiredEvent(eventMetadataRecords[RedisEventSubscriberEventNames.KEY_EXPIRED])
+    await this.handleSubscribeKeyExpiredEvent(
+      eventMetadataRecords[RedisEventSubscriberEventNames.KEY_EXPIRED]
+    )
 
     return this
   }
 
-  private async handleSubscribeKeyExpiredEvent (
+  private async handleSubscribeKeyExpiredEvent(
     eventMetadata: RedisEventSubscriberMetadata<RedisEventSubscriberEventNames.KEY_EXPIRED>
   ) {
     if (!(Array.isArray(eventMetadata) && eventMetadata.length)) {
@@ -107,11 +119,11 @@ export class RedisClient {
     })
   }
 
-  getRedis () {
+  getRedis() {
     return this.redis
   }
 
-  getSubscriber () {
+  getSubscriber() {
     return this.subscriber
   }
 }

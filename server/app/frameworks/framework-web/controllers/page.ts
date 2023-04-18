@@ -6,27 +6,32 @@ import { PageService } from '../services/page'
 import shared from '@sling/artus-web-shared'
 import { initUser } from '../middlewares/business/account'
 
-@HTTPController(
-  '',
-  {
-    order: Infinity // Put it at the last.
-  }
-)
+@HTTPController('', {
+  order: Infinity // Put it at the last.
+})
 @Use(initUser<HTTPMiddleware>())
 export class PageController {
   @Inject(ARTUS_FRAMEWORK_WEB_PAGE_SERVICE)
   pageService: PageService
 
   @Get('/:appPath')
-  async handler (...args: Parameters<HTTPMiddleware>) {
+  async handler(...args: Parameters<HTTPMiddleware>) {
     const [ctx, next] = args
 
-    const { input: { params: { params: { appPath } } } } = ctx
+    const {
+      input: {
+        params: {
+          params: { appPath }
+        }
+      }
+    } = ctx
     if (shared.utils.compareIgnoreCase(appPath, shared.constants.FILE_BASE_DIR)) {
       return await next()
     }
 
-    const { output: { data } } = ctx
+    const {
+      output: { data }
+    } = ctx
     data.body = await this.pageService.render(ctx, appPath!)
   }
 }

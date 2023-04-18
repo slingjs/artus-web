@@ -17,18 +17,18 @@ export type HTTPHandler = Handler<HTTPVersion.V1>
 export type HTTPHandlerArguments = Parameters<HTTPHandler>
 
 export type HTTPHandlerArgumentsRecord = {
-  req: HTTPHandlerArguments[0] & Partial<{ body: any }>,
-  res: HTTPHandlerArguments[1],
-  params: HTTPHandlerArguments[2],
-  store: HTTPHandlerArguments[3],
-  searchParams: HTTPHandlerArguments[4],
+  req: HTTPHandlerArguments[0] & Partial<{ body: any }>
+  res: HTTPHandlerArguments[1]
+  params: HTTPHandlerArguments[2]
+  store: HTTPHandlerArguments[3]
+  searchParams: HTTPHandlerArguments[4]
   app: ArtusApplication
 }
 
 export type HTTPHandlerOutputData = {
-  body: undefined | string | object | Stream,
-  __body__: HTTPHandlerOutputData['body'],
-  status: number | undefined,
+  body: undefined | string | object | Stream
+  __body__: HTTPHandlerOutputData['body']
+  status: number | undefined
   __status__: HTTPHandlerOutputData['status']
   __modified__: boolean
 }

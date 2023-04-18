@@ -11,7 +11,7 @@ export class FrameworkWebClient {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 
-  isListening () {
+  isListening() {
     const client = this.app.container.get(ARTUS_PLUGIN_HTTP_CLIENT) as PluginHTTPClient
     const server = client.getServer()
 

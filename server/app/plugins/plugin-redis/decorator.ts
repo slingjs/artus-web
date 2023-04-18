@@ -7,21 +7,20 @@ import {
 } from './types'
 import { addTag } from '@artus/core'
 
-export function SubscribeRedisEventUnit (): ClassDecorator {
-  return function(target) {
+export function SubscribeRedisEventUnit(): ClassDecorator {
+  return function (target) {
     addTag(REDIS_EVENT_SUBSCRIBER_TAG, target)
   }
 }
 
-export function SubscribeRedisEvent (eventName: RedisEventSubscriberEventNames) {
-  return function(
+export function SubscribeRedisEvent(eventName: RedisEventSubscriberEventNames) {
+  return function (
     _target: Object,
     _key: string | symbol,
     descriptor: TypedPropertyDescriptor<ArrayMember<RedisEventSubscriberMetadata>['handler']>
   ) {
-    const subscriberMetadata: RedisEventSubscriberMetadata = (
+    const subscriberMetadata: RedisEventSubscriberMetadata =
       Reflect.getMetadata(REDIS_EVENT_SUBSCRIBER, descriptor.value!) ?? []
-    )
 
     subscriberMetadata.push({
       handler: descriptor.value!,

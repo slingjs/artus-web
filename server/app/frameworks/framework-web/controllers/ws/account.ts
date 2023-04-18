@@ -1,4 +1,8 @@
-import { WebsocketController, WebsocketEvent, WebsocketUse } from '../../../../plugins/plugin-websocket/decorator'
+import {
+  WebsocketController,
+  WebsocketEvent,
+  WebsocketUse
+} from '../../../../plugins/plugin-websocket/decorator'
 import {
   ARTUS_PLUGIN_WEBSOCKET_CLIENT,
   WebSocketEventNames,
@@ -17,7 +21,7 @@ import {
 @WebsocketUse([executionTimeMiddleware<WebsocketMiddleware>(), initUser<WebsocketMiddleware>()])
 export default class AccountWsController {
   @WebsocketEvent(WebSocketEventNames.CONNECTION, { path: '/observe' })
-  async handleConnection (...args: Parameters<WebsocketMiddleware>) {
+  async handleConnection(...args: Parameters<WebsocketMiddleware>) {
     const [ctx, next] = args
 
     await ctx.input.params.trigger.response(ctx, {
@@ -30,7 +34,7 @@ export default class AccountWsController {
   }
 
   @WebsocketEvent(WebSocketEventNames.MESSAGE, { path: '/observe' })
-  async handleMessage (...args: Parameters<WebsocketMiddleware>) {
+  async handleMessage(...args: Parameters<WebsocketMiddleware>) {
     const [ctx, next] = args
 
     await ctx.input.params.trigger.response(ctx, { receiveMessage: '' })
@@ -39,16 +43,20 @@ export default class AccountWsController {
   }
 
   @WebsocketEvent(WebSocketEventNames.MESSAGE, { path: '/observe' })
-  async handleMessageAndBroadcast (...args: Parameters<WebsocketMiddleware>) {
+  async handleMessageAndBroadcast(...args: Parameters<WebsocketMiddleware>) {
     const [ctx, next] = args
 
-    const { input: { params: { trigger, socket, app, eventArgs } } } = ctx
+    const {
+      input: {
+        params: { trigger, socket, app, eventArgs }
+      }
+    } = ctx
 
     const websocketClient = app.container.get(ARTUS_PLUGIN_WEBSOCKET_CLIENT) as WebsocketClient
 
-    const receivedMessage = eventArgs[0];
+    const receivedMessage = eventArgs[0]
     if (receivedMessage) {
-      websocketClient.getWsServerSameReqPathSockets(socket).forEach(s => {
+      websocketClient.getWsServerSameReqPathSockets(socket).forEach((s) => {
         trigger.send(s, receivedMessage)
       })
     }

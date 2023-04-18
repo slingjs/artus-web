@@ -9,11 +9,11 @@ import LRUCache from 'lru-cache'
 export class CacheClient {
   private cache: LRUCache<any, any, any>
 
-  async init (options: CacheConfig) {
+  async init(options: CacheConfig) {
     this.cache = new LRUCache(options)
   }
 
-  getCache () {
+  getCache() {
     return this.cache
   }
 }

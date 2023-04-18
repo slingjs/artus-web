@@ -12,9 +12,16 @@ export class FileService {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 
-  async sendFile (ctx: HTTPMiddlewareContext, filePath: string) {
-    const { input: { params: { req } } } = ctx
+  async sendFile(ctx: HTTPMiddlewareContext, filePath: string) {
+    const {
+      input: {
+        params: { req }
+      }
+    } = ctx
 
-    return send(req, filePath, { root: (this.app.config as AppConfig).framework.web.distDir, index: false })
+    return send(req, filePath, {
+      root: (this.app.config as AppConfig).framework.web.distDir,
+      index: false
+    })
   }
 }

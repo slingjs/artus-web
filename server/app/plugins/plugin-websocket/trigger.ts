@@ -15,7 +15,7 @@ import ws from 'ws'
 export class WebsocketTrigger extends Trigger {
   private handlePipeline: Pipeline | null
 
-  constructor () {
+  constructor() {
     super()
 
     const websocketTriggerRun: WebsocketMiddleware = async (ctx, next) => {
@@ -29,15 +29,20 @@ export class WebsocketTrigger extends Trigger {
     this.use(websocketTriggerRun)
   }
 
-  async response (ctx: WebsocketMiddlewareContext, body: WebsocketEventResponseBody) {
-    const { input: { params: { socket } }, output: { data } } = ctx
+  async response(ctx: WebsocketMiddlewareContext, body: WebsocketEventResponseBody) {
+    const {
+      input: {
+        params: { socket }
+      },
+      output: { data }
+    } = ctx
 
     data.lastMessage = body
 
     return this.send(socket, body)
   }
 
-  async send (socket: ws.WebSocket, body: WebsocketEventResponseBody) {
+  async send(socket: ws.WebSocket, body: WebsocketEventResponseBody) {
     if (Buffer.isBuffer(body) || typeof body === 'string') {
       socket.send(body.toString())
 
@@ -47,7 +52,7 @@ export class WebsocketTrigger extends Trigger {
     socket.send(JSON.stringify(body))
   }
 
-  setHandlePipeline (pipeline: WebsocketTrigger['pipeline']) {
+  setHandlePipeline(pipeline: WebsocketTrigger['pipeline']) {
     this.handlePipeline = pipeline
   }
 }

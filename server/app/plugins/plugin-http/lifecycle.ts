@@ -17,9 +17,13 @@ export default class HTTPLifecycle implements ApplicationLifecycle {
   app: ArtusApplication
 
   @LifecycleHook()
-  public async didLoad () {
+  public async didLoad() {
     const client = this.app.container.get(ARTUS_PLUGIN_HTTP_CLIENT) as PluginHTTPClient
-    await client.init(filterPluginConfig((this.app.config as AppConfig).plugin.http as HTTPConfig) as AppConfig['plugin']['http'])
+    await client.init(
+      filterPluginConfig(
+        (this.app.config as AppConfig).plugin.http as HTTPConfig
+      ) as AppConfig['plugin']['http']
+    )
 
     // const trigger = this.app.container.get(ARTUS_PLUGIN_HTTP_TRIGGER) as HTTPTrigger
     // await trigger.use(httpExecutionTimeMiddleware())
@@ -32,7 +36,7 @@ export default class HTTPLifecycle implements ApplicationLifecycle {
   }
 
   @LifecycleHook()
-  public async beforeClose () {
+  public async beforeClose() {
     const client = this.app.container.get(ARTUS_PLUGIN_HTTP_CLIENT) as PluginHTTPClient
     const server = client.getServer()
 

@@ -19,14 +19,19 @@ describe('Check server running correctly', () => {
 
     const http = require('http')
     const { p, resolve } = shared.utils.generateOperablePromise()
-    const req = http.get(
-      global.httpUri = url.format({ hostname, port, protocol: 'http' })
-    )
+    const req = http.get((global.httpUri = url.format({ hostname, port, protocol: 'http' })))
 
-    req.on('response', res => {
+    req.on('response', (res) => {
       const setCookies = res.headers['set-cookie'] ?? []
 
-      _.set(global, 'request.headers.Cookie', setCookies.map(v => v.split(';')[0]).filter(Boolean).join(';'))
+      _.set(
+        global,
+        'request.headers.Cookie',
+        setCookies
+          .map((v) => v.split(';')[0])
+          .filter(Boolean)
+          .join(';')
+      )
 
       resolve(res)
     })
@@ -48,7 +53,7 @@ describe('Check server running correctly', () => {
     const ws = require('ws')
 
     const websocket = new ws.WebSocket(
-      global.websocketUri = url.format({ hostname, port, protocol: 'ws' }),
+      (global.websocketUri = url.format({ hostname, port, protocol: 'ws' })),
       global.request
     )
     const { p, resolve } = shared.utils.generateOperablePromise<typeof ws.WebSocket.Event>()
@@ -69,9 +74,11 @@ describe<LocalTestContext>('Account certificates', () => {
   }
 
   it<LocalTestContext>('Sign-up', async () => {
-    const signUpUri = url.format(_.merge(url.parse(global.httpUri), {
-      pathname: '/api/account/sign-up'
-    }))
+    const signUpUri = url.format(
+      _.merge(url.parse(global.httpUri), {
+        pathname: '/api/account/sign-up'
+      })
+    )
 
     const result = await fetch(
       signUpUri,
@@ -85,7 +92,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then(res => {
+    ).then((res) => {
       const setCookies = res.headers.get('set-cookie') ?? ''
       if (setCookies) {
         _.set(global, 'request.headers.cookie', setCookies.split(';')[0]).filter(Boolean).join(';')
@@ -98,9 +105,11 @@ describe<LocalTestContext>('Account certificates', () => {
   })
 
   it<LocalTestContext>('Session', async () => {
-    const sessionUri = url.format(_.merge(url.parse(global.httpUri), {
-      pathname: '/api/account/session'
-    }))
+    const sessionUri = url.format(
+      _.merge(url.parse(global.httpUri), {
+        pathname: '/api/account/session'
+      })
+    )
 
     const session = await fetch(
       sessionUri,
@@ -113,7 +122,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then(res => res.json())
+    ).then((res) => res.json())
 
     assert(_.get(session, 'status') === 'SUCCESS')
 
@@ -123,9 +132,11 @@ describe<LocalTestContext>('Account certificates', () => {
   })
 
   it<LocalTestContext>('Sign-out', async () => {
-    const signOutUri = url.format(_.merge(url.parse(global.httpUri), {
-      pathname: '/api/account/sign-out'
-    }))
+    const signOutUri = url.format(
+      _.merge(url.parse(global.httpUri), {
+        pathname: '/api/account/sign-out'
+      })
+    )
 
     await fetch(
       signOutUri,
@@ -144,9 +155,11 @@ describe<LocalTestContext>('Account certificates', () => {
 
   it<LocalTestContext>('Change-Pwd', async () => {
     const newPwd = Buffer.from('1qaz!QAZ1', 'utf-8').toString('base64')
-    const changePwdUri = url.format(_.merge(url.parse(global.httpUri), {
-      pathname: '/api/account/change-pwd'
-    }))
+    const changePwdUri = url.format(
+      _.merge(url.parse(global.httpUri), {
+        pathname: '/api/account/change-pwd'
+      })
+    )
 
     const result = await fetch(
       changePwdUri,
@@ -165,7 +178,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then(res => res.json())
+    ).then((res) => res.json())
 
     assert(_.get(result, 'status') === 'SUCCESS')
 
@@ -174,9 +187,11 @@ describe<LocalTestContext>('Account certificates', () => {
   })
 
   it<LocalTestContext>('Sign-In', async () => {
-    const signInUri = url.format(_.merge(url.parse(global.httpUri), {
-      pathname: '/api/account/sign-in'
-    }))
+    const signInUri = url.format(
+      _.merge(url.parse(global.httpUri), {
+        pathname: '/api/account/sign-in'
+      })
+    )
 
     const result = await fetch(
       signInUri,
@@ -190,7 +205,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then(res => res.json())
+    ).then((res) => res.json())
 
     assert(_.get(result, 'status') === 'SUCCESS')
 
