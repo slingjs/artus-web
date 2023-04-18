@@ -307,7 +307,9 @@ describe<LocalTestContext>('Account certificates', () => {
           const commandInfo = JSON.parse(event.data)
           // The previous session will be evicted.
           if (commandInfo.command === 'session-evict') {
-            await websocketClient!.close()
+            // No need this. It will be automatically closed.
+            // Due to the server side terminate the ws session unilaterally.
+            // // await websocketClient!.close()
           }
         } catch (e) {}
       }.bind(websocketClient)
@@ -334,7 +336,9 @@ describe<LocalTestContext>('Account certificates', () => {
       return res.json()
     })
 
+    // Wait a little, the websocket will handle the 'session-evicted' command and be closed.
     await shared.utils.promiseDelay(100)
+
     assert(_.get(result, 'status') === 'SUCCESS')
     expect(websocketClient)
     assert(websocketClient!.readyState === websocketClient!.CLOSED)
