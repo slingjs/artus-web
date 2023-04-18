@@ -16,6 +16,7 @@
     "package.json",
     "tsconfig.json",
     "nodemon.json",
-    "./**/package.json"
+    "./**/package.json",
+    "vitest.config.ts"
   ]
 }
