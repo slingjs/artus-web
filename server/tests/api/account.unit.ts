@@ -4,7 +4,7 @@ import _ from 'lodash'
 import fetch from 'node-fetch'
 import shared from '@sling/artus-web-shared'
 import { UserSession } from '@sling/artus-web-shared/types'
-import ws from 'ws'
+import * as ws from 'ws'
 import type { Event } from 'ws'
 
 describe('Check server running correctly', () => {
