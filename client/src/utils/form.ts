@@ -2,7 +2,7 @@ import type { FormItemRule } from 'naive-ui'
 import shared from '@sling/artus-web-shared'
 import _ from 'lodash'
 
-export function validatePassword (rule: FormItemRule, value: string) {
+export function validatePassword(rule: FormItemRule, value: string) {
   if (!shared.constants.accountPasswordPattern.test(value)) {
     /**
      * gte 6, lte 16 characters.
@@ -17,7 +17,7 @@ export function validatePassword (rule: FormItemRule, value: string) {
   }
 }
 
-export function validateName (rule: FormItemRule, value: string) {
+export function validateName(rule: FormItemRule, value: string) {
   if (!shared.constants.accountNamePattern.test(value)) {
     /**
      * gte 6, lte 60 characters.
@@ -29,12 +29,13 @@ export function validateName (rule: FormItemRule, value: string) {
   }
 }
 
-export function validateConfirmPasswordGenerator (formModel: { password: string, [key: string]: any }) {
-  return function validateConfirmPassword (rule: FormItemRule, value: string) {
+export function validateConfirmPasswordGenerator(formModel: {
+  password: string
+  [key: string]: any
+}) {
+  return function validateConfirmPassword(rule: FormItemRule, value: string) {
     if (!_.isEqual(formModel.password, value)) {
-      return new Error(
-        'Please enter the content which is the same as the password.'
-      )
+      return new Error('Please enter the content which is the same as the password.')
     }
   }
 }

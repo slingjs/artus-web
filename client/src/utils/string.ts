@@ -1,3 +1,3 @@
-export function preEncryptPassword (password: string) {
+export function preEncryptPassword(password: string) {
   return btoa(password)
 }

@@ -10,7 +10,7 @@ import type { useUserStore } from '@/stores/user'
 import { setUserSessionSignOutCausedBy } from '@/utils/user'
 import _ from 'lodash'
 
-export const handleAccountObserveWsMessage = function(
+export const handleAccountObserveWsMessage = function (
   userStore: ReturnType<typeof useUserStore>,
   ...args: Parameters<Exclude<WebSocket['onmessage'], null>>
 ) {

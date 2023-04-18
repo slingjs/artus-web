@@ -1,8 +1,11 @@
 <template>
-  <template v-if='isSessionValid'>
+  <template v-if="isSessionValid">
     <article>
-      <section class='caption'>Hello, <span>{{ session!.name }}</span>!</section>
-      <section><a href='javascript:;' target='_self' @click='handleSignOut'>Sign out.</a></section>
+      <section class="caption">
+        Hello, <span>{{ session!.name }}</span
+        >!
+      </section>
+      <section><a href="javascript:;" target="_self" @click="handleSignOut">Sign out.</a></section>
     </article>
   </template>
   <template v-else>
@@ -10,7 +13,7 @@
   </template>
 </template>
 
-<script lang='ts' setup>
+<script lang="ts" setup>
 import { useUserStore } from '@/stores/user'
 import { computed, toRef } from 'vue'
 import { useRouter } from 'vue-router'
@@ -35,7 +38,7 @@ if (isSessionValid.value) {
 }
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .caption {
   &:first-letter {
     font-size: 3em;

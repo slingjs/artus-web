@@ -5,17 +5,17 @@ import type {
 } from '@/types'
 import * as urls from './urls'
 
-export function fetchAccountSession () {
+export function fetchAccountSession() {
   return fetch(urls.account.session, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
     credentials: 'same-origin'
-  }).then(res => res.json())
+  }).then((res) => res.json())
 }
 
-export function fetchAccountSignIn (payload: FetchAccountSignInRequestPayload) {
+export function fetchAccountSignIn(payload: FetchAccountSignInRequestPayload) {
   return fetch(urls.account.signIn, {
     method: 'POST',
     headers: {
@@ -23,7 +23,7 @@ export function fetchAccountSignIn (payload: FetchAccountSignInRequestPayload) {
     },
     body: JSON.stringify(payload),
     credentials: 'same-origin'
-  }).then(res => {
+  }).then((res) => {
     if (!res.ok) {
       throw res
     }
@@ -31,7 +31,7 @@ export function fetchAccountSignIn (payload: FetchAccountSignInRequestPayload) {
   })
 }
 
-export function fetchAccountSignUp (payload: FetchAccountSignUpRequestPayload) {
+export function fetchAccountSignUp(payload: FetchAccountSignUpRequestPayload) {
   return fetch(urls.account.signUp, {
     method: 'POST',
     headers: {
@@ -39,7 +39,7 @@ export function fetchAccountSignUp (payload: FetchAccountSignUpRequestPayload) {
     },
     body: JSON.stringify(payload),
     credentials: 'same-origin'
-  }).then(res => {
+  }).then((res) => {
     if (!res.ok) {
       throw res
     }
@@ -47,7 +47,7 @@ export function fetchAccountSignUp (payload: FetchAccountSignUpRequestPayload) {
   })
 }
 
-export function fetchAccountChangePwd (payload: FetchAccountChangePwdRequestPayload) {
+export function fetchAccountChangePwd(payload: FetchAccountChangePwdRequestPayload) {
   return fetch(urls.account.changePwd, {
     method: 'POST',
     headers: {
@@ -55,7 +55,7 @@ export function fetchAccountChangePwd (payload: FetchAccountChangePwdRequestPayl
     },
     body: JSON.stringify(payload),
     credentials: 'same-origin'
-  }).then(res => {
+  }).then((res) => {
     if (!res.ok) {
       throw res
     }

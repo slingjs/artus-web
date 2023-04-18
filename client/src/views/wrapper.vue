@@ -1,12 +1,12 @@
 <template>
-  <n-layout class='layout'>
-    <div class='layout-wrapper'>
+  <n-layout class="layout">
+    <div class="layout-wrapper">
       <n-layout-header>
         <header>
           <n-h1>Header</n-h1>
         </header>
       </n-layout-header>
-      <n-layout-content :nativeScrollbar='false'>
+      <n-layout-content :nativeScrollbar="false">
         <main>
           <RouterView />
         </main>
@@ -18,7 +18,7 @@
   </n-layout>
 </template>
 
-<script lang='ts' setup>
+<script lang="ts" setup>
 import { onMounted } from 'vue'
 import { NLayout, NLayoutContent, NLayoutFooter, NLayoutHeader, useMessage } from 'naive-ui'
 import { useUserStore } from '@/stores/user'
@@ -31,7 +31,7 @@ onMounted(() => {
 })
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .layout {
   height: 100vh;
   overflow: auto;
