@@ -25,4 +25,4 @@ RUN pnpm run build
 
 EXPOSE 9527
 
-CMD ["/bin/sh", "-c", "pm2", "start", "pnpm", "--", "run", "start"]
+CMD ["/bin/sh", "-c", "pm2-runtime", "pnpm", "--", "start"]
