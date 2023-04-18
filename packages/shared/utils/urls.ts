@@ -4,11 +4,7 @@
  * @param key {string}
  * @param value {string}
  */
-export function updateQueryStringParam (
-  uri: string,
-  key: string,
-  value: string
-): string {
+export function updateQueryStringParam(uri: string, key: string, value: string): string {
   if (!value) return uri
   const re = new RegExp('([?&])' + key + '=.*?(&|$)', 'i')
   const separator = uri.indexOf('?') !== -1 ? '&' : '?'
@@ -23,10 +19,7 @@ export function updateQueryStringParam (
  * @param queryObj {Object<any>}
  * @return {string}
  */
-export function updateQueryParam (
-  uri: string,
-  queryObj: Record<string, any>
-): string {
+export function updateQueryParam(uri: string, queryObj: Record<string, any>): string {
   for (const key in queryObj) {
     if (!queryObj.hasOwnProperty(key)) continue
 
@@ -42,16 +35,13 @@ export function updateQueryParam (
  * @param uri {string}
  * @param keys {string|string[]}
  */
-export function removeQueryStringParam (
-  uri: string,
-  keys: string | string[]
-): string {
+export function removeQueryStringParam(uri: string, keys: string | string[]): string {
   // @ts-ignore
-  [].concat(keys).map(function(key) {
+  ;[].concat(keys).map(function (key) {
     if (!key) return
     const re = new RegExp('([?&])' + key + '=.*?(&|$)', 'i')
     if (re.test(uri)) {
-      uri = uri.replace(re, function(str, $1, $2) {
+      uri = uri.replace(re, function (str, $1, $2) {
         return $1 && $1.startsWith('?') ? $2.replace('&', '?') : $2
       })
     }
@@ -66,7 +56,7 @@ export function removeQueryStringParam (
  * @param ignoreCase {boolean}
  * @return {string|null}
  */
-export function getQueryStringFormTargetSearch (
+export function getQueryStringFormTargetSearch(
   targetSearchString: string,
   name: string,
   ignoreCase: boolean = false
@@ -75,10 +65,7 @@ export function getQueryStringFormTargetSearch (
     return null
   }
 
-  const reg = new RegExp(
-    '(?:[\?|&]?)' + name + '=([^&]*)(?:&|$)',
-    ignoreCase ? 'i' : undefined
-  )
+  const reg = new RegExp('(?:[?|&]?)' + name + '=([^&]*)(?:&|$)', ignoreCase ? 'i' : undefined)
   const r = targetSearchString.match(reg)
   if (r != null) return decodeURIComponent(r[1])
 

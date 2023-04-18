@@ -1,15 +1,14 @@
 import { compareIgnoreCase } from './string'
 import { DEVELOPMENT_MODE, PRODUCTION_MODE } from '../constants'
 
-export function judgeBuildMode (targetMode: string) {
+export function judgeBuildMode(targetMode: string) {
   return compareIgnoreCase(process.env.NODE_ENV, targetMode)
 }
 
-export function judgeBuildModeInProduction () {
+export function judgeBuildModeInProduction() {
   return judgeBuildMode(PRODUCTION_MODE)
 }
 
-
-export function judgeBuildModeInDevelopment () {
+export function judgeBuildModeInDevelopment() {
   return judgeBuildMode(DEVELOPMENT_MODE)
 }

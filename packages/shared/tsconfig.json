@@ -10,13 +10,6 @@
     "declaration": true,
     "sourceMap": true
   },
-  "include": [
-    "./**/*.ts",
-    "./**/*.json"
-  ],
-  "exclude": [
-    "package.json",
-    "tsconfig.json",
-    "nodemon.json"
-  ]
+  "include": ["./**/*.ts", "./**/*.json"],
+  "exclude": ["package.json", "tsconfig.json", "nodemon.json"]
 }

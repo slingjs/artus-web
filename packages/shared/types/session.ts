@@ -39,7 +39,9 @@ export enum UserSessionSignOutCausedBy {
   SESSION_CREDENTIAL_MODIFIED = 'SESSION_CREDENTIAL_MODIFIED'
 }
 
-export type WebsocketUserSessionClientCommandMessageNotifyValue = string | {
-  message: string
-  [key: string]: any
-}
+export type WebsocketUserSessionClientCommandMessageNotifyValue =
+  | string
+  | {
+      message: string
+      [key: string]: any
+    }
