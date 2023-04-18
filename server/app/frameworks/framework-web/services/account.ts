@@ -450,16 +450,17 @@ export class AccountService {
       return
     }
 
-    const getFormattedSessionRecords = async (
+    const getFormattedSessionRecordsWithFallbackUserSession = async (
       userSession: UserSession,
       options?: Partial<{
         fallbackSessionRecordsPersistentDBCondition: Parameters<
           AccountService['findInPersistentDB']
         >
       }>
-    ) => {
+    ): Promise<{ fallbackUserSession: UserSession | null, foundSessionRecords: UserSessionRecords | null }> => {
       let foundSessionRecordsString = await this.getDistributeSessionRecords(userSession.id)
       let foundSessionRecords: UserSessionRecords | null = null
+      let fallbackUserSession: UserSession | null = null
       if (foundSessionRecordsString != null) {
         try {
           foundSessionRecords = JSON.parse(foundSessionRecordsString || '')
@@ -467,7 +468,10 @@ export class AccountService {
       }
 
       if (!_.isEmpty(foundSessionRecords)) {
-        return foundSessionRecords
+        return {
+          fallbackUserSession,
+          foundSessionRecords
+        }
       }
 
       const fallbackSessionRecordsPersistentDBCondition = _.get(
@@ -475,25 +479,38 @@ export class AccountService {
         'fallbackSessionRecordsPersistentDBCondition'
       )
       if (_.isEmpty(fallbackSessionRecordsPersistentDBCondition)) {
-        return null
+        return {
+          fallbackUserSession,
+          foundSessionRecords
+        }
       }
 
       const foundMatchedPersistentDBAccount = await this.findInPersistentDB(
         fallbackSessionRecordsPersistentDBCondition as any
       )
       if (!foundMatchedPersistentDBAccount) {
-        return null
+        return {
+          fallbackUserSession,
+          foundSessionRecords
+        }
       }
 
-      const accountUserId = foundMatchedPersistentDBAccount.userId
-      foundSessionRecordsString = await this.getDistributeSessionRecords(accountUserId)
+      fallbackUserSession = await this.initSession(foundMatchedPersistentDBAccount, { _sessionId: userSession.id })
+      foundSessionRecordsString = await this.getDistributeSessionRecords(fallbackUserSession.id)
       if (foundSessionRecordsString != null) {
         try {
-          return JSON.parse(foundSessionRecordsString || '') as UserSessionRecords
+          return {
+            fallbackUserSession,
+            foundSessionRecords: JSON.parse(foundSessionRecordsString || '') as UserSessionRecords
+          }
+
         } catch (e) {}
       }
 
-      return null
+      return {
+        fallbackUserSession,
+        foundSessionRecords
+      }
     }
 
     const enableMultipleSignedInSessions = _.get(options, 'enableMultipleSignedInSessions')
@@ -508,7 +525,14 @@ export class AccountService {
       } catch (e) {}
 
       if (foundSession) {
-        const foundSessionRecords = await getFormattedSessionRecords(foundSession, options)
+        const { fallbackUserSession, foundSessionRecords } = await getFormattedSessionRecordsWithFallbackUserSession(
+          foundSession,
+          options
+        )
+        if (fallbackUserSession) {
+          foundSession = fallbackUserSession
+        }
+
         // Stale all related sessions.
         if (Array.isArray(foundSessionRecords)) {
           const sessionClientCommandInfo =
@@ -543,7 +567,10 @@ export class AccountService {
         } catch (e) {}
 
         if (foundSession) {
-          const foundSessionRecords = await getFormattedSessionRecords(foundSession, options)
+          const { fallbackUserSession, foundSessionRecords } = await getFormattedSessionRecordsWithFallbackUserSession(foundSession, options)
+          if (fallbackUserSession) {
+            foundSession = fallbackUserSession
+          }
 
           if (Array.isArray(foundSessionRecords)) {
             _.remove(foundSessionRecords!, (r) => r === sessionKeyValue)
