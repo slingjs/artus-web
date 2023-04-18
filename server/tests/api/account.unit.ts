@@ -4,7 +4,8 @@ import _ from 'lodash'
 import fetch from 'node-fetch'
 import shared from '@sling/artus-web-shared'
 import { UserSession } from '@sling/artus-web-shared/types'
-import * as ws from 'ws'
+import ws from 'ws'
+import type { Event } from 'ws'
 
 describe('Check server running correctly', () => {
   const url = require('url')
@@ -55,7 +56,7 @@ describe('Check server running correctly', () => {
       (global.websocketUri = url.format({ hostname, port, protocol: 'ws' })),
       global.request
     )
-    const { p, resolve, reject } = shared.utils.generateOperablePromise<typeof ws.WebSocket.Event>()
+    const { p, resolve, reject } = shared.utils.generateOperablePromise<Event>()
     websocket.onopen = resolve.bind(websocket)
     websocket.onerror = reject.bind(websocket)
 
@@ -246,7 +247,7 @@ describe<LocalTestContext>('Account certificates', () => {
     )
 
     websocketClient = new ws.WebSocket(accountObserveUri, global.request)
-    const { p, resolve, reject } = shared.utils.generateOperablePromise<typeof ws.WebSocket.Event>()
+    const { p, resolve, reject } = shared.utils.generateOperablePromise<Event>()
     websocketClient.onopen = resolve.bind(websocketClient)
     websocketClient.onerror = resolve.bind(reject)
 
@@ -254,7 +255,7 @@ describe<LocalTestContext>('Account certificates', () => {
 
     websocketClient!.addEventListener(
       'message',
-      async function onMessage(event) {
+      async function onMessage (event) {
         websocketObserveMessages.push(event.data)
       }.bind(websocketClient)
     )
@@ -302,7 +303,7 @@ describe<LocalTestContext>('Account certificates', () => {
     // Another event.
     websocketClient!.addEventListener(
       'message',
-      async function onMessage(event) {
+      async function onMessage (event) {
         try {
           const commandInfo = JSON.parse(event.data)
           // The previous session will be evicted.
