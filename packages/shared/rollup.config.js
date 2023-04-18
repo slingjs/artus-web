@@ -17,7 +17,7 @@ export default defineConfig([
     },
     external: ['uuid'],
     plugins: [
-      nodeResolve({ browser: false, moduleDirectories: ['uuid'] }),
+      nodeResolve({ browser: false, moduleDirectories: ['uuid'], preferBuiltins: false }),
       typescript({ tsconfig: './tsconfig.json' })
     ]
   },
@@ -34,7 +34,7 @@ export default defineConfig([
     },
     external: ['uuid'],
     plugins: [
-      nodeResolve({ browser: false, moduleDirectories: ['uuid'] }),
+      nodeResolve({ browser: false, moduleDirectories: ['uuid'], preferBuiltins: false }),
       typescript({ tsconfig: './tsconfig.json' })
     ]
   },
@@ -50,7 +50,7 @@ export default defineConfig([
       entryFileNames: (i) => i.name + '.esm.js'
     },
     plugins: [
-      nodeResolve({ preferBuiltins: true, browser: true }),
+      nodeResolve({ preferBuiltins: false, browser: true }),
       typescript({ tsconfig: './tsconfig.json' })
     ]
   },
@@ -63,7 +63,7 @@ export default defineConfig([
       name: 'index.umd.js'
     },
     plugins: [
-      nodeResolve({ preferBuiltins: true, browser: true }),
+      nodeResolve({ preferBuiltins: false, browser: true }),
       typescript({ tsconfig: './tsconfig.json' })
     ]
   }
