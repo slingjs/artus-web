@@ -89,5 +89,4 @@ services:
     networks:
       - sling-web-net
     volumes:
-      - .:/app
       - /app/node_modules

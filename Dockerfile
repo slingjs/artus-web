@@ -8,18 +8,18 @@ ENV LANG="C.UTF-8"
 
 WORKDIR /app/
 
-COPY ./**/package.json ./pnpm-workspace.yaml /app/
+COPY ./sling-artus-web-*.tgz /app/
 
-RUN npm config set registry=https://registry.npmmirror.com --global
+RUN tar -xzf *.tgz -C ./ \
+    && mv ./package/* . \
+    && rm -rf ./package \
+    && rm -rf ./sling-artus-web-*.tgz
 
-COPY . /app/
-
-RUN npm install -g pnpm pm2 \
+RUN npm config set registry=https://registry.npmmirror.com --global \
+    && npm install -g pnpm pm2 \
     && SHELL=bash pnpm setup \
     && source /root/.bashrc \
-    && pnpm i --shamefully-hoist
-
-RUN pnpm run build
+    && pnpm i
 
 EXPOSE 9527
 
