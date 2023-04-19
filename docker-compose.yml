@@ -79,7 +79,9 @@ services:
       context: .
     container_name: app
     ports:
-      - ${HTTP_PORT:-9527}:9527
+      - ${HTTP_HOST:-0.0.0.0}:${HTTP_PORT:-9527}:9527/tcp
+    expose:
+      - ${HTTP_PORT:-9527}
     restart: always
     environment:
       - TZ=Asia/Shanghai
