@@ -3,21 +3,23 @@ import fs from 'fs'
 import { AppConfig } from '../types'
 import shared from '@sling/artus-web-shared'
 
-const cacheDir = process.env.CACHE_DIR ?? path.resolve(process.cwd(), './.cache')
+const processCwd = process.cwd()
+const cacheDir = process.env.CACHE_DIR ?? path.resolve(processCwd, './.cache')
 const distDir = process.env.DIST_DIR ?? (
   [
-    path.resolve(
-      process.cwd(),
+    path.resolve( // For local dev.
+      processCwd,
       './node_modules/@sling/artus-web-client',
       shared.constants.FILE_BASE_DIR
     ),
-    path.resolve(
-      process.cwd(),
-      './client',
+    path.resolve( // For npm package/docker compose.
+      processCwd,
+      '../artus-web-client',
       shared.constants.FILE_BASE_DIR
     )
   ].find(p => fs.existsSync(p)) || '__nonexistent__'
 )
+
 export default {
   cacheDir,
 
