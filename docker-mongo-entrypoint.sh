@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/bin/sh
+
+#Using sh. Rather than using bash.
+#https://stackoverflow.com/a/38905412
 
 set -e
 set -u

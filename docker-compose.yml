@@ -92,4 +92,6 @@ services:
       - sling-web-net
     links:
       - mongo-0
+      - mongo-1
+      - mongo-2
       - redis
