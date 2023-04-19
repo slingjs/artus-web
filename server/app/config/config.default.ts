@@ -1,13 +1,21 @@
 import path from 'path'
+import fs from 'fs'
 import { AppConfig } from '../types'
 import shared from '@sling/artus-web-shared'
 
 const cacheDir = path.resolve(process.cwd(), './.cache')
-const distDir = path.resolve(
-  process.cwd(),
-  './node_modules/@sling/artus-web-client',
-  shared.constants.FILE_BASE_DIR
-)
+const distDir = [
+  path.resolve(
+    process.cwd(),
+    './node_modules/@sling/artus-web-client',
+    shared.constants.FILE_BASE_DIR
+  ),
+  path.resolve(
+    process.cwd(),
+    './client',
+    shared.constants.FILE_BASE_DIR
+  )
+].find(p => fs.existsSync(p)) || '__nonexistent__'
 export default {
   cacheDir,
 
