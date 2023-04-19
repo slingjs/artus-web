@@ -10,6 +10,8 @@ WORKDIR /app/
 
 COPY ./sling-artus-web-*.tgz /app/
 
+COPY ./docker-pm2-process.config.js /app/
+
 RUN tar -xzf *.tgz -C ./ \
     && mv ./package/* . \
     && rm -rf ./package \
