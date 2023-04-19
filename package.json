@@ -21,7 +21,6 @@
     "typescript"
   ],
   "files": [
-    "*/dist",
     "package.json",
     "pnpm-workspace.yaml"
   ],
