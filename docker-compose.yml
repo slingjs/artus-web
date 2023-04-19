@@ -90,3 +90,6 @@ services:
       - redis
     networks:
       - sling-web-net
+    links:
+      - mongo-0
+      - redis
