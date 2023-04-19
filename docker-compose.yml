@@ -41,7 +41,7 @@ services:
       --replSet rs0
       --bind_ip localhost,mongo-2
     ports:
-      - ${MONGO0_PORT:-27019}:27017
+      - ${MONGO2_PORT:-27019}:27017
     restart: unless-stopped
     networks:
       - sling-web-net
@@ -62,12 +62,12 @@ services:
       - sling-web-net
   redis:
     image: redis:latest
-    container_name: sling-web-redis
+    container_name: redis-server
     restart: always
     environment:
       - TZ=Asia/Shanghai
     ports:
-      - "6379:6379"
+      - ${REDIS_PORT:-6379}:6379
     command:
       - /bin/bash
       - -c
@@ -79,7 +79,7 @@ services:
       context: .
     container_name: app
     ports:
-      - "9527:9527"
+      - ${HTTP_PORT:-9527}:9527
     restart: always
     environment:
       - TZ=Asia/Shanghai

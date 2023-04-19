@@ -10,7 +10,7 @@ WORKDIR /app/
 
 COPY ./sling-artus-web-*.tgz /app/
 
-COPY ./docker-pm2-process.config.js /app/
+#COPY ./docker-pm2-process.config.js /app/
 
 RUN tar -xzf *.tgz -C ./ \
     && mv ./package/* . \
@@ -23,6 +23,13 @@ RUN npm config set registry=https://registry.npmmirror.com --global \
     && source /root/.bashrc \
     && pnpm i --shamefully-hoist
 
-EXPOSE 9527
+#EXPOSE 9527
 
-CMD ["/bin/sh", "-c", "pm2-runtime start '/app/docker-pm2-process.config.js'"]
+# Seems redis could only be accessed by this host or 'redis-server'.
+ENV REDIS_HOST="redis"
+
+# The follow commented-out command will always throw errors...
+# Don't know why. So I make compromise to sunset it.
+#CMD ["/bin/sh", "-c", "pm2-runtime start '/app/docker-pm2-process.config.js'"]
+
+CMD ["/bin/sh", "-c", "pnpm start"]
