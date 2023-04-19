@@ -21,7 +21,7 @@ RUN npm config set registry=https://registry.npmmirror.com --global \
     && npm install -g pnpm pm2 \
     && SHELL=bash pnpm setup \
     && source /root/.bashrc \
-    && pnpm i
+    && pnpm i --shamefully-hoist
 
 EXPOSE 9527
 

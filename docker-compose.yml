@@ -88,5 +88,3 @@ services:
       - redis
     networks:
       - sling-web-net
-    volumes:
-      - /app/node_modules
