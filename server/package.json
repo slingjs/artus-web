@@ -1,6 +1,6 @@
 {
   "name": "@sling/artus-web-server",
-  "version": "0.0.33",
+  "version": "0.0.34",
   "description": "",
   "main": "dist/index.js",
   "bin": "./dist/bin/cli.js",
