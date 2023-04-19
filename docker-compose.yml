@@ -1,25 +1,66 @@
 version: '3'
 
 networks:
-  sling-net:
+  sling-web-net:
     driver: bridge
 
 services:
-  sling-web-mongo:
+  mongo-0:
     image: mongo:latest
-    container_name: sling-web-mongo
-    restart: always
+    container_name: mongo-0
+    command: >
+      mongod
+      --replSet rs0
+      --bind_ip localhost,mongo-0
+    ports:
+      - ${MONGO0_PORT:-27017}:27017
+    restart: unless-stopped
     environment:
       TZ: Asia/Shanghai
-    ports:
-      - "27017:27017"
-    entrypoint: [ "/usr/bin/mongod", "--bind_ip", "localhost,sling-web-mongo", "--replSet", "rs0" ]
-    healthcheck:
-      test: test $$(echo "rs.initiate().ok || rs.status().ok") -eq 1
-      interval: 10s
     networks:
-      - sling-net
-  sling-web-redis:
+      - sling-web-net
+  mongo-1:
+    image: mongo:latest
+    container_name: mongo-1
+    command: >
+      mongod
+      --replSet rs0
+      --bind_ip localhost,mongo-1
+    ports:
+      - ${MONGO1_PORT:-27018}:27017
+    restart: unless-stopped
+    environment:
+      TZ: Asia/Shanghai
+    networks:
+      - sling-web-net
+  mongo-2:
+    image: mongo:latest
+    container_name: mongo-2
+    command: >
+      mongod
+      --replSet rs0
+      --bind_ip localhost,mongo-2
+    ports:
+      - ${MONGO0_PORT:-27019}:27017
+    restart: unless-stopped
+    networks:
+      - sling-web-net
+  mongo-rs-init:
+    image: mongo:latest
+    container_name: mongo-rs-init
+    depends_on:
+      - mongo-0
+      - mongo-1
+      - mongo-2
+    entrypoint: [ "docker-mongo-entrypoint.sh" ]
+    environment:
+      TZ: Asia/Shanghai
+    restart: on-failure
+    volumes:
+      - ./docker-mongo-entrypoint.sh:/usr/local/bin/docker-mongo-entrypoint.sh:ro
+    networks:
+      - sling-web-net
+  redis:
     image: redis:latest
     container_name: sling-web-redis
     restart: always
@@ -32,7 +73,7 @@ services:
       - -c
       - redis-server --appendonly yes --requirepass "123456"
     networks:
-      - sling-net
+      - sling-web-net
   app:
     build:
       context: .
@@ -43,10 +84,10 @@ services:
     environment:
       - TZ=Asia/Shanghai
     depends_on:
-      - sling-web-mongo
-      - sling-web-redis
+      - mongo-rs-init
+      - redis
     networks:
-      - sling-net
+      - sling-web-net
     volumes:
       - .:/app
       - /app/node_modules

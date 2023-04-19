@@ -5,24 +5,22 @@ LABEL com.docker.compose.project=artus-web
 
 # For better Chinese support.
 ENV LANG="C.UTF-8"
-ENV DOCKER_BUILDKIT=0
-ENV COMPOSE_DOCKER_CLI_BUILD=0
 
 WORKDIR /app/
 
 COPY ./**/package.json ./pnpm-workspace.yaml /app/
 
-RUN npm config set registry=https://mirrors.cloud.tencent.com/npm/ --global
+RUN npm config set registry=https://registry.npmmirror.com --global
 
 COPY . /app/
 
 RUN npm install -g pnpm pm2 \
     && SHELL=bash pnpm setup \
     && source /root/.bashrc \
-    && pnpm i
+    && pnpm i --shamefully-hoist
 
 RUN pnpm run build
 
 EXPOSE 9527
 
-CMD ["/bin/sh", "-c", "pm2", "pnpm", "--", "start"]
+CMD ["/bin/sh", "-c", "pm2-runtime start '/app/docker-pm2-process.config.js'"]
