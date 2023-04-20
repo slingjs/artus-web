@@ -27,7 +27,7 @@ RUN npm config set registry=https://registry.npmmirror.com --global \
 
 # Seems redis could only be accessed by this host or 'redis-server'.
 ENV REDIS_HOST="redis"
-ENV MONGO_URI="mongodb://mongo-0:27017/test?replicaSet=rs0"
+ENV MONGO_URI="mongodb://mongo-0:27017,mongo-1:27017,mongo-2:27017/test?replicaSet=rs0"
 
 # The follow commented-out command will always throw errors...
 # Don't know why. So I make compromise to sunset it.

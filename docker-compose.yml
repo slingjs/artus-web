@@ -52,7 +52,10 @@ services:
       - mongo-0
       - mongo-1
       - mongo-2
-    entrypoint: [ "docker-mongo-entrypoint.sh" ]
+    command:
+      - /bin/bash
+      - -c
+      - /usr/local/bin/docker-mongo-entrypoint.sh
     environment:
       TZ: Asia/Shanghai
     restart: on-failure
