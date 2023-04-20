@@ -53,7 +53,7 @@ services:
       - mongo-1
       - mongo-2
     command:
-      - /bin/bash
+      - /bin/sh
       - -c
       - /usr/local/bin/docker-mongo-entrypoint.sh
     environment:
@@ -72,7 +72,7 @@ services:
     ports:
       - ${REDIS_PORT:-6379}:6379
     command:
-      - /bin/bash
+      - /bin/sh
       - -c
       - redis-server --appendonly yes --requirepass "123456"
     networks:
