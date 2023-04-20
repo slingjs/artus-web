@@ -31,6 +31,6 @@ ENV MONGO_URI="mongodb://mongo-0:27017,mongo-1:27017,mongo-2:27017/test?replicaS
 
 # The follow commented-out command will always throw errors...
 # Don't know why. So I make compromise to sunset it.
-#CMD ["/bin/sh", "-c", "pm2-runtime start '/app/docker-pm2-process.config.js'"]
+#CMD ["/bin/bash", "-c", "pm2-runtime start '/app/docker-pm2-process.config.js'"]
 
-CMD ["/bin/sh", "-c", "pnpm start"]
+CMD ["/bin/bash", "-c", "pnpm start"]
