@@ -13,6 +13,7 @@ export interface UserSession {
   email: string
   _sessionId: string
   lastSignedInAt: ISODateString
+  _csrfToken: string
 }
 
 export enum WebsocketUserSessionClientCommandType {
