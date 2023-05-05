@@ -34,6 +34,7 @@ import {
 import { PluginPrismaClient } from '../../../plugins/plugin-prisma/client'
 import _ from 'lodash'
 import { encryptPassword, rectifyPassword } from '../utils/business/account'
+import { encryptCsrfToken } from '../utils/security'
 import cookie from 'cookie'
 import dayjs from 'dayjs'
 import dayjsUtc from 'dayjs/plugin/utc'
@@ -308,6 +309,9 @@ export class AccountService {
     signedInAccount?: Account,
     options?: Partial<{ _sessionId: string }>
   ): Promise<UserSession> {
+    const sessionId = _.get(options, '_sessionId') || shared.utils.calcUUID()
+    const csrfToken = encryptCsrfToken(shared.utils.calcUUID(), sessionId)
+
     if (!signedInAccount) {
       const uuid = shared.utils.calcUUID()
 
@@ -317,8 +321,9 @@ export class AccountService {
         signedIn: false,
         id: uuid,
         email: '',
-        _sessionId: _.get(options, '_sessionId') || shared.utils.calcUUID(),
-        lastSignedInAt: ''
+        _sessionId: sessionId,
+        lastSignedInAt: '',
+        _csrfToken: csrfToken
       }
     }
 
@@ -329,10 +334,11 @@ export class AccountService {
       signedIn: true,
       id: signedInAccount.userId,
       email: signedInAccount.email,
-      _sessionId: _.get(options, '_sessionId') || shared.utils.calcUUID(),
+      _sessionId: sessionId,
       lastSignedInAt: signedInAccount.lastSignedInAt
         ? dayjs.utc(signedInAccount.lastSignedInAt).toISOString()
-        : ''
+        : '',
+      _csrfToken: csrfToken
     }
   }
 

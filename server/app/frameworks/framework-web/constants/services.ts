@@ -1,3 +1,5 @@
+import { HTTPMethod } from '../../../plugins/plugin-http/types'
+
 export const DISTRIBUTE_CACHE_SUCCESS_VALUE = 1
 export const DISTRIBUTE_CACHE_SET_SUCCESS_VALUE = 'OK'
 export const DISTRIBUTE_CACHE_CLEAR_SUCCESS_VALUE = 'OK'
@@ -26,3 +28,10 @@ export const WEBSOCKET_ACCOUNT_OBSERVE_REQUEST_PATH = '/ws/account/observe'
 
 export const userSessionIdPattern = /^USER:[A-Za-z\d\-]+$/
 export const userSessionIdReplacePattern = /^USER:/
+
+export const csrfInterceptHttpMethods = [
+  HTTPMethod.DELETE,
+  HTTPMethod.PUT,
+  HTTPMethod.POST,
+  HTTPMethod.PATCH
+]
