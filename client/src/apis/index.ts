@@ -4,13 +4,12 @@ import type {
   FetchAccountSignUpRequestPayload
 } from '@/types'
 import * as urls from './urls'
+import { formatFetchHeaders } from '@/utils/request'
 
 export function fetchAccountSession() {
   return fetch(urls.account.session, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: formatFetchHeaders(),
     credentials: 'same-origin'
   }).then((res) => res.json())
 }
@@ -18,9 +17,7 @@ export function fetchAccountSession() {
 export function fetchAccountSignIn(payload: FetchAccountSignInRequestPayload) {
   return fetch(urls.account.signIn, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: formatFetchHeaders(),
     body: JSON.stringify(payload),
     credentials: 'same-origin'
   }).then((res) => {
@@ -34,9 +31,7 @@ export function fetchAccountSignIn(payload: FetchAccountSignInRequestPayload) {
 export function fetchAccountSignUp(payload: FetchAccountSignUpRequestPayload) {
   return fetch(urls.account.signUp, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: formatFetchHeaders(),
     body: JSON.stringify(payload),
     credentials: 'same-origin'
   }).then((res) => {
@@ -50,9 +45,7 @@ export function fetchAccountSignUp(payload: FetchAccountSignUpRequestPayload) {
 export function fetchAccountChangePwd(payload: FetchAccountChangePwdRequestPayload) {
   return fetch(urls.account.changePwd, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: formatFetchHeaders(),
     body: JSON.stringify(payload),
     credentials: 'same-origin'
   }).then((res) => {

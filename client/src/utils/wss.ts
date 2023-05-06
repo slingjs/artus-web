@@ -9,6 +9,7 @@ import shared from '@sling/artus-web-shared'
 import type { useUserStore } from '@/stores/user'
 import { setUserSessionSignOutCausedBy } from '@/utils/user'
 import _ from 'lodash'
+import { setCsrfToken } from '@/utils/request'
 
 export const handleAccountObserveWsMessage = function (
   userStore: ReturnType<typeof useUserStore>,
@@ -31,6 +32,11 @@ export const handleAccountObserveWsMessage = function (
   switch (commandInfo.command) {
     case WebsocketUserSessionClientCommandType.SET_COOKIE: {
       Cookies.set(shared.constants.USER_SESSION_KEY, commandInfo.value)
+
+      break
+    }
+    case WebsocketUserSessionClientCommandType.SET_CSRF_TOKEN: {
+      setCsrfToken(commandInfo.value)
 
       break
     }

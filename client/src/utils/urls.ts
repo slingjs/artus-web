@@ -1,4 +1,5 @@
 import shared from '@sling/artus-web-shared'
+import { getCsrfToken } from '@/utils/request'
 
 let tempAnchor: HTMLAnchorElement | undefined
 let tempFragment: DocumentFragment | undefined
@@ -25,6 +26,8 @@ export function formatWebsocketUrlWithFragment(urlFragment: string) {
   const href = new URL(formatHTTPUrlWithFragment(urlFragment))
 
   href.protocol = 'ws'
+
+  href.username = getCsrfToken()
 
   return href.toString()
 }
