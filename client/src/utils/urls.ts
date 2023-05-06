@@ -27,9 +27,14 @@ export function formatWebsocketUrlWithFragment(urlFragment: string) {
 
   href.protocol = 'ws'
 
-  href.username = getCsrfToken()
-
   return href.toString()
+}
+
+export function calcWebsocketSubProtocols() {
+  return [
+    shared.constants.WEBSOCKET_SUB_PROTOCOL,
+    shared.constants.USER_CSRF_TOKEN_KEY + shared.constants.WEBSOCKET_SUB_PROTOCOL_LINKER + getCsrfToken()
+  ]
 }
 
 export function getQueryString(name: string, ignoreCase: boolean = false) {
