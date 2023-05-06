@@ -8,9 +8,7 @@ export function updateQueryStringParam(uri: string, key: string, value: string):
   if (!value) return uri
   const re = new RegExp('([?&])' + key + '=.*?(&|$)', 'i')
   const separator = uri.indexOf('?') !== -1 ? '&' : '?'
-  return re.test(uri)
-    ? uri.replace(re, '$1' + key + '=' + value + '$2')
-    : uri + separator + key + '=' + value
+  return re.test(uri) ? uri.replace(re, '$1' + key + '=' + value + '$2') : uri + separator + key + '=' + value
 }
 
 /**

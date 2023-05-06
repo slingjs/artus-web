@@ -19,7 +19,8 @@ export interface UserSession {
 export enum WebsocketUserSessionClientCommandType {
   SET_COOKIE = 'set-cookie',
   SESSION_EVICT = 'session-evict',
-  MESSAGE_NOTIFY = 'MESSAGE_NOTIFY'
+  MESSAGE_NOTIFY = 'MESSAGE_NOTIFY',
+  SET_CSRF_TOKEN = 'set-csrf-token'
 }
 
 export enum WebsocketUserSessionClientCommandTrigger {

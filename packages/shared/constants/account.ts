@@ -7,8 +7,7 @@
  * At least 1 special character.
  * At least 1 numeric character.
  */
-export const accountPasswordPatternString =
-  '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W])[A-Za-z\\d\\W]{6,16}$'
+export const accountPasswordPatternString = '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W])[A-Za-z\\d\\W]{6,16}$'
 export const accountPasswordPattern = new RegExp(accountPasswordPatternString, 'u')
 /**
  * gte 6, lte 60 characters.

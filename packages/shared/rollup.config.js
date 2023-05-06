@@ -13,7 +13,7 @@ export default defineConfig([
       preserveModulesRoot: './',
       sourcemap: true,
       // Rename all ts files to .cjs
-      entryFileNames: (i) => i.name + '.cjs'
+      entryFileNames: i => i.name + '.cjs'
     },
     external: ['uuid'],
     plugins: [
@@ -30,7 +30,7 @@ export default defineConfig([
       preserveModulesRoot: './',
       sourcemap: true,
       // Rename all ts files to .mjs
-      entryFileNames: (i) => i.name + '.mjs'
+      entryFileNames: i => i.name + '.mjs'
     },
     external: ['uuid'],
     plugins: [
@@ -47,12 +47,9 @@ export default defineConfig([
       preserveModulesRoot: './',
       sourcemap: true,
       // Rename all ts files to .mjs
-      entryFileNames: (i) => i.name + '.esm.js'
+      entryFileNames: i => i.name + '.esm.js'
     },
-    plugins: [
-      nodeResolve({ preferBuiltins: false, browser: true }),
-      typescript({ tsconfig: './tsconfig.json' })
-    ]
+    plugins: [nodeResolve({ preferBuiltins: false, browser: true }), typescript({ tsconfig: './tsconfig.json' })]
   },
   {
     input: './index.ts',
@@ -62,9 +59,6 @@ export default defineConfig([
       sourcemap: true,
       name: 'index.umd.js'
     },
-    plugins: [
-      nodeResolve({ preferBuiltins: false, browser: true }),
-      typescript({ tsconfig: './tsconfig.json' })
-    ]
+    plugins: [nodeResolve({ preferBuiltins: false, browser: true }), typescript({ tsconfig: './tsconfig.json' })]
   }
 ])
