@@ -12,9 +12,14 @@ import {
   WebsocketUserSessionClientCommandTrigger,
   WebsocketUserSessionClientCommandType
 } from '@sling/artus-web-shared/types'
+import { authSecurityMiddleware } from '../../middlewares/security/auth'
 
 @WebsocketController('/ws/account')
-@WebsocketUse([executionTimeMiddleware<WebsocketMiddleware>(), initUser<WebsocketMiddleware>()])
+@WebsocketUse([
+  executionTimeMiddleware<WebsocketMiddleware>(),
+  initUser<WebsocketMiddleware>(),
+  authSecurityMiddleware<WebsocketMiddleware>()
+])
 export default class AccountWsController {
   @WebsocketEvent(WebSocketEventNames.CONNECTION, { path: '/observe' })
   async handleConnection(...args: Parameters<WebsocketMiddleware>) {

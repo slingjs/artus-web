@@ -10,10 +10,15 @@ import { AccountService } from '../../services/account'
 import { getCsrfToken } from '../../utils/security'
 import { Middleware } from '@artus/pipeline'
 import { WebsocketMiddleware } from '../../../../plugins/plugin-websocket/types'
+import {
+  WebsocketUserSessionClientCommandInfo,
+  WebsocketUserSessionClientCommandTrigger,
+  WebsocketUserSessionClientCommandType
+} from '@sling/artus-web-shared/types'
 
-export const apiReqSecurityMiddleware = function apiReqSecurityMiddleware<T extends Middleware = HTTPMiddleware>() {
+export const authSecurityMiddleware = function authSecurityMiddleware<T extends Middleware = HTTPMiddleware>() {
   return <any | (T extends HTTPMiddleware ? HTTPMiddleware : WebsocketMiddleware)>(
-    async function apiReqSecurityMiddleware(ctx, next) {
+    async function authSecurityMiddleware(ctx, next) {
       const {
         input: {
           params: { app, req }
@@ -25,8 +30,21 @@ export const apiReqSecurityMiddleware = function apiReqSecurityMiddleware<T exte
       const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
 
       const isCtxFromHTTP = judgeCtxIsFromHTTP(ctx)
-      const csrfRejection = () => {
-        ctx.output.data.status = status.UNAUTHORIZED
+      const csrfRejection = async () => {
+        if (isCtxFromHTTP) {
+          ctx.output.data.status = status.UNAUTHORIZED
+
+          return
+        }
+
+        await ctx.input.params.trigger.response(ctx, {
+          command: WebsocketUserSessionClientCommandType.MESSAGE_NOTIFY,
+          value: 'Invalid csrf token!',
+          trigger: WebsocketUserSessionClientCommandTrigger.SYSTEM
+        } as WebsocketUserSessionClientCommandInfo)
+        await ctx.input.params.trigger.response(ctx, 'Socket shutting down...')
+        // Terminate the socket.
+        ctx.input.params.socket.terminate()
       }
 
       const csrfToken = getCsrfToken(ctx)
@@ -37,31 +55,30 @@ export const apiReqSecurityMiddleware = function apiReqSecurityMiddleware<T exte
         if (!isReqMethodMatched) {
           return await next()
         }
-
-        if (!csrfToken) {
-          await csrfRejection()
-          return
-        }
-
-        let user = await userService.getCtxSession(ctx)
-        if (!user) {
-          if (!sessionCookieValue) {
-            await csrfRejection()
-            return
-          }
-
-          try {
-            user = JSON.parse((await userService.getDistributeSession(sessionCookieValue)) as string)
-          } catch (e) {}
-        }
-
-        if (_.get(user, '_csrfToken') !== csrfToken) {
-          await csrfRejection()
-          return
-        }
-
-        return await next()
       }
+
+      if (!csrfToken) {
+        await csrfRejection()
+        return
+      }
+
+      let user = await userService.getCtxSession(ctx)
+      if (!user) {
+        if (!sessionCookieValue) {
+          await csrfRejection()
+          return
+        }
+
+        try {
+          user = JSON.parse((await userService.getDistributeSession(sessionCookieValue)) as string)
+        } catch (e) {}
+      }
+
+      if (_.get(user, '_csrfToken') !== csrfToken) {
+        await csrfRejection()
+        return
+      }
+
       // endregion
 
       return await next()

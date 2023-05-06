@@ -16,13 +16,13 @@ import status from 'http-status'
 import { bypassInitUserMiddlewareFilter } from '../../utils/business/account'
 import { filterXSS } from 'xss'
 import shared from '@sling/artus-web-shared'
-import { apiReqSecurityMiddleware } from '../../middlewares/security/security'
+import { authSecurityMiddleware } from '../../middlewares/security/auth'
 
 @HTTPController('/api/account')
 @Use([
   executionTimeMiddleware<HTTPMiddleware>(),
   initUser<HTTPMiddleware>({ bypassFilter: bypassInitUserMiddlewareFilter }),
-  apiReqSecurityMiddleware<HTTPMiddleware>()
+  authSecurityMiddleware<HTTPMiddleware>()
 ])
 export default class AccountApiController {
   @Inject(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE)
