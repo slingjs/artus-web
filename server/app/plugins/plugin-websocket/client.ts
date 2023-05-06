@@ -248,7 +248,7 @@ export class WebsocketClient {
       }
 
       const reqUrlObj = url.parse(reqUrl || '/')
-      if (!reqUrlObj.path) {
+      if (!reqUrlObj.pathname) {
         handleOnException()
         return
       }
@@ -257,11 +257,11 @@ export class WebsocketClient {
       _.set(socket, WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY, reqUrlObj)
 
       const eventRuleTargetPath = _.get(options, 'requestPathCaseSensitive')
-        ? reqUrlObj.path
-        : reqUrlObj.path.toLowerCase()
+        ? reqUrlObj.pathname
+        : reqUrlObj.pathname.toLowerCase()
       const matchedEventRuleItem = eventRules.get(eventRuleTargetPath)
       if (!(matchedEventRuleItem && matchedEventRuleItem.size)) {
-        handleOnException(`No registered handler for such path: ${reqUrlObj.path}`)
+        handleOnException(`No registered handler for such path: ${reqUrlObj.pathname}`)
         return
       }
 
