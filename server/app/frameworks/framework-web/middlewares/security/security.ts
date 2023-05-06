@@ -11,9 +11,7 @@ import { getCsrfToken } from '../../utils/security'
 import { Middleware } from '@artus/pipeline'
 import { WebsocketMiddleware } from '../../../../plugins/plugin-websocket/types'
 
-export const apiReqSecurityMiddleware = function apiReqSecurityMiddleware<
-  T extends Middleware = HTTPMiddleware
->() {
+export const apiReqSecurityMiddleware = function apiReqSecurityMiddleware<T extends Middleware = HTTPMiddleware>() {
   return <any | (T extends HTTPMiddleware ? HTTPMiddleware : WebsocketMiddleware)>(
     async function apiReqSecurityMiddleware(ctx, next) {
       const {
@@ -24,10 +22,7 @@ export const apiReqSecurityMiddleware = function apiReqSecurityMiddleware<
       const userService = app.container.get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
 
       // region CSRF Checking.
-      const sessionCookieValue = _.get(
-        cookie.parse(req.headers.cookie || ''),
-        shared.constants.USER_SESSION_KEY
-      )
+      const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
 
       const isCtxFromHTTP = judgeCtxIsFromHTTP(ctx)
       const csrfRejection = () => {
@@ -37,9 +32,7 @@ export const apiReqSecurityMiddleware = function apiReqSecurityMiddleware<
       const csrfToken = getCsrfToken(ctx)
 
       if (isCtxFromHTTP) {
-        const isReqMethodMatched = csrfInterceptHttpMethods.some((m) =>
-          shared.utils.compareIgnoreCase(m, req.method)
-        )
+        const isReqMethodMatched = csrfInterceptHttpMethods.some(m => shared.utils.compareIgnoreCase(m, req.method))
 
         if (!isReqMethodMatched) {
           return await next()
@@ -58,9 +51,7 @@ export const apiReqSecurityMiddleware = function apiReqSecurityMiddleware<
           }
 
           try {
-            user = JSON.parse(
-              (await userService.getDistributeSession(sessionCookieValue)) as string
-            )
+            user = JSON.parse((await userService.getDistributeSession(sessionCookieValue)) as string)
           } catch (e) {}
         }
 

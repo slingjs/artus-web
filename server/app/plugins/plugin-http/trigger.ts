@@ -43,8 +43,7 @@ export class HTTPTrigger extends Trigger {
       }
     } = ctx
 
-    res.statusCode =
-      typeof status === 'number' ? status : body == null ? DEFAULT_HTTP_STATUS : SUCCESS_HTTP_STATUS
+    res.statusCode = typeof status === 'number' ? status : body == null ? DEFAULT_HTTP_STATUS : SUCCESS_HTTP_STATUS
 
     if (Buffer.isBuffer(body) || typeof body === 'string') {
       return res.end(body)

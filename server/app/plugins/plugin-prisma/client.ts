@@ -19,7 +19,7 @@ export class PluginPrismaClient {
   async init(config: PrismaPluginClientConfig) {
     this.dataSources = {}
 
-    Object.keys(config.dataSources).forEach((dbName) => {
+    Object.keys(config.dataSources).forEach(dbName => {
       const datasource = config.dataSources[dbName] as PrismaPluginClientConfigDataSourceItem
       if (!datasource.enable) {
         return
@@ -33,7 +33,7 @@ export class PluginPrismaClient {
       // Load envs.
       const envs = _.get(datasource, 'envs')
       if (envs && typeof envs === 'object') {
-        Object.keys(envs).forEach((envName) => {
+        Object.keys(envs).forEach(envName => {
           const envVal = envs[envName]
           if (envVal != null) {
             process.env[envName] = envVal
@@ -59,6 +59,6 @@ export class PluginPrismaClient {
     const dataSources = Object.values(this.dataSources)
 
     // Disconnect.
-    await Promise.allSettled(dataSources.map((ds) => ds.prisma.$disconnect()))
+    await Promise.allSettled(dataSources.map(ds => ds.prisma.$disconnect()))
   }
 }

@@ -9,11 +9,5 @@
     "moduleResolution": "Node"
   },
   "include": ["./**/*.ts", "./**/*.json"],
-  "exclude": [
-    "package.json",
-    "tsconfig.json",
-    "nodemon.json",
-    "./**/package.json",
-    "vitest.config.ts"
-  ]
+  "exclude": ["package.json", "tsconfig.json", "nodemon.json", "./**/package.json", "vitest.config.ts"]
 }

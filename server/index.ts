@@ -4,6 +4,6 @@ const run = async () => {
   return await start()
 }
 
-run().catch((e) => {
+run().catch(e => {
   console.error('[Fatal] Failed to start app.', e)
 })

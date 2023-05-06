@@ -37,11 +37,7 @@ export function WebsocketEvent(
   eventName: WebsocketEventMetadata['eventName'],
   options: Partial<WebsocketEventDecoratorOptions> = websocketEventDecoratorDefaultOptions
 ) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<WebsocketMiddleware>
-  ) {
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<WebsocketMiddleware>) {
     const eventMetadata = {
       eventName,
       options
@@ -52,22 +48,14 @@ export function WebsocketEvent(
 }
 
 export function WebsocketUse(middlewares: ArrayOrPrimitive<WebsocketMiddleware>) {
-  return function (
-    target: Object,
-    _key?: string | symbol,
-    descriptor?: TypedPropertyDescriptor<WebsocketMiddleware>
-  ) {
+  return function (target: Object, _key?: string | symbol, descriptor?: TypedPropertyDescriptor<WebsocketMiddleware>) {
     // Class Decorator.
     if (arguments.length === 1) {
       const clazzControllerMiddlewaresMetadata: WebsocketEventMiddlewaresMetadata =
         Reflect.getMetadata(WEBSOCKET_MIDDLEWARE_METADATA, target) ?? []
 
       clazzControllerMiddlewaresMetadata.push(middlewares)
-      Reflect.defineMetadata(
-        WEBSOCKET_MIDDLEWARE_METADATA,
-        clazzControllerMiddlewaresMetadata,
-        target
-      )
+      Reflect.defineMetadata(WEBSOCKET_MIDDLEWARE_METADATA, clazzControllerMiddlewaresMetadata, target)
 
       return
     }
@@ -77,10 +65,6 @@ export function WebsocketUse(middlewares: ArrayOrPrimitive<WebsocketMiddleware>)
       Reflect.getMetadata(WEBSOCKET_MIDDLEWARE_METADATA, target) ?? []
     methodEventMiddlewaresMetadata.push(middlewares)
 
-    Reflect.defineMetadata(
-      WEBSOCKET_EVENT_METADATA,
-      methodEventMiddlewaresMetadata,
-      descriptor!.value!
-    )
+    Reflect.defineMetadata(WEBSOCKET_EVENT_METADATA, methodEventMiddlewaresMetadata, descriptor!.value!)
   }
 }

@@ -39,8 +39,7 @@ export class MemoryCache {
   }
 
   async get(key: MemoryCacheKey, options?: Partial<MemoryCacheGetOptions>) {
-    const needRefresh =
-      _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenGet')
+    const needRefresh = _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenGet')
 
     if (needRefresh) {
       let ttl = _.get(options, 'ttl')
@@ -54,11 +53,7 @@ export class MemoryCache {
     return this.client.get(key)
   }
 
-  async set(
-    key: MemoryCacheKey,
-    value: MemoryCacheValue,
-    options?: Partial<MemoryCacheSetOptions>
-  ) {
+  async set(key: MemoryCacheKey, value: MemoryCacheValue, options?: Partial<MemoryCacheSetOptions>) {
     let ttl = _.get(options, 'ttl')
     if (ttl == null) {
       ttl = _.get(this.defaultOptions, 'ttl')
@@ -74,8 +69,7 @@ export class MemoryCache {
   }
 
   async exists(key: MemoryCacheKey, options?: Partial<MemoryCacheExistsOptions>) {
-    const needRefresh =
-      _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenExists')
+    const needRefresh = _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenExists')
 
     this.client.has(key, { updateAgeOnHas: needRefresh })
   }

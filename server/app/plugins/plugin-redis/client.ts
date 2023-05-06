@@ -26,19 +26,14 @@ export class RedisClient {
   async init(config: RedisConfig) {
     this.redis = new Redis(config)
 
-    const eventMetadataRecords: Record<
-      RedisEventSubscriberEventNames,
-      RedisEventSubscriberMetadata
-    > = {} as any
+    const eventMetadataRecords: Record<RedisEventSubscriberEventNames, RedisEventSubscriberMetadata> = {} as any
 
     const redisOperablePromise = shared.utils.generateOperablePromise<Redis>()
     this.redis.once('ready', async () => {
       const eventSubscriberControllerClazzs = this.app.container.getInjectableByTag(
         REDIS_EVENT_SUBSCRIBER_TAG
       ) as FunctionConstructor[]
-      if (
-        !(Array.isArray(eventSubscriberControllerClazzs) && eventSubscriberControllerClazzs.length)
-      ) {
+      if (!(Array.isArray(eventSubscriberControllerClazzs) && eventSubscriberControllerClazzs.length)) {
         return redisOperablePromise.resolve(this.redis)
       }
 
@@ -62,8 +57,7 @@ export class RedisClient {
           for (const eventMetadata of redisEventSubscriberMetadata) {
             let eventMetadataRecord = eventMetadataRecords[eventMetadata.eventName]
             if (!eventMetadataRecord) {
-              eventMetadataRecords[eventMetadata.eventName] = eventMetadataRecord =
-                [] as RedisEventSubscriberMetadata
+              eventMetadataRecords[eventMetadata.eventName] = eventMetadataRecord = [] as RedisEventSubscriberMetadata
             }
 
             eventMetadataRecord.push({
@@ -91,9 +85,7 @@ export class RedisClient {
     this.subscriber.once('error', subscriberOperablePromise.reject)
 
     await subscriberOperablePromise.p
-    await this.handleSubscribeKeyExpiredEvent(
-      eventMetadataRecords[RedisEventSubscriberEventNames.KEY_EXPIRED]
-    )
+    await this.handleSubscribeKeyExpiredEvent(eventMetadataRecords[RedisEventSubscriberEventNames.KEY_EXPIRED])
 
     return this
   }

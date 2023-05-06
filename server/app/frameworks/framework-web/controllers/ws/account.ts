@@ -1,8 +1,4 @@
-import {
-  WebsocketController,
-  WebsocketEvent,
-  WebsocketUse
-} from '../../../../plugins/plugin-websocket/decorator'
+import { WebsocketController, WebsocketEvent, WebsocketUse } from '../../../../plugins/plugin-websocket/decorator'
 import {
   ARTUS_PLUGIN_WEBSOCKET_CLIENT,
   WebSocketEventNames,
@@ -56,7 +52,7 @@ export default class AccountWsController {
 
     const receivedMessage = eventArgs[0]
     if (receivedMessage) {
-      websocketClient.getWsServerSameReqPathSockets(socket).forEach((s) => {
+      websocketClient.getWsServerSameReqPathSockets(socket).forEach(s => {
         trigger.send(s, receivedMessage)
       })
     }

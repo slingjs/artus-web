@@ -23,14 +23,14 @@ describe('Check server running correctly', () => {
     const { p, resolve } = shared.utils.generateOperablePromise()
     const req = http.get((global.httpUri = url.format({ hostname, port, protocol: 'http' })))
 
-    req.on('response', (res) => {
+    req.on('response', res => {
       const setCookies = res.headers['set-cookie'] ?? []
 
       _.set(
         global,
         'request.headers.Cookie',
         setCookies
-          .map((v) => v.split(';')[0])
+          .map(v => v.split(';')[0])
           .filter(Boolean)
           .join(';')
       )
@@ -97,7 +97,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then((res) => {
+    ).then(res => {
       const setCookies = res.headers.get('set-cookie') ?? ''
       if (setCookies) {
         _.set(global, 'request.headers.Cookie', setCookies.split(';')[0] ?? '')
@@ -133,7 +133,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then((res) => {
+    ).then(res => {
       const setCookies = res.headers.get('set-cookie') ?? ''
       if (setCookies) {
         _.set(global, 'request.headers.Cookie', setCookies.split(';')[0] ?? '')
@@ -196,7 +196,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then((res) => res.json())
+    ).then(res => res.json())
 
     assert(_.get(result, 'status') === 'SUCCESS')
 
@@ -223,7 +223,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then((res) => {
+    ).then(res => {
       const setCookies = res.headers.get('set-cookie') ?? ''
       if (setCookies) {
         _.set(global, 'request.headers.Cookie', setCookies.split(';')[0] ?? '')
@@ -255,7 +255,7 @@ describe<LocalTestContext>('Account certificates', () => {
 
     websocketClient!.addEventListener(
       'message',
-      async function onMessage (event) {
+      async function onMessage(event) {
         websocketObserveMessages.push(event.data)
       }.bind(websocketClient)
     )
@@ -280,7 +280,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         global.request
       )
-    ).then((res) => {
+    ).then(res => {
       const setCookies = res.headers.get('set-cookie') ?? ''
       if (setCookies) {
         _.set(global, 'request.headers.Cookie', setCookies.split(';')[0] ?? '')
@@ -303,7 +303,7 @@ describe<LocalTestContext>('Account certificates', () => {
     // Another event.
     websocketClient!.addEventListener(
       'message',
-      async function onMessage (event) {
+      async function onMessage(event) {
         try {
           const commandInfo = JSON.parse(event.data)
           // The previous session will be evicted.
@@ -328,7 +328,7 @@ describe<LocalTestContext>('Account certificates', () => {
         },
         body: JSON.stringify(_.pick(accountCertificate, ['email', 'password']))
       })
-    ).then((res) => {
+    ).then(res => {
       const setCookies = res.headers.get('set-cookie') ?? ''
       if (setCookies) {
         _.set(global, 'request.headers.Cookie', setCookies.split(';')[0] ?? '')

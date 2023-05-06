@@ -12,8 +12,5 @@ export function encryptCsrfToken(base: string, salt: string) {
 }
 
 export function getCsrfToken(ctx: HTTPMiddlewareContext) {
-  return _.get(
-    ctx.input.params.req.headers,
-    shared.constants.USER_CSRF_TOKEN_KEY.toLowerCase()
-  ) as string
+  return _.get(ctx.input.params.req.headers, shared.constants.USER_CSRF_TOKEN_KEY.toLowerCase()) as string
 }

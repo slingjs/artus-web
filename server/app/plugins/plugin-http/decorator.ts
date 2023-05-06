@@ -14,10 +14,7 @@ import {
   HTTPControllerDecoratorOptions
 } from './types'
 import { ArrayOrPrimitive } from '@sling/artus-web-shared/types'
-import {
-  HTTPControllerDecoratorDefaultOptions,
-  HTTPRouteDecoratorDefaultOptions
-} from './constants'
+import { HTTPControllerDecoratorDefaultOptions, HTTPRouteDecoratorDefaultOptions } from './constants'
 
 export function HTTPController(
   prefix: string = '',
@@ -35,17 +32,9 @@ export function HTTPController(
   }
 }
 
-export function Get(
-  path: string = '',
-  options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
-) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
-      []) as HTTPRouteMetadata
+export function Get(path: string = '', options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions) {
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.GET, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
@@ -56,13 +45,8 @@ export function Post(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
-      []) as HTTPRouteMetadata
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.POST, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
@@ -73,30 +57,17 @@ export function Delete(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
-      []) as HTTPRouteMetadata
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.DELETE, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function Put(
-  path: string = '',
-  options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
-) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
-      []) as HTTPRouteMetadata
+export function Put(path: string = '', options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions) {
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.PUT, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
@@ -107,13 +78,8 @@ export function Patch(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
-      []) as HTTPRouteMetadata
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.PATCH, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
@@ -124,13 +90,8 @@ export function Head(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
-      []) as HTTPRouteMetadata
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.HEAD, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
@@ -141,28 +102,16 @@ export function Options(
   path: string = '',
   options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
 ) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
-    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ??
-      []) as HTTPRouteMetadata
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
+    const routeMetadataList = (Reflect.getMetadata(HTTP_ROUTER_METADATA, descriptor.value!) ?? []) as HTTPRouteMetadata
     routeMetadataList.push({ path, method: HTTPMethod.OPTIONS, options })
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
   }
 }
 
-export function All(
-  path: string = '',
-  options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions
-) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
+export function All(path: string = '', options: Partial<HTTPRouteDecoratorOptions> = HTTPRouteDecoratorDefaultOptions) {
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
     const routeMetadataList = [
       { path, method: Object.values(HTTPMethod), options } // All support methods.
     ] as HTTPRouteMetadata
@@ -171,11 +120,7 @@ export function All(
 }
 
 export function HTTPRoute(options: HTTPMethodRouteDecoratorOptions) {
-  return function (
-    _target: Object,
-    _key: string | symbol,
-    descriptor: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
+  return function (_target: Object, _key: string | symbol, descriptor: TypedPropertyDescriptor<HTTPMiddleware>) {
     const routeMetadataList = ([] as HTTPRouteMetadata).concat(options)
 
     Reflect.defineMetadata(HTTP_ROUTER_METADATA, routeMetadataList, descriptor.value!)
@@ -183,11 +128,7 @@ export function HTTPRoute(options: HTTPMethodRouteDecoratorOptions) {
 }
 
 export function Use(middlewares: ArrayOrPrimitive<HTTPMiddleware>) {
-  return function (
-    target: Object,
-    _key?: string | symbol,
-    descriptor?: TypedPropertyDescriptor<HTTPMiddleware>
-  ) {
+  return function (target: Object, _key?: string | symbol, descriptor?: TypedPropertyDescriptor<HTTPMiddleware>) {
     // Class Decorator.
     if (arguments.length === 1) {
       const clazzRouteMiddlewaresMetadata: HTTPRouteMiddlewaresMetadata =
@@ -204,10 +145,6 @@ export function Use(middlewares: ArrayOrPrimitive<HTTPMiddleware>) {
       Reflect.getMetadata(HTTP_MIDDLEWARE_METADATA, descriptor!.value!) ?? []
 
     methodRouteMiddlewaresMetadata.push(middlewares)
-    Reflect.defineMetadata(
-      HTTP_MIDDLEWARE_METADATA,
-      methodRouteMiddlewaresMetadata,
-      descriptor!.value!
-    )
+    Reflect.defineMetadata(HTTP_MIDDLEWARE_METADATA, methodRouteMiddlewaresMetadata, descriptor!.value!)
   }
 }

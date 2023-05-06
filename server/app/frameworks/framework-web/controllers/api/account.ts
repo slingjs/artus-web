@@ -92,16 +92,14 @@ export default class AccountApiController {
      *
      * fetch('/api/account/sign-in', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ' }) })
      */
-    const result = await this.accountService
-      .signIn(req.body, { passwordPreEncrypt: true })
-      .catch((e) => {
-        this.app.logger.error('[Error] Failed to sign in.', e)
+    const result = await this.accountService.signIn(req.body, { passwordPreEncrypt: true }).catch(e => {
+      this.app.logger.error('[Error] Failed to sign in.', e)
 
-        return this.accountService.formatResponseData({
-          code: AccountResponseDataCode.ERROR_SIGN_IN_UNEXPECTED_ERROR,
-          status: ResponseDataStatus.FAIL
-        })
+      return this.accountService.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_IN_UNEXPECTED_ERROR,
+        status: ResponseDataStatus.FAIL
       })
+    })
 
     const accountData = _.get(result, 'data.account')
     if (!accountData) {
@@ -115,10 +113,7 @@ export default class AccountApiController {
     // @ts-ignore
     await this.accountService.handleSessionCertificated(ctx, accountData, {
       enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-      enableRecordMultipleSignedInSessions: !!_.get(
-        relatedConfig,
-        'enableRecordMultipleSignedInSessions'
-      ),
+      enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
       methodType: UserSessionCertificatedFromMethodType.SIGN_IN
     })
 
@@ -167,16 +162,14 @@ export default class AccountApiController {
      *
      * fetch('/api/account/sign-up', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', name: 'YouAreMySunShine' }) })
      */
-    const result = await this.accountService
-      .signUp(req.body, { passwordPreEncrypt: true })
-      .catch((e) => {
-        this.app.logger.error('[Error] Failed to sign up.', e)
+    const result = await this.accountService.signUp(req.body, { passwordPreEncrypt: true }).catch(e => {
+      this.app.logger.error('[Error] Failed to sign up.', e)
 
-        return this.accountService.formatResponseData({
-          code: AccountResponseDataCode.ERROR_SIGN_UP_UNEXPECTED_ERROR,
-          status: ResponseDataStatus.FAIL
-        })
+      return this.accountService.formatResponseData({
+        code: AccountResponseDataCode.ERROR_SIGN_UP_UNEXPECTED_ERROR,
+        status: ResponseDataStatus.FAIL
       })
+    })
 
     const accountData = _.get(result, 'data.account')
     if (!accountData) {
@@ -189,10 +182,7 @@ export default class AccountApiController {
     // @ts-ignore
     await this.accountService.handleSessionCertificated(ctx, accountData, {
       enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-      enableRecordMultipleSignedInSessions: !!_.get(
-        relatedConfig,
-        'enableRecordMultipleSignedInSessions'
-      )
+      enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions')
     })
 
     data.status = status.OK
@@ -218,17 +208,12 @@ export default class AccountApiController {
     const relatedConfig = await this.accountService.getConfig()
     await this.accountService.signOut(ctx, {
       enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-      enableRecordMultipleSignedInSessions: !!_.get(
-        relatedConfig,
-        'enableRecordMultipleSignedInSessions'
-      ),
+      enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
       methodType: UserSessionTamperedFromMethodType.SIGN_OUT
     })
 
     // If callback.
-    const callback = filterXSS(
-      _.get(searchParams, shared.constants.accountSignOutCallbackSearchParamKey) || ''
-    )
+    const callback = filterXSS(_.get(searchParams, shared.constants.accountSignOutCallbackSearchParamKey) || '')
     if (callback) {
       // Redirect.
       data.status = status.FOUND
@@ -261,16 +246,14 @@ export default class AccountApiController {
      *
      * fetch('/api/account/change-pwd', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: 'i@test.com', password: '1qaz!QAZ', oldPassword: '1qaz!QAZ' }) })
      */
-    const result = await this.accountService
-      .changePwd(req.body, { passwordPreEncrypt: true })
-      .catch((e) => {
-        this.app.logger.error('[Error] Failed to change pwd.', e)
+    const result = await this.accountService.changePwd(req.body, { passwordPreEncrypt: true }).catch(e => {
+      this.app.logger.error('[Error] Failed to change pwd.', e)
 
-        return this.accountService.formatResponseData({
-          code: AccountResponseDataCode.ERROR_CHANGE_PWD_UNEXPECTED_ERROR,
-          status: ResponseDataStatus.FAIL
-        })
+      return this.accountService.formatResponseData({
+        code: AccountResponseDataCode.ERROR_CHANGE_PWD_UNEXPECTED_ERROR,
+        status: ResponseDataStatus.FAIL
       })
+    })
 
     const accountData = _.get(result, 'data.account')
     if (!accountData) {
@@ -282,10 +265,7 @@ export default class AccountApiController {
     const relatedConfig = await this.accountService.getConfig()
     await this.accountService.handleCertificatedSessionTampered(ctx, {
       enableMultipleSignedInSessions: !!_.get(relatedConfig, 'enableMultipleSignedInSessions'),
-      enableRecordMultipleSignedInSessions: !!_.get(
-        relatedConfig,
-        'enableRecordMultipleSignedInSessions'
-      ),
+      enableRecordMultipleSignedInSessions: !!_.get(relatedConfig, 'enableRecordMultipleSignedInSessions'),
       fallbackSessionRecordsPersistentDBCondition: _.pick(req.body, 'email') as any,
       methodType: UserSessionTamperedFromMethodType.CHANGE_PWD
     })

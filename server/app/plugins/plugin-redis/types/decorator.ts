@@ -5,9 +5,8 @@ export enum RedisEventSubscriberEventNames {
   KEY_EXPIRED = 'KEY_EXPIRED'
 }
 
-export type RedisEventSubscriberMetadata<
-  E extends RedisEventSubscriberEventNames = RedisEventSubscriberEventNames
-> = Array<{
-  handler: Function
-  eventName: E
-}>
+export type RedisEventSubscriberMetadata<E extends RedisEventSubscriberEventNames = RedisEventSubscriberEventNames> =
+  Array<{
+    handler: Function
+    eventName: E
+  }>

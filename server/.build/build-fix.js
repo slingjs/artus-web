@@ -6,7 +6,7 @@ const { globSync } = require('glob')
 globSync(['./**'], {
   cwd: path.resolve(__dirname, '../app/frameworks/framework-web/models'),
   ignore: '**/generated/**'
-}).forEach((p) => {
+}).forEach(p => {
   const fullPath = path.resolve(__dirname, '../app/frameworks/framework-web/models', p)
   if (fs.statSync(fullPath).isDirectory()) {
     return

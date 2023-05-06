@@ -13,7 +13,7 @@ const job = function () {
     '../app/frameworks/framework-web/models/mysql/schema.prisma'
   ]
 
-  schemaPaths.forEach((p) => {
+  schemaPaths.forEach(p => {
     execSync('npx prisma generate --schema ' + p, { cwd: __dirname })
   })
 }
