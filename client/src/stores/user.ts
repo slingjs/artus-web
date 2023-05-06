@@ -1,11 +1,6 @@
 import { defineStore } from 'pinia'
 import { reactive } from 'vue'
-import {
-  fetchAccountChangePwd,
-  fetchAccountSession,
-  fetchAccountSignIn,
-  fetchAccountSignUp
-} from '@/apis'
+import { fetchAccountChangePwd, fetchAccountSession, fetchAccountSignIn, fetchAccountSignUp } from '@/apis'
 import _ from 'lodash'
 import type { UserSession } from '@sling/artus-web-shared/types'
 import type { WsHandler, WsHandlers } from '@/types'
@@ -82,7 +77,7 @@ export const useUserStore = defineStore('user', {
       await this.setWsHandler(handler)
     },
     async beforeUnload() {
-      await Promise.allSettled(Object.values(this.wsHandlers).map((handler) => handler.ws.close()))
+      await Promise.allSettled(Object.values(this.wsHandlers).map(handler => handler.ws.close()))
     }
   }
 })

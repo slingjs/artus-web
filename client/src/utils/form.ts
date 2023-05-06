@@ -29,10 +29,7 @@ export function validateName(rule: FormItemRule, value: string) {
   }
 }
 
-export function validateConfirmPasswordGenerator(formModel: {
-  password: string
-  [key: string]: any
-}) {
+export function validateConfirmPasswordGenerator(formModel: { password: string; [key: string]: any }) {
   return function validateConfirmPassword(rule: FormItemRule, value: string) {
     if (!_.isEqual(formModel.password, value)) {
       return new Error('Please enter the content which is the same as the password.')

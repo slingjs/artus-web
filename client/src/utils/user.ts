@@ -7,10 +7,7 @@ export function setUserSessionSignOutCausedBy(causedBy: UserSessionSignOutCaused
 }
 
 export function getUserSessionSignOutCausedBy(options?: Partial<{ autoRemove: boolean }>) {
-  return sessionCache.getSessionCache(
-    USER_SIGN_OUT_CAUSED_BY_KEY,
-    options
-  ) as UserSessionSignOutCausedBy | null
+  return sessionCache.getSessionCache(USER_SIGN_OUT_CAUSED_BY_KEY, options) as UserSessionSignOutCausedBy | null
 }
 
 export function getUserSessionSignOutCausedByMessage(options?: Partial<{ autoRemove: boolean }>) {

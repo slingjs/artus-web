@@ -11,7 +11,7 @@ export function fetchAccountSession() {
     method: 'POST',
     headers: formatFetchHeaders(),
     credentials: 'same-origin'
-  }).then((res) => res.json())
+  }).then(res => res.json())
 }
 
 export function fetchAccountSignIn(payload: FetchAccountSignInRequestPayload) {
@@ -20,7 +20,7 @@ export function fetchAccountSignIn(payload: FetchAccountSignInRequestPayload) {
     headers: formatFetchHeaders(),
     body: JSON.stringify(payload),
     credentials: 'same-origin'
-  }).then((res) => {
+  }).then(res => {
     if (!res.ok) {
       throw res
     }
@@ -34,7 +34,7 @@ export function fetchAccountSignUp(payload: FetchAccountSignUpRequestPayload) {
     headers: formatFetchHeaders(),
     body: JSON.stringify(payload),
     credentials: 'same-origin'
-  }).then((res) => {
+  }).then(res => {
     if (!res.ok) {
       throw res
     }
@@ -48,7 +48,7 @@ export function fetchAccountChangePwd(payload: FetchAccountChangePwdRequestPaylo
     headers: formatFetchHeaders(),
     body: JSON.stringify(payload),
     credentials: 'same-origin'
-  }).then((res) => {
+  }).then(res => {
     if (!res.ok) {
       throw res
     }

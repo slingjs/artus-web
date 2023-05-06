@@ -9,12 +9,7 @@
         <n-input v-model:value="formConfig.model.email" placeholder="" type="email" name="email" />
       </n-form-item>
       <n-form-item label="Password" path="password" first>
-        <n-input
-          v-model:value="formConfig.model.password"
-          placeholder=""
-          type="password"
-          name="password"
-        />
+        <n-input v-model:value="formConfig.model.password" placeholder="" type="password" name="password" />
       </n-form-item>
       <n-form-item label="Confirm Password" path="confirmPassword" first>
         <n-input
@@ -38,18 +33,7 @@
 </template>
 
 <script lang="ts" setup>
-import {
-  NCard,
-  NForm,
-  NFormItem,
-  NInput,
-  NButton,
-  NH1,
-  FormInst,
-  useMessage,
-  NA,
-  NSpace
-} from 'naive-ui'
+import { NCard, NForm, NFormItem, NInput, NButton, NH1, FormInst, useMessage, NA, NSpace } from 'naive-ui'
 import { reactive, ref } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
@@ -122,7 +106,7 @@ const message = useMessage()
 
 /* Methods START */
 function handleSubmit() {
-  ;(formRef.value as FormInst).validate((errors) => {
+  ;(formRef.value as FormInst).validate(errors => {
     if (errors) {
       return
     }
@@ -133,13 +117,13 @@ function handleSubmit() {
           password: preEncryptPassword(formConfig.model.password)
         }) as any
       )
-      .then((res) => {
+      .then(res => {
         message.success('Success!')
         sessionStorage.setItem(USER_SIGN_IN_PRESET_EMAIL_KEY, formConfig.model.email)
         setTimeout(() => router.replace({ name: 'home' }), 500)
       })
       .catch((e: Response) => {
-        e.json().then((res) => {
+        e.json().then(res => {
           message.error(res.code || 'Failed')
         })
       })
