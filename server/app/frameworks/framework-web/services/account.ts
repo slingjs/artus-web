@@ -307,10 +307,10 @@ export class AccountService {
 
   async initSession(
     signedInAccount?: Account,
-    options?: Partial<{ _sessionId: string }>
+    options?: Partial<{ _sessionId: string; _csrfToken: string }>
   ): Promise<UserSession> {
     const sessionId = _.get(options, '_sessionId') || shared.utils.calcUUID()
-    const csrfToken = encryptCsrfToken(shared.utils.calcUUID(), sessionId)
+    const csrfToken = _.get(options, '_csrfToken') || encryptCsrfToken(shared.utils.calcUUID(), sessionId)
 
     if (!signedInAccount) {
       const uuid = shared.utils.calcUUID()
@@ -364,9 +364,11 @@ export class AccountService {
       shared.constants.USER_SESSION_KEY
     )
     const ctxPreviousSessionKeyValue = _.get(ctxPreviousSession, '_sessionId')
-    const sessionKeyValue =
-      ctxPreviousSessionKeyValue || sessionCookieValue || shared.utils.calcUUID()
-    const session = await this.initSession(signedInAccount, { _sessionId: sessionKeyValue })
+    const sessionKeyValue = ctxPreviousSessionKeyValue || sessionCookieValue || shared.utils.calcUUID()
+    const session = await this.initSession(signedInAccount, {
+      _sessionId: sessionKeyValue,
+      _csrfToken: _.get(ctxPreviousSession, '_csrfToken')
+    })
     await this.setCtxSession(ctx, session)
 
     const enableMultipleSignedInSessions = _.get(options, 'enableMultipleSignedInSessions')
@@ -501,7 +503,10 @@ export class AccountService {
         }
       }
 
-      fallbackUserSession = await this.initSession(foundMatchedPersistentDBAccount, { _sessionId: userSession.id })
+      fallbackUserSession = await this.initSession(foundMatchedPersistentDBAccount, {
+        _sessionId: userSession.id,
+        _csrfToken: _.get(userSession, '_csrfToken')
+      })
       foundSessionRecordsString = await this.getDistributeSessionRecords(fallbackUserSession.id)
       if (foundSessionRecordsString != null) {
         try {
