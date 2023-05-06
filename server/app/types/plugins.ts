@@ -7,7 +7,8 @@ export enum PluginsEnum {
   redis = 'redis',
   cache = 'cache',
   prisma = 'prisma',
-  websocket = 'websocket'
+  websocket = 'websocket',
+  view = 'view'
 }
 
 export type PluginsConfig = {

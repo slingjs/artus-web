@@ -21,5 +21,9 @@ export default {
   prisma: {
     enable: true,
     path: path.resolve(__dirname, '../../../plugins/plugin-prisma')
+  },
+  view: {
+    enable: true,
+    path: path.resolve(__dirname, '../../../plugins/plugin-view')
   }
 } as PluginsConfig

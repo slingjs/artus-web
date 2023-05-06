@@ -48,6 +48,12 @@ export default {
       port: 9528,
       useSharedHTTPServer: true,
       requestPathCaseSensitive: false
+    },
+    view: {
+      renderOptions: {
+        async: true,
+        debug: false
+      }
     }
   },
   framework: {

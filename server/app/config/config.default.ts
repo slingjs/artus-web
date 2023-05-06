@@ -5,20 +5,23 @@ import shared from '@sling/artus-web-shared'
 
 const processCwd = process.cwd()
 const cacheDir = process.env.CACHE_DIR ?? path.resolve(processCwd, './.cache')
-const distDir = process.env.DIST_DIR ?? (
-  [
-    path.resolve( // For local dev.
+const distDir =
+  process.env.DIST_DIR ??
+  ([
+    path.resolve(
+      // For local dev.
       processCwd,
       './node_modules/@sling/artus-web-client',
       shared.constants.FILE_BASE_DIR
     ),
-    path.resolve( // For npm package/docker compose.
+    path.resolve(
+      // For npm package/docker compose.
       processCwd,
       '../artus-web-client',
       shared.constants.FILE_BASE_DIR
     )
-  ].find(p => fs.existsSync(p)) || '__nonexistent__'
-)
+  ].find(p => fs.existsSync(p)) ||
+    '__nonexistent__')
 
 export default {
   cacheDir,
@@ -49,10 +52,7 @@ export default {
       dataSources: {
         mongo: {
           enable: true,
-          schemaOutputPath: path.resolve(
-            __dirname,
-            '../frameworks/framework-web/models/mongo/generated/client'
-          ),
+          schemaOutputPath: path.resolve(__dirname, '../frameworks/framework-web/models/mongo/generated/client'),
           envs: {
             // https://www.mongodb.com/compatibility/deploying-a-mongodb-cluster-with-docker
             MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/test?replicaSet=rs0'
@@ -60,10 +60,7 @@ export default {
         },
         mysql: {
           enable: true,
-          schemaOutputPath: path.resolve(
-            __dirname,
-            '../frameworks/framework-web/models/mysql/generated/client'
-          ),
+          schemaOutputPath: path.resolve(__dirname, '../frameworks/framework-web/models/mysql/generated/client'),
           envs: {
             // https://hub.docker.com/_/mysql
             MYSQL_URI: process.env.MYSQL_URI || 'mysql://root:123456@localhost:3306/test'
@@ -76,6 +73,13 @@ export default {
       port: +process.env.WEBSOCKET_HOST! || shared.constants.SERVER_PORT,
       useSharedHTTPServer: true, // Use shared http server or not. The 'http' plugin may register that server.
       requestPathCaseSensitive: false
+    },
+    view: {
+      renderOptions: {
+        async: true,
+        root: distDir,
+        debug: false
+      }
     }
   },
 
@@ -86,9 +90,7 @@ export default {
       api: {
         account: {
           // Should one account sign in multiple time at the mean time that last session didn't expire?
-          enableMultipleSignedInSessions: !!(
-            process.env.WEB_API_ACCOUNT_ENABLE_MULTIPLE_SIGNED_IN_SESSION ?? false
-          ),
+          enableMultipleSignedInSessions: !!(process.env.WEB_API_ACCOUNT_ENABLE_MULTIPLE_SIGNED_IN_SESSION ?? false),
           enableRecordMultipleSignedInSessions: !!(
             process.env.WEB_API_ACCOUNT_ENABLE_RECORDS_MULTIPLE_SIGNED_IN_SESSIONS ?? false
           )
