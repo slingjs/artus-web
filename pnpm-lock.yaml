@@ -63,6 +63,9 @@ importers:
       '@rushstack/eslint-patch':
         specifier: ^1.2.0
         version: 1.2.0
+      '@types/ejs':
+        specifier: ^3.1.2
+        version: 3.1.2
       '@types/js-cookie':
         specifier: ^3.0.3
         version: 3.0.3
@@ -90,6 +93,9 @@ importers:
       '@vue/tsconfig':
         specifier: ^0.1.3
         version: 0.1.3(@types/node@18.14.2)
+      ejs:
+        specifier: ^3.1.9
+        version: 3.1.9
       eslint:
         specifier: ^8.34.0
         version: 8.34.0
@@ -1727,7 +1733,6 @@ packages:
 
   /async@3.2.4:
     resolution: {integrity: sha512-iAB+JbDEGXhyIUavoDl9WP/Jj106Kz9DEn1DPgYw5ruDn0e3Wgi3sKFm55sASdGBNOQB8F59d9qQ7deqrHA8wQ==}
-    dev: false
 
   /asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
@@ -2187,7 +2192,6 @@ packages:
     hasBin: true
     dependencies:
       jake: 10.8.5
-    dev: false
 
   /electron-to-chromium@1.4.342:
     resolution: {integrity: sha512-dTei3VResi5bINDENswBxhL+N0Mw5YnfWyTqO75KGsVldurEkhC9+CelJVAse8jycWyP8pv3VSj4BSyP8wTWJA==}
@@ -2578,7 +2582,6 @@ packages:
     resolution: {integrity: sha512-w1cEuf3S+DrLCQL7ET6kz+gmlJdbq9J7yXCSjK/OZCPA+qEN1WyF4ZAf0YYJa4/shHJra2t/d/r8SV4Ji+x+8Q==}
     dependencies:
       minimatch: 5.1.6
-    dev: false
 
   /fill-range@7.0.1:
     resolution: {integrity: sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==}
@@ -3140,7 +3143,6 @@ packages:
       chalk: 4.1.2
       filelist: 1.0.4
       minimatch: 3.1.2
-    dev: false
 
   /js-beautify@1.14.6:
     resolution: {integrity: sha512-GfofQY5zDp+cuHc+gsEXKPpNw2KbPddreEo35O6jT6i0RVK6LhsoYBhq5TvK4/n74wnA0QbK8gGd+jUZwTMKJw==}
