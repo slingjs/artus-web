@@ -1,6 +1,6 @@
 {
   "name": "@sling/artus-web-shared",
-  "version": "0.0.22",
+  "version": "0.0.23",
   "description": "",
   "scripts": {
     "build": "rimraf ./dist && rollup -c rollup.config.js",
