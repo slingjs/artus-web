@@ -12,3 +12,7 @@ export function judgeBuildModeInProduction() {
 export function judgeBuildModeInDevelopment() {
   return judgeBuildMode(DEVELOPMENT_MODE)
 }
+
+export function getSupremeCsrfToken() {
+  return process.env.VITE_SUPREME_CSRF_TOKEN || process.env.SUPREME_CSRF_TOKEN || ''
+}
