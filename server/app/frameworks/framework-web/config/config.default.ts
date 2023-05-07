@@ -63,6 +63,11 @@ export default {
           enableMultipleSignedInSessions: true,
           enableRecordMultipleSignedInSessions: false
         }
+      },
+      security: {
+        csrf: {
+          supremeToken: ''
+        }
       }
     }
   }

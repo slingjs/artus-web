@@ -15,6 +15,7 @@ import {
   WebsocketUserSessionClientCommandTrigger,
   WebsocketUserSessionClientCommandType
 } from '@sling/artus-web-shared/types'
+import { AppConfig } from '../../../../types'
 
 export const authSecurityMiddleware = function authSecurityMiddleware<T extends Middleware = HTTPMiddleware>() {
   return <any | (T extends HTTPMiddleware ? HTTPMiddleware : WebsocketMiddleware)>(
@@ -60,6 +61,12 @@ export const authSecurityMiddleware = function authSecurityMiddleware<T extends 
       if (!csrfToken) {
         await csrfRejection()
         return
+      }
+
+      // Supreme csrf token. For client dev.
+      const supremeCsrfToken = _.get((app.config as AppConfig).framework.web, 'security.csrf.supremeToken')
+      if (supremeCsrfToken && csrfToken === supremeCsrfToken) {
+        return await next()
       }
 
       let user = await userService.getCtxSession(ctx)

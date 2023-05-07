@@ -95,6 +95,11 @@ export default {
             process.env.WEB_API_ACCOUNT_ENABLE_RECORDS_MULTIPLE_SIGNED_IN_SESSIONS ?? false
           )
         }
+      },
+      security: {
+        csrf: {
+          supremeToken: shared.utils.getSupremeCsrfToken()
+        }
       }
     }
   }
