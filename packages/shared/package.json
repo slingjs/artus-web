@@ -11,7 +11,7 @@
     "typescript"
   ],
   "files": [
-    "dist/",
+    "dist/**/*.!(*map)",
     "package.json"
   ],
   "author": {
