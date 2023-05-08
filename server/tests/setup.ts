@@ -1,7 +1,9 @@
 import { vi } from 'vitest'
-import appConfig from '../app/config/config.default'
+import dotEnv from 'dotenv'
 
-vi.stubGlobal('config', appConfig)
+dotEnv.config()
+
+vi.stubGlobal('config', {})
 vi.stubGlobal('request', {})
 vi.stubGlobal('httpUri', '')
 vi.stubGlobal('websocketUri', '')

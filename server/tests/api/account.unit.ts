@@ -1,4 +1,4 @@
-import { describe, expect, it, assert } from 'vitest'
+import { describe, expect, it, assert, vi } from 'vitest'
 import { LocalTestContext } from '../index'
 import _ from 'lodash'
 import fetch from 'node-fetch'
@@ -6,9 +6,12 @@ import shared from '@sling/artus-web-shared'
 import { UserSession } from '@sling/artus-web-shared/types'
 import * as ws from 'ws'
 import type { Event } from 'ws'
+import appConfig from '../../app/config/config.default'
 
 describe('Check server running correctly', () => {
   const url = require('url')
+
+  vi.stubGlobal('config', appConfig)
 
   it<LocalTestContext>('Check HTTP service', async () => {
     // Check the server be running or not.
@@ -33,6 +36,12 @@ describe('Check server running correctly', () => {
           .map(v => v.split(';')[0])
           .filter(Boolean)
           .join(';')
+      )
+
+      _.set(
+        global,
+        `request.headers.${ shared.constants.USER_CSRF_TOKEN_KEY }`,
+        global.config.framework.web.security.csrf.supremeToken
       )
 
       resolve(res)
@@ -321,13 +330,16 @@ describe<LocalTestContext>('Account certificates', () => {
     // Will manufacture a new session cookie key.
     const result = await fetch(
       signInUri,
-      _.merge({
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
+      _.merge(
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(_.pick(accountCertificate, ['email', 'password']))
         },
-        body: JSON.stringify(_.pick(accountCertificate, ['email', 'password']))
-      })
+        _.omit(global.request, 'headers.Cookie')
+      )
     ).then(res => {
       const setCookies = res.headers.get('set-cookie') ?? ''
       if (setCookies) {
