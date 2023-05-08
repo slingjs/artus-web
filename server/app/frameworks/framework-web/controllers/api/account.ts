@@ -18,11 +18,7 @@ import shared from '@sling/artus-web-shared'
 import { authSecurityMiddleware } from '../../middlewares/security/auth'
 
 @HTTPController('/api/account')
-@Use([
-  executionTimeMiddleware<HTTPMiddleware>(),
-  initUser<HTTPMiddleware>(),
-  authSecurityMiddleware<HTTPMiddleware>()
-])
+@Use([executionTimeMiddleware<HTTPMiddleware>(), initUser<HTTPMiddleware>(), authSecurityMiddleware<HTTPMiddleware>()])
 export default class AccountApiController {
   @Inject(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE)
   accountService: AccountService
