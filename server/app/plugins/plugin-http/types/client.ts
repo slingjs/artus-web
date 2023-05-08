@@ -2,6 +2,8 @@ import { Handler, HTTPVersion } from 'find-my-way'
 import { BaseContext, Middleware, BaseInput, BaseOutput } from '@artus/pipeline'
 import { Stream } from 'stream'
 import { ArtusApplication } from '@artus/core'
+import { HTTPControllerMetadata, HTTPRouteMetadata } from './decorator'
+import { ArrayMember } from '@sling/artus-web-shared/dist/types'
 
 export interface HTTPConfig {
   host: string
@@ -23,6 +25,10 @@ export type HTTPHandlerArgumentsRecord = {
   store: HTTPHandlerArguments[3]
   searchParams: HTTPHandlerArguments[4]
   app: ArtusApplication
+  metadata: {
+    controller: HTTPControllerMetadata
+    route: ArrayMember<HTTPRouteMetadata>
+  }
 }
 
 export type HTTPHandlerOutputData = {

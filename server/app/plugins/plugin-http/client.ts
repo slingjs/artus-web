@@ -131,7 +131,11 @@ export class PluginHTTPClient {
           params,
           store,
           searchParams,
-          app
+          app,
+          metadata: {
+            controller: controllerMetadata,
+            route: routeMetadata
+          }
         }
 
         const output = new Output() as HTTPMiddlewareContext['output']

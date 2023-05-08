@@ -29,6 +29,7 @@ export type HTTPRouteDecoratorOptions = {
   useBodyParser: boolean
   bodyParserOptions: any
   bodyParserType: 'json' | 'raw' | 'text' | 'urlencoded'
+  bypassInitUserMiddleware: boolean
 }
 
 export type HTTPRouteMetadata = Array<{
