@@ -40,7 +40,7 @@ describe('Check server running correctly', () => {
 
       _.set(
         global,
-        `request.headers.${ shared.constants.USER_CSRF_TOKEN_KEY }`,
+        `request.headers.${shared.constants.USER_CSRF_TOKEN_KEY}`,
         global.config.framework.web.security.csrf.supremeToken
       )
 
