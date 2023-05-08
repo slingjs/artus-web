@@ -16,8 +16,14 @@ export function encryptCsrfToken(base: string, salt: string) {
 
 export function getCsrfToken(ctx: HTTPMiddlewareContext | WebsocketMiddlewareContext) {
   const isCtxFromHTTP = judgeCtxIsFromHTTP(ctx)
+  const token = _.get(ctx.input.params.req.headers, shared.constants.USER_CSRF_TOKEN_KEY.toLowerCase()) as string
   if (isCtxFromHTTP) {
-    return _.get(ctx.input.params.req.headers, shared.constants.USER_CSRF_TOKEN_KEY.toLowerCase()) as string
+    return token
+  }
+
+  // Websocket node.js client requests may contain this req header.
+  if (token) {
+    return token
   }
 
   const {
