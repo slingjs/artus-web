@@ -3,7 +3,7 @@ import _ from 'lodash'
 import { HTTPMiddlewareContext } from '../../../../plugins/plugin-http/types'
 
 export function encryptPassword(password: string, salt: string) {
-  const hash = crypto.createHash('MD5', {
+  const hash = crypto.createHash('SHA256', {
     encoding: 'utf-8'
   })
 
