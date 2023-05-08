@@ -13,7 +13,6 @@ import { HTTPMethod, HTTPMiddleware } from '../../../../plugins/plugin-http/type
 import { executionTimeMiddleware } from '../../middlewares/common/execution-time'
 import _ from 'lodash'
 import status from 'http-status'
-import { bypassInitUserMiddlewareFilter } from '../../utils/business/account'
 import { filterXSS } from 'xss'
 import shared from '@sling/artus-web-shared'
 import { authSecurityMiddleware } from '../../middlewares/security/auth'
@@ -21,7 +20,7 @@ import { authSecurityMiddleware } from '../../middlewares/security/auth'
 @HTTPController('/api/account')
 @Use([
   executionTimeMiddleware<HTTPMiddleware>(),
-  initUser<HTTPMiddleware>({ bypassFilter: bypassInitUserMiddlewareFilter }),
+  initUser<HTTPMiddleware>(),
   authSecurityMiddleware<HTTPMiddleware>()
 ])
 export default class AccountApiController {
@@ -194,7 +193,10 @@ export default class AccountApiController {
 
   @HTTPRoute({
     path: '/sign-out',
-    method: [HTTPMethod.POST, HTTPMethod.GET]
+    method: [HTTPMethod.POST, HTTPMethod.GET],
+    options: {
+      bypassInitUserMiddleware: true
+    }
   })
   async signOut(...args: Parameters<HTTPMiddleware>) {
     const [ctx, _next] = args

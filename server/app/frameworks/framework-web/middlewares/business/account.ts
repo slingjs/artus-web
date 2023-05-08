@@ -27,10 +27,15 @@ export const initUser = <T extends Middleware = HTTPMiddleware>(
       return await next()
     }
 
+    const isCtxFromHTTP = judgeCtxIsFromHTTP(ctx)
+    if (isCtxFromHTTP) {
+      if (_.get(ctx.input.params.metadata, 'route.options.bypassInitUserMiddleware')) {
+        return await next()
+      }
+    }
+
     const sessionCookieValue = _.get(cookie.parse(req.headers.cookie || ''), shared.constants.USER_SESSION_KEY)
     const userService = app.container.get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
-
-    const isCtxFromHTTP = judgeCtxIsFromHTTP(ctx)
 
     const initNewSession = async function initNewSession(sessionCookieValue?: string) {
       const newSession = await userService.initSession(undefined, {
