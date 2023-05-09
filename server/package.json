@@ -35,6 +35,8 @@
   "homepage": "https://github.com/slingjs/artus-web",
   "license": "MIT",
   "peerDependencies": {
+    "@sling/artus-web-client": "workspace:^",
+    "@sling/artus-web-shared": "workspace:^",
     "lodash": "^4.17.21",
     "tslib": "^2.5.0",
     "typescript": "^5.0.2"
