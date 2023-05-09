@@ -13,7 +13,7 @@ export const ACCESSIBLE_ACCOUNT_PROPERTIES = ['email', 'name', 'roles', 'userId'
 export const USER_SESSION_COOKIE_MAX_AGE = 60 * 30 // s.
 export const USER_SESSION_COOKIE_MAX_AGE_REMEMBERED = 60 * 60 * 24 // s.
 export const USER_SESSION_COOKIE_MAX_AGE_REMOVED = -1 // s.
-export const PAGE_PROHIBIT_ACCOUNT_PROPERTIES = ['_sessionId', 'roles']
+export const PAGE_PROHIBIT_ACCOUNT_PROPERTIES = ['_sessionId', 'roles', '_csrfToken']
 
 export const SERVICE_DEFAULT_RESPONSE_CODE = 'SUCCESS'
 export const SERVICE_DEFAULT_RESPONSE_MESSAGE = 'ok'
