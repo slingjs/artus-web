@@ -102,7 +102,8 @@ function handleSubmit() {
       .then(res => {
         message.success('Success!')
         sessionStorage.setItem(USER_SIGN_IN_PRESET_EMAIL_KEY, formConfig.model.email)
-        setTimeout(() => router.replace({ name: 'accountLandingSignIn' }), 500)
+        // Need to reload the page due to the csrf token staled.
+        setTimeout(() => location.href = router.resolve({ name: 'accountLandingSignIn' }).href, 500)
       })
       .catch((e: Response) => {
         e.json().then(res => {

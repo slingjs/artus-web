@@ -48,15 +48,12 @@ export const useUserStore = defineStore('user', {
     },
     async fetchSignIn(...args: Parameters<typeof fetchAccountSignIn>) {
       await fetchAccountSignIn(...args)
-      await this.fetchSession()
     },
     async fetchSignUp(...args: Parameters<typeof fetchAccountSignUp>) {
       await fetchAccountSignUp(...args)
-      await this.fetchSession()
     },
     async fetchChangePwd(...args: Parameters<typeof fetchAccountChangePwd>) {
       await fetchAccountChangePwd(...args)
-      await this.fetchSession()
     },
     fetchSignOut(params?: Record<string, string>) {
       if (!getUserSessionSignOutCausedBy()) {
