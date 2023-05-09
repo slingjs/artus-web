@@ -65,6 +65,7 @@
     "vue-tsc": "^1.2.0"
   },
   "peerDependencies": {
+    "@sling/artus-web-shared": "workspace:^",
     "tslib": "^2.5.0",
     "typescript": "^5.0.2"
   }
