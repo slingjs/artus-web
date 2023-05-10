@@ -29,16 +29,17 @@ export default class FrameworkWebLifecycle implements ApplicationLifecycle {
       .readFileSync(path.resolve(__dirname, '../../frameworks/framework-web/models/casbin/account/test-policy.ini'))
       .toString('utf-8')
 
-    enforcer.setAdapter(await new StringAdapter(adapterStr))
+    await enforcer.setAdapter(await new StringAdapter(adapterStr))
+    // Need this step to make the policy effective.
+    await enforcer.loadPolicy()
 
-    const a = await enforcer.enforce('sling', 'data2', 'read')
-    console.log(a)
+    await enforcer.enableLog(true)
+
+    await enforcer.enforce('sling', 'data2', 'read') // True.
 
     const enforceContext = await newEnforceContext('2')
     // enforceContext.eType = 'e';
-    const b = await enforcer.enforce(enforceContext, { age: 52 }, '/data1', 'write')
-
-    console.log(b)
+    await enforcer.enforce(enforceContext, { age: 52 }, '/data1', 'write') // True.
 
     // const newEnforcer = await casbin.newEnforcer(modelStr, 'p, sling, data1, allow')
     //
