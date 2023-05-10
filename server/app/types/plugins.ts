@@ -8,7 +8,8 @@ export enum PluginsEnum {
   cache = 'cache',
   prisma = 'prisma',
   websocket = 'websocket',
-  view = 'view'
+  view = 'view',
+  casbin = 'casbin'
 }
 
 export type PluginsConfig = {

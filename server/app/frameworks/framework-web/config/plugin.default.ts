@@ -25,5 +25,9 @@ export default {
   view: {
     enable: true,
     path: path.resolve(__dirname, '../../../plugins/plugin-view')
+  },
+  casbin: {
+    enable: true,
+    path: path.resolve(__dirname, '../../../plugins/plugin-casbin')
   }
 } as PluginsConfig

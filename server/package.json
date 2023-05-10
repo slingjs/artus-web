@@ -51,6 +51,7 @@
     "ajv": "^8.12.0",
     "ajv-formats": "^2.1.1",
     "body-parser": "^1.20.2",
+    "casbin": "^5.26.1",
     "cookie": "^0.5.0",
     "dayjs": "^1.11.7",
     "dotenv": "^16.0.3",
