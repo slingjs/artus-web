@@ -76,9 +76,8 @@ export class AccountService {
   private readonly app: ArtusApplication
 
   async getConfig() {
-    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
     const cacheKey = 'framework.web.api.account.config'
-    let result = await cacheService.memory.get(cacheKey)
+    let result = await this.cacheService.memory.get(cacheKey)
     if (!result) {
       result = _.get(this.app.config as AppConfig, 'framework.web.api.account')
     }
@@ -597,9 +596,7 @@ export class AccountService {
   }
 
   async getDistributeSession(sessionKeyValue: string) {
-    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
-
-    return cacheService.distribute.get(this.calcDistributeCacheSessionKey(sessionKeyValue), {
+    return this.cacheService.distribute.get(this.calcDistributeCacheSessionKey(sessionKeyValue), {
       needRefresh: true,
       ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL
     })
@@ -608,18 +605,14 @@ export class AccountService {
   async getDistributeSessionRecords(
     userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
   ) {
-    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
-
-    return cacheService.distribute.get(this.calcDistributeCacheSessionRecordsKey(userId), {
+    return this.cacheService.distribute.get(this.calcDistributeCacheSessionRecordsKey(userId), {
       needRefresh: true,
       ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL
     })
   }
 
   async setDistributeSession(sessionKeyValue: string, session: UserSession) {
-    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
-
-    return cacheService.distribute.set(this.calcDistributeCacheSessionKey(sessionKeyValue), JSON.stringify(session), {
+    return this.cacheService.distribute.set(this.calcDistributeCacheSessionKey(sessionKeyValue), JSON.stringify(session), {
       ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL
     })
   }
@@ -628,9 +621,7 @@ export class AccountService {
     userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId'],
     sessionRecords: UserSessionRecords
   ) {
-    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
-
-    return cacheService.distribute.set(
+    return this.cacheService.distribute.set(
       this.calcDistributeCacheSessionRecordsKey(userId),
       JSON.stringify(sessionRecords),
       { ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL }
@@ -646,9 +637,7 @@ export class AccountService {
   async staleDistributeSessionRecords(
     userId: Exclude<PromiseFulfilledResult<ReturnType<AccountService['findInPersistentDB']>>, null>['userId']
   ) {
-    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
-
-    return cacheService.distribute.stale(this.calcDistributeCacheSessionRecordsKey(userId))
+    return this.cacheService.distribute.stale(this.calcDistributeCacheSessionRecordsKey(userId))
   }
 
   async findInPersistentDB(condition: Pick<Account, 'email'>) {
