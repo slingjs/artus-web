@@ -63,6 +63,9 @@ import { WebsocketClient } from '../../../plugins/plugin-websocket/client'
 import { WebsocketTrigger } from '../../../plugins/plugin-websocket/trigger'
 import url from 'url'
 import { SubscribeDistributeCacheEvent, SubscribeDistributeCacheEventUnit } from './cache/distribute'
+import { ARTUS_PLUGIN_CASBIN_CLIENT } from '../../../plugins/plugin-casbin/types'
+import { PluginCasbinClient } from '../../../plugins/plugin-casbin/client'
+import fs from 'fs'
 
 dayjs.extend(dayjsUtc)
 
@@ -74,6 +77,9 @@ dayjs.extend(dayjsUtc)
 export class AccountService {
   @Inject(ArtusInjectEnum.Application)
   private readonly app: ArtusApplication
+
+  @Inject(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE)
+  private readonly cacheService: CacheService
 
   async getConfig() {
     const cacheKey = 'framework.web.api.account.config'
@@ -91,6 +97,20 @@ export class AccountService {
     return prismaClient.getPrisma<PersistentDBInstance<PrismaPluginDataSourceName.MONGO>>(
       PrismaPluginDataSourceName.MONGO
     )
+  }
+
+  // @ts-ignore
+  async getCasbinEnforcer(): PromiseFulfilledResult<ReturnType<PluginCasbinClient['newEnforcer']>> {
+    const cacheKey = 'framework.web.api.account.casbin'
+    let result = await this.cacheService.memory.get(cacheKey)
+    if (!result) {
+      const casbin = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
+
+      const modelStr = fs.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
+      result = await casbin.newEnforcer(modelStr)
+    }
+
+    return result
   }
 
   formatResponseData(
@@ -612,9 +632,13 @@ export class AccountService {
   }
 
   async setDistributeSession(sessionKeyValue: string, session: UserSession) {
-    return this.cacheService.distribute.set(this.calcDistributeCacheSessionKey(sessionKeyValue), JSON.stringify(session), {
-      ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL
-    })
+    return this.cacheService.distribute.set(
+      this.calcDistributeCacheSessionKey(sessionKeyValue),
+      JSON.stringify(session),
+      {
+        ttl: USER_DISTRIBUTE_CACHE_DEFAULT_TTL
+      }
+    )
   }
 
   async setDistributeSessionRecords(
@@ -629,9 +653,7 @@ export class AccountService {
   }
 
   async staleDistributeSession(sessionKeyValue: string) {
-    const cacheService = this.app.container.get(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE) as CacheService
-
-    return cacheService.distribute.stale(this.calcDistributeCacheSessionKey(sessionKeyValue))
+    return this.cacheService.distribute.stale(this.calcDistributeCacheSessionKey(sessionKeyValue))
   }
 
   async staleDistributeSessionRecords(

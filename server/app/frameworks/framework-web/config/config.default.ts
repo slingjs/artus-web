@@ -61,7 +61,8 @@ export default {
       api: {
         account: {
           enableMultipleSignedInSessions: true,
-          enableRecordMultipleSignedInSessions: false
+          enableRecordMultipleSignedInSessions: false,
+          casbinModelPath: path.resolve(__dirname, '../models/casbin/account/model.ini')
         }
       },
       security: {
