@@ -4,7 +4,7 @@ import {
   PrismaPluginClientDataSourceItemInstance,
   PrismaPluginDataSourceName
 } from '../../../plugins/plugin-prisma/types'
-import { Roles, UserSession } from '@sling/artus-web-shared/types'
+import { PromiseOrPrimitive, Roles, UserSession } from '@sling/artus-web-shared/types'
 import { RedisEventSubscriberEventNames } from '../../../plugins/plugin-redis/types'
 
 export const ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE = 'ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE'
@@ -15,6 +15,9 @@ export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE = 'ARTUS_FRAMEWORK_WEB
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY'
 
 export const DistributeCacheEventSubscriberEventNames = RedisEventSubscriberEventNames
+
+export const MemoryCacheWrapSetterValueKey = Symbol('cache:value')
+export const MemoryCacheWrapSetterOptionsKey = Symbol('cache:options')
 
 export enum ResponseDataStatus {
   SUCCESS = 'SUCCESS',
@@ -70,7 +73,7 @@ export type PersistentDBInstance<T extends PrismaPluginDataSourceName = any> =
 
 export type MemoryCacheKey = string
 
-export type MemoryCacheValue = string
+export type MemoryCacheValue = any
 
 export type MemoryCacheDefaultOptions = {
   ttl: number // ms.
@@ -98,6 +101,14 @@ export interface MemoryCacheStaleOptions {}
 
 export interface MemoryCacheExpireOptions {
   ttl: number // ms.
+}
+
+export interface MemoryCacheGetSetOptions extends MemoryCacheGetOptions {
+  valueSetJudgement: (curVal: MemoryCacheValue, key: MemoryCacheKey) => boolean
+}
+
+export interface MemoryCacheGetSetSetter<V = MemoryCacheValue, S = MemoryCacheSetOptions> {
+  (curVal: V, key: MemoryCacheKey): PromiseOrPrimitive<(V | (Record<symbol, V> & Record<symbol, S>))>
 }
 
 export interface AccountSignUpPayload {

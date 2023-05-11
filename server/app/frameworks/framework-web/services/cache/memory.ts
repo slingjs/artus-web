@@ -7,11 +7,15 @@ import {
   MemoryCacheExistsOptions,
   MemoryCacheExpireOptions,
   MemoryCacheGetOptions,
+  MemoryCacheGetSetOptions,
+  MemoryCacheGetSetSetter,
   MemoryCacheKey,
   MemoryCacheRemoveOptions,
   MemoryCacheSetOptions,
   MemoryCacheStaleOptions,
-  MemoryCacheValue
+  MemoryCacheValue,
+  MemoryCacheWrapSetterOptionsKey,
+  MemoryCacheWrapSetterValueKey
 } from '../../types'
 import { MEMORY_CACHE_DEFAULT_TTL } from '../../constants'
 import _ from 'lodash'
@@ -38,7 +42,17 @@ export class MemoryCache {
     _.merge(this.defaultOptions, options)
   }
 
-  async get(key: MemoryCacheKey, options?: Partial<MemoryCacheGetOptions>) {
+  async wrapSetterValue<V = MemoryCacheValue, O = MemoryCacheSetOptions, T = MemoryCacheGetSetSetter<V, O>>(
+    val: V,
+    options?: O
+  ) {
+    return {
+      [MemoryCacheWrapSetterValueKey]: val,
+      [MemoryCacheWrapSetterOptionsKey]: options
+    } as Exclude<T, V>
+  }
+
+  async get<V = MemoryCacheValue>(key: MemoryCacheKey, options?: Partial<MemoryCacheGetOptions>): Promise<V> {
     const needRefresh = _.get(options, 'needRefresh') || _.get(this.defaultOptions, 'refreshWhenGet')
 
     if (needRefresh) {
@@ -93,5 +107,31 @@ export class MemoryCache {
 
   async clear() {
     return this.client.clear()
+  }
+
+  async getSet<V = MemoryCacheValue>(
+    key: MemoryCacheKey,
+    setter: MemoryCacheGetSetSetter<V, Partial<MemoryCacheSetOptions>>,
+    getOptions?: Partial<MemoryCacheGetSetOptions>
+  ): Promise<V> {
+    const cachedValue = await this.get(key, getOptions)
+    const valueSetJudgement = _.get(getOptions, 'valueSetJudgement')
+    let needToSet = cachedValue === undefined
+    if (typeof valueSetJudgement === 'function') {
+      needToSet = await valueSetJudgement(cachedValue, key)
+    }
+
+    if (!needToSet) {
+      return cachedValue
+    }
+
+    const setterResult = await setter(cachedValue, key)
+    const setterValue = _.has(setterResult, MemoryCacheWrapSetterValueKey)
+      ? _.get(setterResult as Exclude<typeof setterResult, V>, MemoryCacheWrapSetterValueKey)
+      : (setterResult as Exclude<typeof setterResult, object>)
+
+    await this.set(key, setterValue, _.get(setterResult as Exclude<typeof setterResult, V>, MemoryCacheWrapSetterOptionsKey))
+
+    return setterValue
   }
 }

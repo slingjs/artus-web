@@ -82,13 +82,9 @@ export class AccountService {
   private readonly cacheService: CacheService
 
   async getConfig() {
-    const cacheKey = 'framework.web.api.account.config'
-    let result = await this.cacheService.memory.get(cacheKey)
-    if (!result) {
-      result = _.get(this.app.config as AppConfig, 'framework.web.api.account')
-    }
-
-    return result
+    return this.cacheService.memory.getSet('framework.web.api.account.config', () =>
+      _.get(this.app.config as AppConfig, 'framework.web.api.account') as any
+    )
   }
 
   private getPrisma() {
@@ -100,17 +96,26 @@ export class AccountService {
   }
 
   // @ts-ignore
-  async getCasbinEnforcer(): PromiseFulfilledResult<ReturnType<PluginCasbinClient['newEnforcer']>> {
-    const cacheKey = 'framework.web.api.account.casbin'
-    let result = await this.cacheService.memory.get(cacheKey)
-    if (!result) {
+  async getCasbinEnforcer(options?: Partial<{ withCache: boolean }>): ReturnType<PluginCasbinClient['newEnforcer']> {
+    if (!_.get(options, 'withCache')) {
       const casbin = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
+      const modelStr = await this.cacheService.memory.getSet<string>(
+        'framework.web.api.account.config.casbinModelPath',
+        async () => fs.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
+      )
 
-      const modelStr = fs.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
-      result = await casbin.newEnforcer(modelStr)
+      return casbin.newEnforcer(modelStr)
     }
 
-    return result
+    return this.cacheService.memory.getSet('framework.web.api.account.casbin', async () => {
+      const casbin = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
+      const modelStr = await this.cacheService.memory.getSet<string>(
+        'framework.web.api.account.config.casbinModelPath',
+        async () => fs.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
+      )
+
+      return casbin.newEnforcer(modelStr)
+    })
   }
 
   formatResponseData(
