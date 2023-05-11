@@ -30,17 +30,17 @@
   },
   "dependencies": {
     "@types/glob": "^8.1.0",
-    "glob": "^9.3.4",
+    "glob": "^9.3.5",
     "tslib": "^2.5.0",
-    "typescript": "^5.0.2",
+    "typescript": "^5.0.4",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.0.2",
     "@rollup/plugin-typescript": "^11.1.0",
-    "@types/node": "^18.14.2",
+    "@types/node": "^18.16.7",
     "@types/uuid": "^9.0.1",
-    "rollup": "^3.20.2"
+    "rollup": "^3.21.6"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",

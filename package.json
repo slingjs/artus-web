@@ -39,11 +39,11 @@
     "@sling/artus-web-shared": "workspace:^",
     "lodash": "^4.17.21",
     "tslib": "^2.5.0",
-    "typescript": "^5.0.3"
+    "typescript": "^5.0.4"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.192",
-    "@types/node": "^18.14.2",
+    "@types/lodash": "^4.14.194",
+    "@types/node": "^18.16.7",
     "rimraf": "^4.4.1"
   }
 }
