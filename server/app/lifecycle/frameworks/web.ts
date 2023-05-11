@@ -24,7 +24,7 @@ export default class FrameworkWebLifecycle implements ApplicationLifecycle {
   @LifecycleHook()
   public async didReady() {
     const accountService = this.app.container.get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
-    const enforcer = await accountService.getCasbinEnforcer()
+    let enforcer = await accountService.getCasbinEnforcer({ withCache: true })
     const adapterStr = fs
       .readFileSync(path.resolve(__dirname, '../../frameworks/framework-web/models/casbin/account/test-policy.ini'))
       .toString('utf-8')
@@ -36,7 +36,12 @@ export default class FrameworkWebLifecycle implements ApplicationLifecycle {
     await enforcer.enableLog(true)
 
     await enforcer.enforce('sling', 'data2', 'read') // True.
+    // Remove.
+    await enforcer.removePolicy('SUPER_ADMIN', 'data2', 'read')
+    await enforcer.enforce('sling', 'data2', 'read') // False.
 
+    // ReGet. Try cache.
+    enforcer = await accountService.getCasbinEnforcer({ withCache: true })
     const enforceContext = await newEnforceContext('2')
     // enforceContext.eType = 'e';
     await enforcer.enforce(enforceContext, { age: 52 }, '/data1', 'write') // True.
