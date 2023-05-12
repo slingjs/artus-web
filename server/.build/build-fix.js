@@ -5,7 +5,7 @@ const { globSync } = require('glob')
 // Copy the models.
 globSync(['./**'], {
   cwd: path.resolve(__dirname, '../app/frameworks/framework-web/models'),
-  ignore: '**/generated/**'
+  ignore: ['**/generated/**', '**/casbin/*-seed.ts']
 }).forEach(p => {
   const fullPath = path.resolve(__dirname, '../app/frameworks/framework-web/models', p)
   if (fs.statSync(fullPath).isDirectory()) {
