@@ -17,8 +17,44 @@ model Account {
   salt           String // UUID
   password       String
   createdAt      DateTime? @default(now())
-  updatedAt      DateTime? @default(now())
+  updatedAt      DateTime? @default(now()) // @updatedAt
   lastSignedInAt DateTime?
   inactive       Boolean   @default(false)
   inactiveAt     DateTime?
+}
+
+// Casbin model.
+// https://github.com/node-casbin/prisma-adapter#getting-started
+model CasbinModel {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId // _id.
+  bizRealm  String // To distinguish different casbin policy types. E.g. This rule is for 'account' service only.
+  sec       String
+  // https://casbin.org/docs/model-storage
+  pType     String
+  v0        String?
+  v1        String?
+  v2        String?
+  v3        String?
+  v4        String?
+  v5        String?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
+}
+
+// Casbin policy.
+// https://github.com/node-casbin/prisma-adapter#getting-started
+model CasbinPolicy {
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId // _id.
+  bizRealm  String // To distinguish different casbin policy types. E.g. This rule is for 'account' service only.
+  sec       String
+  // https://casbin.org/docs/model-storage
+  pType     String
+  v0        String?
+  v1        String?
+  v2        String?
+  v3        String?
+  v4        String?
+  v5        String?
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @default(now()) @updatedAt
 }

@@ -12,6 +12,7 @@ import { newEnforceContext, StringAdapter } from 'casbin'
 import fs from 'fs'
 import path from 'path'
 import { AccountService } from '../../frameworks/framework-web/services/account'
+import { MongoSeed } from '../../frameworks/framework-web/models/casbin/mongo-seed'
 
 @LifecycleHookUnit()
 export default class FrameworkWebLifecycle implements ApplicationLifecycle {
@@ -26,7 +27,7 @@ export default class FrameworkWebLifecycle implements ApplicationLifecycle {
     const accountService = this.app.container.get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
     let enforcer = await accountService.getCasbinEnforcer({ withCache: true })
     const adapterStr = fs
-      .readFileSync(path.resolve(__dirname, '../../frameworks/framework-web/models/casbin/account/test-policy.ini'))
+      .readFileSync(path.resolve(__dirname, '../../frameworks/framework-web/models/casbin/account/policy.ini'))
       .toString('utf-8')
 
     await enforcer.setAdapter(await new StringAdapter(adapterStr))
@@ -54,5 +55,7 @@ export default class FrameworkWebLifecycle implements ApplicationLifecycle {
     // const c = await enforcer.enforce(newEnforcerC, { Age: 70 }, '/data1', 'read')
     //
     // console.log(c)
+
+    await (this.app.container.get(MongoSeed) as MongoSeed).init()
   }
 }

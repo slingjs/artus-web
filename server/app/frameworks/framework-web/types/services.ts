@@ -108,7 +108,7 @@ export interface MemoryCacheGetSetOptions extends MemoryCacheGetOptions {
 }
 
 export interface MemoryCacheGetSetSetter<V = MemoryCacheValue, S = MemoryCacheSetOptions> {
-  (curVal: V, key: MemoryCacheKey): PromiseOrPrimitive<(V | (Record<symbol, V> & Record<symbol, S>))>
+  (curVal: V, key: MemoryCacheKey): PromiseOrPrimitive<V | (Record<symbol, V> & Record<symbol, S>)>
 }
 
 export interface AccountSignUpPayload {
