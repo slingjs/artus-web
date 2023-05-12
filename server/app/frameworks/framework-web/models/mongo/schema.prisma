@@ -23,6 +23,17 @@ model Account {
   inactiveAt     DateTime?
 }
 
+model Role {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId // _id.
+  name        String    @unique
+  roleId      String    @unique
+  description String
+  createdAt   DateTime? @default(now())
+  updatedAt   DateTime? @default(now()) @updatedAt
+  inactive    Boolean   @default(false)
+  inactiveAt  DateTime?
+}
+
 // Casbin model.
 // https://github.com/node-casbin/prisma-adapter#getting-started
 model CasbinModel {
