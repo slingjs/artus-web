@@ -1,0 +1,11 @@
+[
+  {
+    "userId": "1efefd78-17e0-099b-af0c-031300e1e6e1",
+    "name": "Admin",
+    "roles": ["SUPER_ADMIN"],
+    "email": "admin@admin.com",
+    "salt": "f7e76f7e-0496-4ffc-b296-a6708ad24483",
+    "password": "024c5aefdd7f897dffcc3e79b220f4b91553f4fb8e39adb9dd065d4ed7f36b44",
+    "__password__": "1qaz!QAZ"
+  }
+]

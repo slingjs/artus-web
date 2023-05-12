@@ -1,14 +1,15 @@
-import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../../plugins/plugin-prisma/types'
-import { PluginPrismaClient } from '../../../../plugins/plugin-prisma/client'
+import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../plugins/plugin-prisma/types'
+import { PluginPrismaClient } from '../../../plugins/plugin-prisma/client'
 import { ArtusApplication, ArtusInjectEnum, Inject, Injectable, ScopeEnum } from '@artus/core'
-import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, PersistentDBInstance } from '../../types'
+import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, ARTUS_FRAMEWORK_WEB_CACHE_SERVICE, PersistentDBInstance } from '../types'
 import { newEnforceContext, StringAdapter } from 'casbin'
 import path from 'path'
 import fs from 'fs'
-import { ARTUS_PLUGIN_CASBIN_CLIENT } from '../../../../plugins/plugin-casbin/types'
-import { PluginCasbinClient } from '../../../../plugins/plugin-casbin/client'
+import { ARTUS_PLUGIN_CASBIN_CLIENT } from '../../../plugins/plugin-casbin/types'
+import { PluginCasbinClient } from '../../../plugins/plugin-casbin/client'
 import _ from 'lodash'
-import { AccountService } from '../../services/account'
+import { AccountService } from '../services/account'
+import { CacheService } from '../services/cache'
 
 @Injectable({
   scope: ScopeEnum.SINGLETON
@@ -17,37 +18,49 @@ export class MongoSeed {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 
-  async judgeInitialized() {
-    const prismaClient = this.app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
-    const mongoPrisma = prismaClient.getPrisma<PersistentDBInstance<PrismaPluginDataSourceName.MONGO>>(
+  @Inject(ARTUS_PLUGIN_PRISMA_CLIENT)
+  prismaClient: PluginPrismaClient
+
+  @Inject(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE)
+  cacheService: CacheService
+
+  get mongoPrisma() {
+    return this.prismaClient.getPrisma<PersistentDBInstance<PrismaPluginDataSourceName.MONGO>>(
       PrismaPluginDataSourceName.MONGO
     )
+  }
 
-    return Promise.allSettled([mongoPrisma.casbinPolicy.findFirst(), mongoPrisma.casbinModel.findFirst()]).then(res => {
-      return !!res.reduce((acc, cur) => {
-        if ('value' in cur) {
-          return acc + 1
-        }
-
-        return acc
-      }, 0)
+  async judgeInitialized() {
+    await Promise.allSettled([this.judgeCasbinInitialized(), this.judgePrismaModelInitialized()]).then(res => {
+      return res.every(r => !!_.get(r, 'value'))
     })
   }
 
-  async init() {
-    const prismaClient = this.app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
-    const mongoPrisma = prismaClient.getPrisma<PersistentDBInstance<PrismaPluginDataSourceName.MONGO>>(
-      PrismaPluginDataSourceName.MONGO
-    )
+  private async judgeCasbinInitialized() {
+    return Promise.allSettled([
+      this.mongoPrisma.casbinPolicy.findFirst(),
+      this.mongoPrisma.casbinModel.findFirst()
+    ]).then(res => {
+      // return !!res.reduce((acc, cur) => {
+      //   if ('value' in cur) {
+      //     return acc + 1
+      //   }
+      //
+      //   return acc
+      // }, 0)
+      return res.every(r => !!_.get(r, 'value'))
+    })
+  }
 
+  private async initCasbin() {
     const casbinClient = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
     const enforcer = await casbinClient.newEnforcer(
-      fs.readFileSync(path.resolve(__dirname, './account/model.ini')).toString('utf-8')
+      fs.readFileSync(path.resolve(__dirname, './casbin/account/model.ini')).toString('utf-8')
     )
     const policyAdapter = new StringAdapter(
-      fs.readFileSync(path.resolve(__dirname, './account/policy.ini')).toString('utf-8') +
+      fs.readFileSync(path.resolve(__dirname, './casbin/account/policy.ini')).toString('utf-8') +
         '\r\n' +
-        fs.readFileSync(path.resolve(__dirname, './account/group.ini')).toString('utf-8')
+        fs.readFileSync(path.resolve(__dirname, './casbin/account/group.ini')).toString('utf-8')
     )
 
     await enforcer.setAdapter(policyAdapter)
@@ -83,8 +96,6 @@ export class MongoSeed {
       }, {} as Record<string, string>)
     }
 
-    this.app.logger.info('Mongodb seed running.')
-
     // Save.
     await Promise.allSettled(
       _.flattenDeep(
@@ -97,7 +108,7 @@ export class MongoSeed {
               return
             }
 
-            return mongoPrisma.casbinModel.create({
+            return this.mongoPrisma.casbinModel.create({
               data: {
                 bizRealm: 'service.account',
                 sec: mapPType,
@@ -115,7 +126,7 @@ export class MongoSeed {
                 return
               }
 
-              return mongoPrisma.casbinPolicy.create({
+              return this.mongoPrisma.casbinPolicy.create({
                 data: {
                   bizRealm: 'service.account',
                   sec: mapPType,
@@ -130,6 +141,54 @@ export class MongoSeed {
         })
       )
     )
+  }
+
+  private async initPrismaModel() {
+    const presetRole = require('./mongo/account/role.json') as any[]
+    const presetAccount = require('./mongo/account/account.json') as any[]
+    const jobs = presetRole.map(r => this.mongoPrisma.role.create({ data: r }))
+
+    return Promise.allSettled(
+      jobs.concat(
+        presetAccount.map(a =>
+          this.mongoPrisma.account.create({
+            data: _.omit(a, '__password__') as any
+          })
+        ) as any
+      )
+    ).then(res => {
+      return res
+    })
+  }
+
+  private async judgePrismaModelInitialized() {
+    return Promise.allSettled([this.mongoPrisma.account.findFirst(), this.mongoPrisma.role.findFirst()]).then(res => {
+      // return !!res.reduce((acc, cur) => {
+      //   if ('value' in cur) {
+      //     return acc + 1
+      //   }
+      //
+      //   return acc
+      // }, 0)
+      return res.every(r => !!_.get(r, 'value'))
+    })
+  }
+
+  async init() {
+    const seedFileCachePath = 'model-seeds.txt'
+    const seedFileCacheSymbol = 'mongo-seed-operated'
+    // Judging operated.
+    const isSeedOperated = await this.cacheService.file.exists(seedFileCachePath, seedFileCacheSymbol)
+    if (isSeedOperated) {
+      return
+    }
+
+    this.app.logger.info('Mongodb seed running.')
+
+    await Promise.allSettled([this.initCasbin(), this.initPrismaModel()])
+
+    // Mark as operated.
+    await this.cacheService.file.append(seedFileCachePath, seedFileCacheSymbol, { useNewLineOnEOF: true })
 
     this.app.logger.info('Mongodb seed executed.')
   }

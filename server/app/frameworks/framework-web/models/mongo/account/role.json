@@ -1,0 +1,12 @@
+[
+  {
+    "roleId": "0907a790-6f16-e44a-6d03-7ccbc8efe622",
+    "name": "ANONYMOUS",
+    "description": "Anonymous user"
+  },
+  {
+    "roleId": "f10c66ee-aafa-f669-e372-6d14a2032f71",
+    "name": "SUPER_ADMIN",
+    "description": "Super admin"
+  }
+]
