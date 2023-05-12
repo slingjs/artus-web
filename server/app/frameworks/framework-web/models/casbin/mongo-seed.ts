@@ -1,13 +1,14 @@
 import { ARTUS_PLUGIN_PRISMA_CLIENT, PrismaPluginDataSourceName } from '../../../../plugins/plugin-prisma/types'
 import { PluginPrismaClient } from '../../../../plugins/plugin-prisma/client'
 import { ArtusApplication, ArtusInjectEnum, Inject, Injectable, ScopeEnum } from '@artus/core'
-import { PersistentDBInstance } from '../../types'
-import { StringAdapter } from 'casbin'
+import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, PersistentDBInstance } from '../../types'
+import { newEnforceContext, StringAdapter } from 'casbin'
 import path from 'path'
 import fs from 'fs'
 import { ARTUS_PLUGIN_CASBIN_CLIENT } from '../../../../plugins/plugin-casbin/types'
 import { PluginCasbinClient } from '../../../../plugins/plugin-casbin/client'
 import _ from 'lodash'
+import { AccountService } from '../../services/account'
 
 @Injectable({
   scope: ScopeEnum.SINGLETON
@@ -15,6 +16,23 @@ import _ from 'lodash'
 export class MongoSeed {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
+
+  async judgeInitialized() {
+    const prismaClient = this.app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
+    const mongoPrisma = prismaClient.getPrisma<PersistentDBInstance<PrismaPluginDataSourceName.MONGO>>(
+      PrismaPluginDataSourceName.MONGO
+    )
+
+    return Promise.allSettled([mongoPrisma.casbinPolicy.findFirst(), mongoPrisma.casbinModel.findFirst()]).then(res => {
+      return !!res.reduce((acc, cur) => {
+        if ('value' in cur) {
+          return acc + 1
+        }
+
+        return acc
+      }, 0)
+    })
+  }
 
   async init() {
     const prismaClient = this.app.container.get(ARTUS_PLUGIN_PRISMA_CLIENT) as PluginPrismaClient
@@ -114,5 +132,39 @@ export class MongoSeed {
     )
 
     this.app.logger.info('Mongodb seed executed.')
+  }
+
+  async tests() {
+    const accountService = this.app.container.get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
+    let enforcer = await accountService.getCasbinEnforcer({ withCache: true })
+    const adapterStr = fs
+      .readFileSync(path.resolve(__dirname, '../../frameworks/framework-web/models/casbin/account/policy.ini'))
+      .toString('utf-8')
+
+    await enforcer.setAdapter(await new StringAdapter(adapterStr))
+    // Need this step to make the policy effective.
+    await enforcer.loadPolicy()
+
+    await enforcer.enableLog(true)
+
+    await enforcer.enforce('sling', 'data2', 'read') // True.
+    // Remove.
+    await enforcer.removePolicy('SUPER_ADMIN', 'data2', 'read')
+    await enforcer.enforce('sling', 'data2', 'read') // False.
+
+    // ReGet. Try cache.
+    enforcer = await accountService.getCasbinEnforcer({ withCache: true })
+    const enforceContext = await newEnforceContext('2')
+    // enforceContext.eType = 'e';
+    await enforcer.enforce(enforceContext, { age: 52 }, '/data1', 'write') // True.
+
+    // const newEnforcer = await casbin.newEnforcer(modelStr, 'p, sling, data1, allow')
+    //
+    // await newEnforcer.addNamedPolicy('p2', 'r2.sub.Age > 18 && r2.sub.Age < 60', '/data1', 'read', 'allow')
+    // const newEnforcerC = await newEnforceContext('2')
+    // // enforceContext.eType = 'e';
+    // const c = await enforcer.enforce(newEnforcerC, { Age: 70 }, '/data1', 'read')
+    //
+    // console.log(c)
   }
 }
