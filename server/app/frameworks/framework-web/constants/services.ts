@@ -24,3 +24,6 @@ export const userSessionIdPattern = /^USER:[A-Za-z\d\-]+$/
 export const userSessionIdReplacePattern = /^USER:/
 
 export const csrfInterceptHttpMethods = [HTTPMethod.DELETE, HTTPMethod.PUT, HTTPMethod.POST, HTTPMethod.PATCH]
+
+export const fileNewLineOnEOFPattern = /\r\n$/
+export const fileNewLineMark = '\r\n'
