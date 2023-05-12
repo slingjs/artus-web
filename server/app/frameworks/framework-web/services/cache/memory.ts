@@ -130,7 +130,11 @@ export class MemoryCache {
       ? _.get(setterResult as Exclude<typeof setterResult, V>, MemoryCacheWrapSetterValueKey)
       : (setterResult as Exclude<typeof setterResult, object>)
 
-    await this.set(key, setterValue, _.get(setterResult as Exclude<typeof setterResult, V>, MemoryCacheWrapSetterOptionsKey))
+    await this.set(
+      key,
+      setterValue,
+      _.get(setterResult as Exclude<typeof setterResult, V>, MemoryCacheWrapSetterOptionsKey)
+    )
 
     return setterValue
   }

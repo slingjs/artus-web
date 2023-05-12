@@ -82,8 +82,9 @@ export class AccountService {
   private readonly cacheService: CacheService
 
   async getConfig() {
-    return this.cacheService.memory.getSet('framework.web.api.account.config', () =>
-      _.get(this.app.config as AppConfig, 'framework.web.api.account') as any
+    return this.cacheService.memory.getSet(
+      'framework.web.api.account.config',
+      () => _.get(this.app.config as AppConfig, 'framework.web.api.account') as any
     )
   }
 
