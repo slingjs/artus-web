@@ -6,6 +6,7 @@ import {
   WEBSOCKET_CONTROLLER_TAG,
   WEBSOCKET_EVENT_METADATA,
   WEBSOCKET_MIDDLEWARE_METADATA,
+  WEBSOCKET_SOCKET_REQUEST_METRICS_KEY,
   WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY,
   WebsocketConfig,
   WebsocketControllerMetadata,
@@ -13,6 +14,7 @@ import {
   WebsocketEventMiddlewaresMetadata,
   WebSocketEventNames,
   WebsocketEventRules,
+  WebsocketMetrics,
   WebsocketMiddlewareContext
 } from './types'
 import http from 'http'
@@ -80,6 +82,27 @@ export class WebsocketClient {
 
   getWsServer() {
     return this.wsServer
+  }
+
+  recordSocketMetrics(socket: ws.WebSocket, obj: WebsocketMetrics | object, options?: Partial<{ reset: boolean }>) {
+    if (_.get(options, 'reset')) {
+      _.set(socket, WEBSOCKET_SOCKET_REQUEST_METRICS_KEY, obj as WebsocketMetrics)
+
+      return obj as WebsocketMetrics
+    }
+
+    let metrics = _.get(socket, WEBSOCKET_SOCKET_REQUEST_METRICS_KEY) as WebsocketMetrics
+    if (!metrics) {
+      _.set(socket, WEBSOCKET_SOCKET_REQUEST_METRICS_KEY, (metrics = {} as WebsocketMetrics))
+    }
+
+    _.merge(metrics, obj)
+
+    return metrics
+  }
+
+  getSocketMetrics(socket: ws.WebSocket) {
+    return _.get(socket, WEBSOCKET_SOCKET_REQUEST_METRICS_KEY) as WebsocketMetrics
   }
 
   filterWsServerSockets(options?: Partial<{ filter: Parameters<Array<ws.WebSocket>['filter']>[0] }>) {
@@ -265,6 +288,8 @@ export class WebsocketClient {
         return
       }
 
+      this.recordSocketMetrics(socket, { startTimestamp: Date.now() })
+
       app.logger.info('New websocket connection arrived, request url:', reqUrl)
 
       const enabledSocketEventNames = (
@@ -331,6 +356,16 @@ export class WebsocketClient {
       // Observe socket events.
       enabledSocketEventNames.forEach(eventName => {
         socket.on(eventName, dispatchEventGenerator(eventName))
+      })
+
+      socket.on(WebSocketEventNames.CLOSE, () => {
+        const metrics = this.recordSocketMetrics(socket, { endTimestamp: Date.now() })
+
+        app.logger.info(
+          'Websocket connection closed, duration: %ss, request url: %s',
+          ((metrics.endTimestamp - metrics.startTimestamp) / 1000).toFixed(2),
+          reqUrl
+        )
       })
     })
   }

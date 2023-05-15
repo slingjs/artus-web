@@ -13,6 +13,8 @@ export const WEBSOCKET_SOCKET_REQUEST_URL_OBJ_KEY = Symbol.for('websocket#reques
 
 export const WEBSOCKET_SOCKET_REQUEST_USER_SESSION_KEY = Symbol.for('websocket#request#userSessionKey')
 
+export const WEBSOCKET_SOCKET_REQUEST_METRICS_KEY = Symbol.for('websocket#request#metrics')
+
 export enum WebSocketEventNames {
   CONNECTION = 'connection',
   MESSAGE = 'message',
@@ -71,3 +73,8 @@ export type WebsocketEventRuleItemData = {
 export type WebsocketEventRuleItem = Map<WebsocketEventRuleItemData['event'], WebsocketEventRuleItemData>
 
 export type WebsocketEventRules = Map<WebsocketEventDecoratorOptions['path'], WebsocketEventRuleItem>
+
+export type WebsocketMetrics = {
+  startTimestamp: number
+  endTimestamp: number
+}
