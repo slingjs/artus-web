@@ -6,12 +6,12 @@ import {
   LifecycleHook,
   LifecycleHookUnit
 } from '@artus/core'
-import { ARTUS_FRAMEWORK_WEB_CLIENT } from '../../frameworks/framework-web/types'
-import { FrameworkWebClient } from '../../frameworks/framework-web/client'
-import { MongoSeed } from '../../frameworks/framework-web/models/mongo-seed'
+import { ARTUS_FRAMEWORK_WEB_CLIENT } from '../types'
+import { FrameworkWebClient } from '../client'
+import { MongoSeed } from '../models/mongo-seed'
 
 @LifecycleHookUnit()
-export default class FrameworkWebLifecycle implements ApplicationLifecycle {
+export default class PrerequisitesLifecycle implements ApplicationLifecycle {
   @Inject(ArtusInjectEnum.Application)
   app: ArtusApplication
 
