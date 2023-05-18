@@ -15,7 +15,7 @@ export class FileCache {
   private app: ArtusApplication
 
   get folder() {
-    return path.resolve((this.app.config as AppConfig).cacheDir, './file-service')
+    return path.resolve((this.app.config as AppConfig).framework.cacheDir, './file-service')
   }
 
   private prerequisites() {
