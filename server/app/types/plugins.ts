@@ -15,11 +15,3 @@ export enum PluginsEnum {
 export type PluginsConfig = {
   [key in PluginsEnum]: PluginConfigItem
 }
-
-export enum FrameworksEnum {
-  web = 'web'
-}
-
-export type FrameworksConfig = {
-  [key in FrameworksEnum]: PluginConfigItem
-}

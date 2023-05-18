@@ -1,12 +1,13 @@
-import { Injectable, ScopeEnum, Trigger } from '@artus/core'
+import { Injectable, ScopeEnum } from '@artus/core'
+import { Pipeline } from '@artus/pipeline'
+import ws from 'ws'
 import {
   ARTUS_PLUGIN_WEBSOCKET_TRIGGER,
   WebsocketEventResponseBody,
   WebsocketMiddleware,
   WebsocketMiddlewareContext
 } from './types'
-import { Pipeline } from '@artus/pipeline'
-import ws from 'ws'
+import { Trigger } from '../../trigger'
 
 @Injectable({
   id: ARTUS_PLUGIN_WEBSOCKET_TRIGGER,
@@ -52,7 +53,7 @@ export class WebsocketTrigger extends Trigger {
     socket.send(JSON.stringify(body))
   }
 
-  setHandlePipeline(pipeline: WebsocketTrigger['pipeline']) {
+  setHandlePipeline(pipeline: WebsocketTrigger['handlePipeline']) {
     this.handlePipeline = pipeline
   }
 }

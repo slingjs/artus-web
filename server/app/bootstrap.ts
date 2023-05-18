@@ -1,17 +1,15 @@
 import 'reflect-metadata'
-import { ArtusApplication, Scanner } from '@artus/core'
+import { ArtusApplication, ArtusScanner } from '@artus/core'
 import dotEnv from 'dotenv'
 import fsExtra from 'fs-extra'
 
 dotEnv.config()
 
 export async function start(options: any = {}) {
-  const scanner = new Scanner({
-    appName: 'application',
+  const scanner = new ArtusScanner({
     needWriteFile: false,
     extensions: ['.ts'],
     configDir: 'config',
-    framework: options.framework || { path: __dirname },
     exclude: options.exclude || ['test']
   })
 
@@ -19,10 +17,9 @@ export async function start(options: any = {}) {
   const manifest = await scanner.scan(baseDir)
 
   // Start app.
-  const artusEnv = options.artusEnv || 'default'
   const app = new ArtusApplication()
 
-  await app.load(manifest[artusEnv], baseDir)
+  await app.load(manifest, baseDir)
 
   // Add cache dir.
   const cacheDir = options.cacheDir || app.config.cacheDir

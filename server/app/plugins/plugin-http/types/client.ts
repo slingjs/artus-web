@@ -3,7 +3,7 @@ import { BaseContext, Middleware, BaseInput, BaseOutput } from '@artus/pipeline'
 import { Stream } from 'stream'
 import { ArtusApplication } from '@artus/core'
 import { HTTPControllerMetadata, HTTPRouteMetadata } from './decorator'
-import { ArrayMember } from '@sling/artus-web-shared/dist/types'
+import { ArrayMember } from '@sling/artus-web-shared/types'
 
 export interface HTTPConfig {
   host: string

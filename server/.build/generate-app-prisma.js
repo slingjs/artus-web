@@ -8,10 +8,7 @@ const job = function () {
     return
   }
 
-  const schemaPaths = [
-    '../app/frameworks/framework-web/models/mongo/schema.prisma',
-    '../app/frameworks/framework-web/models/mysql/schema.prisma'
-  ]
+  const schemaPaths = ['../app/models/mongo/schema.prisma', '../app/models/mysql/schema.prisma']
 
   schemaPaths.forEach(p => {
     execSync('npx prisma generate --schema ' + p, { cwd: __dirname })

@@ -52,7 +52,7 @@ export default {
       dataSources: {
         mongo: {
           enable: true,
-          schemaOutputPath: path.resolve(__dirname, '../frameworks/framework-web/models/mongo/generated/client'),
+          schemaOutputPath: path.resolve(__dirname, '../models/mongo/generated/client'),
           envs: {
             // https://www.mongodb.com/compatibility/deploying-a-mongodb-cluster-with-docker
             MONGO_URI: process.env.MONGO_URI || 'mongodb://localhost:27017/test?replicaSet=rs0'
@@ -60,7 +60,7 @@ export default {
         },
         mysql: {
           enable: true,
-          schemaOutputPath: path.resolve(__dirname, '../frameworks/framework-web/models/mysql/generated/client'),
+          schemaOutputPath: path.resolve(__dirname, '../models/mysql/generated/client'),
           envs: {
             // https://hub.docker.com/_/mysql
             MYSQL_URI: process.env.MYSQL_URI || 'mysql://root:123456@localhost:3306/test'
@@ -84,22 +84,20 @@ export default {
   },
 
   framework: {
-    web: {
-      cacheDir: path.resolve(cacheDir, 'frameworks/web'),
-      distDir,
-      api: {
-        account: {
-          // Should one account sign in multiple time at the mean time that last session didn't expire?
-          enableMultipleSignedInSessions: !!(process.env.WEB_API_ACCOUNT_ENABLE_MULTIPLE_SIGNED_IN_SESSION ?? false),
-          enableRecordMultipleSignedInSessions: !!(
-            process.env.WEB_API_ACCOUNT_ENABLE_RECORDS_MULTIPLE_SIGNED_IN_SESSIONS ?? false
-          )
-        }
-      },
-      security: {
-        csrf: {
-          supremeToken: shared.utils.getSupremeCsrfToken()
-        }
+    cacheDir: path.resolve(cacheDir, 'framework'),
+    distDir,
+    api: {
+      account: {
+        // Should one account sign in multiple time at the mean time that last session didn't expire?
+        enableMultipleSignedInSessions: !!(process.env.WEB_API_ACCOUNT_ENABLE_MULTIPLE_SIGNED_IN_SESSION ?? false),
+        enableRecordMultipleSignedInSessions: !!(
+          process.env.WEB_API_ACCOUNT_ENABLE_RECORDS_MULTIPLE_SIGNED_IN_SESSIONS ?? false
+        )
+      }
+    },
+    security: {
+      csrf: {
+        supremeToken: shared.utils.getSupremeCsrfToken()
       }
     }
   }
