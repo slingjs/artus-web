@@ -2,6 +2,7 @@ import 'reflect-metadata'
 import { ArtusApplication, ArtusScanner } from '@artus/core'
 import dotEnv from 'dotenv'
 import fsExtra from 'fs-extra'
+import { AppConfig } from './types'
 
 dotEnv.config()
 
@@ -22,7 +23,7 @@ export async function start(options: any = {}) {
   await app.load(manifest, baseDir)
 
   // Add cache dir.
-  const cacheDir = options.cacheDir || app.config.cacheDir
+  const cacheDir = options.cacheDir || (app.config as AppConfig).cacheDir
   if (cacheDir) {
     await fsExtra.ensureDir(cacheDir)
   }

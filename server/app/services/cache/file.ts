@@ -1,5 +1,5 @@
 import { ArtusApplication, ArtusInjectEnum, Inject, Injectable, ScopeEnum } from '@artus/core'
-import { ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_FILE_SYSTEM } from '../../types'
+import { AppConfig, ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_FILE_SYSTEM } from '../../types'
 import fsExtra from 'fs-extra'
 import path from 'path'
 import shared from '@sling/artus-web-shared'
@@ -15,7 +15,7 @@ export class FileCache {
   private app: ArtusApplication
 
   get folder() {
-    return path.resolve(this.app.config.cacheDir, './file-service')
+    return path.resolve((this.app.config as AppConfig).cacheDir, './file-service')
   }
 
   private prerequisites() {
