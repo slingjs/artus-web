@@ -65,7 +65,7 @@ import url from 'url'
 import { SubscribeDistributeCacheEvent, SubscribeDistributeCacheEventUnit } from './cache/distribute'
 import { ARTUS_PLUGIN_CASBIN_CLIENT } from '../plugins/plugin-casbin/types'
 import { PluginCasbinClient } from '../plugins/plugin-casbin/client'
-import fs from 'fs'
+import fsExtra from 'fs-extra'
 
 dayjs.extend(dayjsUtc)
 
@@ -102,7 +102,7 @@ export class AccountService {
       const casbin = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
       const modelStr = await this.cacheService.memory.getSet<string>(
         'framework.api.account.config.casbinModelPath',
-        async () => fs.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
+        async () => fsExtra.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
       )
 
       return casbin.newEnforcer(modelStr)
@@ -112,7 +112,7 @@ export class AccountService {
       const casbin = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
       const modelStr = await this.cacheService.memory.getSet<string>(
         'framework.api.account.config.casbinModelPath',
-        async () => fs.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
+        async () => fsExtra.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
       )
 
       return casbin.newEnforcer(modelStr)

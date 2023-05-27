@@ -1,5 +1,5 @@
 import path from 'path'
-import fs from 'fs'
+import fsExtra from 'fs-extra'
 import { AppConfig } from '../types'
 import shared from '@sling/artus-web-shared'
 
@@ -20,7 +20,7 @@ const distDir =
       '../artus-web-client',
       shared.constants.FILE_BASE_DIR
     )
-  ].find(p => fs.existsSync(p)) ||
+  ].find(p => fsExtra.existsSync(p)) ||
     '__nonexistent__')
 
 export default {

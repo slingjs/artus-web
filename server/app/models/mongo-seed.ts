@@ -4,7 +4,7 @@ import { ArtusApplication, ArtusInjectEnum, Inject, Injectable, ScopeEnum } from
 import { ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE, ARTUS_FRAMEWORK_WEB_CACHE_SERVICE, PersistentDBInstance } from '../types'
 import { newEnforceContext, StringAdapter } from 'casbin'
 import path from 'path'
-import fs from 'fs'
+import fsExtra from 'fs-extra'
 import { ARTUS_PLUGIN_CASBIN_CLIENT } from '../plugins/plugin-casbin/types'
 import { PluginCasbinClient } from '../plugins/plugin-casbin/client'
 import _ from 'lodash'
@@ -55,12 +55,12 @@ export class MongoSeed {
   private async initCasbin() {
     const casbinClient = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
     const enforcer = await casbinClient.newEnforcer(
-      fs.readFileSync(path.resolve(__dirname, './casbin/account/model.ini')).toString('utf-8')
+      fsExtra.readFileSync(path.resolve(__dirname, './casbin/account/model.ini')).toString('utf-8')
     )
     const policyAdapter = new StringAdapter(
-      fs.readFileSync(path.resolve(__dirname, './casbin/account/policy.ini')).toString('utf-8') +
+      fsExtra.readFileSync(path.resolve(__dirname, './casbin/account/policy.ini')).toString('utf-8') +
         '\r\n' +
-        fs.readFileSync(path.resolve(__dirname, './casbin/account/group.ini')).toString('utf-8')
+        fsExtra.readFileSync(path.resolve(__dirname, './casbin/account/group.ini')).toString('utf-8')
     )
 
     await enforcer.setAdapter(policyAdapter)
@@ -196,7 +196,7 @@ export class MongoSeed {
   async tests() {
     const accountService = this.app.container.get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
     let enforcer = await accountService.getCasbinEnforcer({ withCache: true })
-    const adapterStr = fs
+    const adapterStr = fsExtra
       .readFileSync(path.resolve(__dirname, '../../models/casbin/account/policy.ini'))
       .toString('utf-8')
 
