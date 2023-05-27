@@ -11,11 +11,13 @@ export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE = 'ARTUS_FRAMEWORK_WEB_CACHE_SERV
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_DISTRIBUTE'
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_MEMORY'
 export const ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_FILE_SYSTEM = 'ARTUS_FRAMEWORK_WEB_CACHE_SERVICE_FILE_SYSTEM'
+export const ARTUS_FRAMEWORK_WEB_CASBIN_SERVICE = 'ARTUS_FRAMEWORK_WEB_CASBIN_SERVICE'
 
 export const DistributeCacheEventSubscriberEventNames = RedisEventSubscriberEventNames
 
 export const MemoryCacheWrapSetterValueKey = Symbol('cache:value')
 export const MemoryCacheWrapSetterOptionsKey = Symbol('cache:options')
+export const MemoryCacheGetSetBypassValue = Symbol('cache:getSet:bypassValue')
 
 export enum ResponseDataStatus {
   SUCCESS = 'SUCCESS',
@@ -105,9 +107,10 @@ export interface MemoryCacheGetSetOptions extends MemoryCacheGetOptions {
   valueSetJudgement: (curVal: MemoryCacheValue, key: MemoryCacheKey) => boolean
 }
 
-export interface MemoryCacheGetSetSetter<V = MemoryCacheValue, S = MemoryCacheSetOptions> {
-  (curVal: V, key: MemoryCacheKey): PromiseOrPrimitive<V | (Record<symbol, V> & Record<symbol, S>)>
-}
+export type MemoryCacheGetSetSetter<V = MemoryCacheValue, S = MemoryCacheSetOptions> = (
+  curVal: V,
+  key: MemoryCacheKey
+) => PromiseOrPrimitive<V | symbol | (Record<symbol, V | symbol> & Record<symbol, S>) | any>
 
 export interface AccountSignUpPayload {
   email: string
@@ -173,4 +176,34 @@ export enum UserSessionTamperedFromMethodType {
 
 export enum UserSessionCertificatedFromMethodType {
   SIGN_IN = 'sign-in'
+}
+
+export type CasbinPolicy = {
+  id: string
+  bizRealm: string
+  sec: string
+  pType: string
+  v0: string | null
+  v1: string | null
+  v2: string | null
+  v3: string | null
+  v4: string | null
+  v5: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
+}
+
+export type CasbinModel = {
+  id: string
+  bizRealm: string
+  sec: string
+  pType: string
+  v0: string | null
+  v1: string | null
+  v2: string | null
+  v3: string | null
+  v4: string | null
+  v5: string | null
+  createdAt: Date | null
+  updatedAt: Date | null
 }

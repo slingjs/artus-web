@@ -7,6 +7,7 @@ import {
   MemoryCacheExistsOptions,
   MemoryCacheExpireOptions,
   MemoryCacheGetOptions,
+  MemoryCacheGetSetBypassValue,
   MemoryCacheGetSetOptions,
   MemoryCacheGetSetSetter,
   MemoryCacheKey,
@@ -36,6 +37,10 @@ export class MemoryCache {
 
   private get client() {
     return this.cacheClient.getCache()
+  }
+
+  get getSetBypassValue() {
+    return MemoryCacheGetSetBypassValue
   }
 
   mergeDefaultOptions(options: Partial<MemoryCacheDefaultOptions>) {
@@ -113,7 +118,7 @@ export class MemoryCache {
     key: MemoryCacheKey,
     setter: MemoryCacheGetSetSetter<V, Partial<MemoryCacheSetOptions>>,
     getOptions?: Partial<MemoryCacheGetSetOptions>
-  ): Promise<V> {
+  ): Promise<V | undefined> {
     const cachedValue = await this.get(key, getOptions)
     const valueSetJudgement = _.get(getOptions, 'valueSetJudgement')
     let needToSet = cachedValue === undefined
@@ -126,16 +131,22 @@ export class MemoryCache {
     }
 
     const setterResult = await setter(cachedValue, key)
-    const setterValue = _.has(setterResult, MemoryCacheWrapSetterValueKey)
-      ? _.get(setterResult as Exclude<typeof setterResult, V>, MemoryCacheWrapSetterValueKey)
-      : (setterResult as Exclude<typeof setterResult, object>)
+    const setterValue = (
+      _.has(setterResult, MemoryCacheWrapSetterValueKey)
+        ? _.get(setterResult as Exclude<typeof setterResult, V>, MemoryCacheWrapSetterValueKey)
+        : (setterResult as Exclude<typeof setterResult, object>)
+    ) as V | symbol
+
+    if (typeof setterValue === 'symbol' && setterValue === this.getSetBypassValue) {
+      return
+    }
 
     await this.set(
       key,
-      setterValue,
+      setterValue as Exclude<typeof setterValue, symbol>,
       _.get(setterResult as Exclude<typeof setterResult, V>, MemoryCacheWrapSetterOptionsKey)
     )
 
-    return setterValue
+    return setterValue as Exclude<typeof setterValue, symbol>
   }
 }

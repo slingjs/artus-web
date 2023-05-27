@@ -195,7 +195,11 @@ export class MongoSeed {
 
   async tests() {
     const accountService = this.app.container.get(ARTUS_FRAMEWORK_WEB_ACCOUNT_SERVICE) as AccountService
-    let enforcer = await accountService.getCasbinEnforcer({ withCache: true })
+    let enforcer = await accountService.getCasbinEnforcer()
+    if (!enforcer) {
+      return
+    }
+
     const adapterStr = fsExtra
       .readFileSync(path.resolve(__dirname, '../../models/casbin/account/policy.ini'))
       .toString('utf-8')
@@ -212,7 +216,7 @@ export class MongoSeed {
     await enforcer.enforce('sling', 'data2', 'read') // False.
 
     // ReGet. Try cache.
-    enforcer = await accountService.getCasbinEnforcer({ withCache: true })
+    enforcer = (await accountService.getCasbinEnforcer())!
     const enforceContext = await newEnforceContext('2')
     // enforceContext.eType = 'e';
     await enforcer.enforce(enforceContext, { age: 52 }, '/data1', 'write') // True.

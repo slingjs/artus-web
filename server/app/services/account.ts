@@ -12,7 +12,9 @@ import {
   ResponseDataStatus,
   UserSessionCertificatedFromMethodType,
   UserSessionRecords,
-  UserSessionTamperedFromMethodType
+  UserSessionTamperedFromMethodType,
+  ARTUS_FRAMEWORK_WEB_CASBIN_SERVICE,
+  CasbinModel
 } from '../types'
 import { HTTPMiddlewareContext } from '../plugins/plugin-http/types'
 import { CacheService } from './cache'
@@ -65,7 +67,7 @@ import url from 'url'
 import { SubscribeDistributeCacheEvent, SubscribeDistributeCacheEventUnit } from './cache/distribute'
 import { ARTUS_PLUGIN_CASBIN_CLIENT } from '../plugins/plugin-casbin/types'
 import { PluginCasbinClient } from '../plugins/plugin-casbin/client'
-import fsExtra from 'fs-extra'
+import { CasbinService } from './casbin'
 
 dayjs.extend(dayjsUtc)
 
@@ -80,6 +82,9 @@ export class AccountService {
 
   @Inject(ARTUS_FRAMEWORK_WEB_CACHE_SERVICE)
   private readonly cacheService: CacheService
+
+  @Inject(ARTUS_FRAMEWORK_WEB_CASBIN_SERVICE)
+  private readonly casbinService: CasbinService
 
   async getConfig() {
     return this.cacheService.memory.getSet(
@@ -96,27 +101,41 @@ export class AccountService {
     )
   }
 
-  // @ts-ignore
-  async getCasbinEnforcer(options?: Partial<{ withCache: boolean }>): ReturnType<PluginCasbinClient['newEnforcer']> {
-    if (!_.get(options, 'withCache')) {
-      const casbin = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
-      const modelStr = await this.cacheService.memory.getSet<string>(
-        'framework.api.account.config.casbinModelPath',
-        async () => fsExtra.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
-      )
+  async getCasbinModels() {
+    return this.cacheService.memory.getSet<CasbinModel[]>('framework.api.account.casbinModels', async () => {
+      const accountModels = await this.getPrisma().casbinModel.findMany({ where: { bizRealm: 'service.account' } })
+      if (!accountModels) {
+        return this.cacheService.memory.getSetBypassValue
+      }
 
-      return casbin.newEnforcer(modelStr)
-    }
-
-    return this.cacheService.memory.getSet('framework.api.account.casbin', async () => {
-      const casbin = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
-      const modelStr = await this.cacheService.memory.getSet<string>(
-        'framework.api.account.config.casbinModelPath',
-        async () => fsExtra.readFileSync((await this.getConfig()).casbinModelPath).toString('utf-8')
-      )
-
-      return casbin.newEnforcer(modelStr)
+      return accountModels
     })
+  }
+
+  async getCasbinModelsStr() {
+    return this.cacheService.memory.getSet<string>('framework.api.account.casbinModelsStr', async () => {
+      const accountModels = await this.getCasbinModels()
+      if (!accountModels) {
+        return this.cacheService.memory.getSetBypassValue
+      }
+
+      return this.casbinService.formatModels(accountModels)
+    })
+  }
+
+  async getCasbinEnforcer() {
+    return this.cacheService.memory.getSet<PromiseFulfilledResult<ReturnType<PluginCasbinClient['newEnforcer']>>>(
+      'framework.api.account.casbin',
+      async () => {
+        const casbin = this.app.container.get(ARTUS_PLUGIN_CASBIN_CLIENT) as PluginCasbinClient
+        const modelStr = await this.getCasbinModelsStr()
+        if (modelStr == null) {
+          return this.cacheService.memory.getSetBypassValue
+        }
+
+        return casbin.newEnforcer(modelStr)
+      }
+    )
   }
 
   formatResponseData(
