@@ -42,7 +42,7 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "@artus/core": "^2.0.2",
+    "@artus/core": "^2.1.0",
     "@artus/pipeline": "^0.2.3",
     "@prisma/client": "^4.14.1",
     "@sling/artus-web-client": "workspace:^",
